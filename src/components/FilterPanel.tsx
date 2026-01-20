@@ -20,11 +20,11 @@ export default function FilterPanel({
 
   const handleChange = (
     key: keyof FilterParams,
-    value: string | number | undefined,
+    value: string | number | boolean | undefined,
   ) => {
     const newFilters = {
       ...localFilters,
-      [key]: value === "" ? undefined : value,
+      [key]: value === "" || value === false ? undefined : value,
     };
 
     // Remove undefined values
@@ -48,7 +48,7 @@ export default function FilterPanel({
   };
 
   const wineTypes = ["secco", "abboccato", "amabile", "dolce"];
-  const wineColors = ["bianco", "rosso", "rosato", "sparkling"];
+  const wineColors = ["bianco", "rosso", "rosato"];
 
   // Translation helpers
   const getTypeLabel = (type: string) => {
@@ -66,7 +66,6 @@ export default function FilterPanel({
       bianco: "Біле",
       rosso: "Червоне",
       rosato: "Рожеве",
-      sparkling: "Ігристе",
     };
     return labels[color] || color;
   };
@@ -133,6 +132,26 @@ export default function FilterPanel({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Frizzante Checkbox */}
+      <div className="mb-6">
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={localFilters.frizzante === true}
+              onChange={(e) =>
+                handleChange("frizzante", e.target.checked ? true : undefined)
+              }
+              className="sr-only peer"
+            />
+            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </div>
+          <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700 transition-colors">
+            Frizzante
+          </span>
+        </label>
       </div>
 
       {/* Minimum Rating */}

@@ -7,17 +7,32 @@ import { useState, useEffect } from "react";
 export default function Navbar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
+
+    // Get user email from localStorage
+    if (token) {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          setUserEmail(user.email || "");
+        } catch (e) {
+          console.error("Error parsing user from localStorage:", e);
+        }
+      }
+    }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setIsLoggedIn(false);
+    setUserEmail("");
     window.location.href = "/";
   };
 
@@ -58,12 +73,19 @@ export default function Navbar() {
                 >
                   Додати вино
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-rose-100 text-rose-700 rounded-full font-medium hover:bg-rose-200 transition-colors"
-                >
-                  Вийти
-                </button>
+                <div className="flex items-center gap-3">
+                  {userEmail && (
+                    <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                      {userEmail}
+                    </span>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-rose-100 text-rose-700 rounded-full font-medium hover:bg-rose-200 transition-colors"
+                  >
+                    Вийти
+                  </button>
+                </div>
               </>
             ) : (
               <Link
@@ -118,6 +140,11 @@ export default function Navbar() {
               </Link>
               {isLoggedIn ? (
                 <>
+                  {userEmail && (
+                    <div className="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
+                      {userEmail}
+                    </div>
+                  )}
                   <Link
                     href="/add-card"
                     className="font-medium text-gray-600 hover:text-rose-600"

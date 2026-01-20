@@ -70,6 +70,7 @@ export const cardsAPI = {
       cards = cards.filter((card: WineCard) => {
         if (filters.type && card.type !== filters.type) return false;
         if (filters.color && card.color !== filters.color) return false;
+        if (filters.frizzante && card.frizzante !== true) return false;
         if (filters.minRating && card.rating < filters.minRating) return false;
         if (filters.search) {
           const searchLower = filters.search.toLowerCase();
@@ -117,6 +118,7 @@ export const cardsAPI = {
     formData.append("name", card.name || "");
     formData.append("type", card.type || "secco");
     formData.append("color", card.color || "bianco");
+    formData.append("frizzante", String(card.frizzante || false));
     formData.append("winery", card.winery || "");
     formData.append("country", card.country || "");
     formData.append("region", card.region || "");
@@ -154,6 +156,8 @@ export const cardsAPI = {
     if (card.name !== undefined) formData.append("name", card.name);
     if (card.type !== undefined) formData.append("type", card.type);
     if (card.color !== undefined) formData.append("color", card.color);
+    if (card.frizzante !== undefined)
+      formData.append("frizzante", String(card.frizzante));
     if (card.winery !== undefined) formData.append("winery", card.winery);
     if (card.country !== undefined) formData.append("country", card.country);
     if (card.region !== undefined) formData.append("region", card.region);

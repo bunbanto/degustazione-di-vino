@@ -1,7 +1,7 @@
 "use client";
 
 import { WineCard } from "@/types";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
 interface WineCardProps {
@@ -9,17 +9,77 @@ interface WineCardProps {
   onRate?: (id: string, rating: number) => void;
 }
 
+// SVG Star component with optional fill percentage
+function StarIcon({
+  filled,
+  half = false,
+}: {
+  filled: boolean;
+  half?: boolean;
+}) {
+  return (
+    <div className="relative w-5 h-5">
+      {/* Background (empty star) */}
+      <svg
+        className="absolute top-0 left-0 w-full h-full text-gray-300"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+
+      {/* Foreground (filled/half star) */}
+      <svg
+        className={`absolute top-0 left-0 w-full h-full ${filled || half ? "text-yellow-400" : "text-transparent"}`}
+        viewBox="0 0 20 20"
+        style={
+          half
+            ? {
+                clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)",
+              }
+            : {}
+        }
+        fill="currentColor"
+      >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    </div>
+  );
+}
+
 export default function WineCardComponent({ card, onRate }: WineCardProps) {
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
-  const handleRate = (rating: number) => {
-    setUserRating(rating);
-    if (onRate) {
-      onRate(card._id, rating);
+  // Load rating from localStorage on mount
+  useEffect(() => {
+    const savedRatings = localStorage.getItem("wineRatings");
+    if (savedRatings) {
+      const ratings = JSON.parse(savedRatings);
+      const savedRating = ratings[card._id];
+      if (savedRating !== undefined) {
+        setUserRating(savedRating);
+      }
     }
-  };
+  }, [card._id]);
+
+  const handleRate = useCallback(
+    (rating: number) => {
+      setUserRating(rating);
+
+      // Save to localStorage
+      const savedRatings = localStorage.getItem("wineRatings");
+      const ratings = savedRatings ? JSON.parse(savedRatings) : {};
+      ratings[card._id] = rating;
+      localStorage.setItem("wineRatings", JSON.stringify(ratings));
+
+      if (onRate) {
+        onRate(card._id, rating);
+      }
+    },
+    [card._id, onRate],
+  );
 
   const getRatingColor = (rating: number) => {
     if (rating >= 8) return "text-green-600";
@@ -48,6 +108,15 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     return colors[color] || color;
   };
 
+  // Calculate display rating
+  const displayRating = userRating > 0 ? userRating : card.rating;
+  const hasUserRating = userRating > 0;
+  const currentRating = hoverRating || userRating;
+
+  // Generate 10 stars with 0.5 step
+  // Each star can be: empty, half (0.5), or full (1.0)
+  const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
   return (
     <>
       <div className="glass-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
@@ -71,6 +140,11 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
           {card.color && (
             <div className="absolute top-3 left-3 bg-rose-600/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-white shadow-md capitalize">
               {getColorLabel(card.color)}
+            </div>
+          )}
+          {card.frizzante && (
+            <div className="absolute top-3 left-3 bg-amber-500/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-white shadow-md capitalize mt-8">
+              Frizzante
             </div>
           )}
           {/* Edit Button */}
@@ -105,7 +179,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
             <p className="text-gray-500 text-sm mb-2">{card.winery}</p>
           )}
 
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
             <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-md text-xs font-medium">
               {getTypeLabel(card.type)}
             </span>
@@ -123,37 +197,48 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
             {card.description}
           </p>
 
-          {/* Rating */}
+          {/* Rating - 10 stars with 0.5 step (with half stars) */}
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div
-                className={`text-2xl font-bold ${getRatingColor(card.rating)}`}
+                className={`text-2xl font-bold ${getRatingColor(displayRating)}`}
               >
-                {card.rating.toFixed(1)}
+                {displayRating.toFixed(1)}
               </div>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    className="p-0.5"
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    onClick={() => handleRate(star)}
-                  >
-                    <svg
-                      className={`w-5 h-5 ${
-                        star <= (hoverRating || userRating)
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  </button>
-                ))}
+              {hasUserRating && (
+                <span className="text-xs text-green-600 bg-green-50 px-1 rounded">
+                  Ваша
+                </span>
+              )}
+              <div className="flex items-center -space-x-0.5">
+                {stars.map((star) => {
+                  const starValue = star;
+                  const prevStarValue = star - 1;
+                  const isFull = currentRating >= starValue;
+                  const isHalf = !isFull && currentRating > prevStarValue;
+
+                  return (
+                    <div key={star} className="relative group/star">
+                      {/* Left half clickable */}
+                      <div
+                        className="absolute left-0 top-0 w-1/2 h-full z-10 cursor-pointer"
+                        style={{ width: "50%" }}
+                        onMouseEnter={() => setHoverRating(prevStarValue + 0.5)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => handleRate(prevStarValue + 0.5)}
+                      />
+                      {/* Right half clickable */}
+                      <div
+                        className="absolute right-0 top-0 w-1/2 h-full z-10 cursor-pointer"
+                        style={{ left: "50%" }}
+                        onMouseEnter={() => setHoverRating(starValue)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => handleRate(starValue)}
+                      />
+                      <StarIcon filled={isFull} half={isHalf} />
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <span className="text-sm text-gray-500">
@@ -209,7 +294,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
         </div>
       </div>
 
-      {/* Image Modal - rendered outside card to allow full viewport */}
+      {/* Image Modal */}
       {isImageModalOpen && (
         <div
           className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-0"

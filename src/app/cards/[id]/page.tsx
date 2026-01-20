@@ -24,6 +24,7 @@ export default function EditCardPage() {
     name: "",
     type: "secco",
     color: "bianco",
+    frizzante: false,
     winery: "",
     country: "",
     region: "",
@@ -120,6 +121,7 @@ export default function EditCardPage() {
         name: card.name || "",
         type: card.type || "secco",
         color: card.color || "bianco",
+        frizzante: card.frizzante || false,
         winery: card.winery || "",
         country: card.country || "",
         region: card.region || "",
@@ -169,7 +171,7 @@ export default function EditCardPage() {
     }
   };
 
-  const handleChange = (field: string, value: string | number) => {
+  const handleChange = (field: string, value: string | number | boolean) => {
     setFormData({ ...formData, [field]: value });
   };
 
@@ -210,7 +212,6 @@ export default function EditCardPage() {
     { value: "bianco", label: "Біле" },
     { value: "rosso", label: "Червоне" },
     { value: "rosato", label: "Рожеве" },
-    { value: "sparkling", label: "Ігристе" },
   ];
 
   return (
@@ -286,6 +287,26 @@ export default function EditCardPage() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Frizzante Checkbox */}
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={formData.frizzante}
+                      onChange={(e) =>
+                        handleChange("frizzante", e.target.checked)
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700 transition-colors">
+                    Frizzante
+                  </span>
+                </label>
               </div>
 
               {/* Winery */}

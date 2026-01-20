@@ -4,6 +4,7 @@ export interface WineCard {
   name: string;
   type: string;
   color: string;
+  frizzante?: boolean;
   winery?: string;
   country?: string;
   region?: string;
@@ -41,6 +42,7 @@ export interface PaginationParams {
 export interface FilterParams {
   type?: string;
   color?: string;
+  frizzante?: boolean;
   minRating?: number;
   maxRating?: number;
   search?: string;

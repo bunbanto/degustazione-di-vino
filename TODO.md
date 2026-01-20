@@ -1,40 +1,33 @@
-# TODO - Оновлення проекту
+# TODO - Degustazione di Vino
 
-## Виправлення реєстрації
+## Changes Completed
 
-**Проблема:** Реєстрація не працювала через невідповідність полів:
+### 1. Rating System (WineCard.tsx)
 
-- Бекенд очікує `name`, клієнт відправляв `username`
-- Бекенд не повертає токен при реєстрації
+- [x] Change from 5 to 10 stars
+- [x] Add 0.5 step rating
+- [x] Save rating to localStorage
+- [x] Update card numbers on rating
 
-**Виправлення:**
+### 2. Filters (FilterPanel.tsx)
 
-### 1. src/services/api.ts
+- [x] Remove "sparkling" from color dropdown
+- [x] Add separate "Frizzante" checkbox
 
-- [x] Змінено `username` на `name` у функції `register`
+### 3. Add/Edit Pages
 
-### 2. src/app/login/page.tsx
+- [x] Remove "sparkling" from colors
+- [x] Add "Frizzante" checkbox
 
-- [x] Змінено `username` на `name` у formData
-- [x] Змінено поле форми на "Ваше ім'я"
-- [x] Оновлено handleSubmit для використання `formData.name`
+### 4. Types (types/index.ts)
 
-## Рік вина
+- [x] Add `frizzante?: boolean` field
 
-### 1. Змінено "Рік врожаю" → "Рік вина"
+### 5. API Service (services/api.ts)
 
-- [x] src/app/add-card/page.tsx - label змінено
-- [x] src/app/cards/[id]/page.tsx - label змінено
+- [x] Add frizzante to create/update functions
 
-### 2. Рік вина на картці
+### 6. Cards Page (cards/page.tsx)
 
-- [x] src/components/WineCard.tsx - вже відображає `{card.year} р.`
-
-## Завантаження зображень
-
-Додано покращення для завантаження зображень:
-
-- [x] Валідація типу файлу (JPG, PNG, WebP)
-- [x] Валідація розміру файлу (до 5MB)
-- [x] Drag & Drop підтримка
-- [x] Повідомлення про помилки завантаження
+- [x] Add frizzante filter support
+- [x] Add frizzante filter to URL params
