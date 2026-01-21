@@ -169,8 +169,7 @@ export const cardsAPI = {
     if (card.price !== undefined) formData.append("price", String(card.price));
     if (card.description !== undefined)
       formData.append("description", card.description);
-    if (card.rating !== undefined)
-      formData.append("rating", String(card.rating));
+    // Rating should not be updated through card edit - it is updated only through the rate endpoint
 
     // Додаємо файл зображення
     if (imageFile) {

@@ -33,13 +33,11 @@ export default function EditCardPage() {
     anno: new Date().getFullYear(),
     alcohol: 12,
     price: 0,
-    rating: 0,
     description: "",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState<string>("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentCard, setCurrentCard] = useState<WineCard | null>(null);
 
   // Drag & Drop handlers
@@ -78,39 +76,16 @@ export default function EditCardPage() {
     };
   }, []);
 
-  // Get current user ID and username from localStorage
-  useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        const userId = user.id?.toString() || user._id?.toString() || null;
-        setCurrentUserId(userId);
-        // Store username in localStorage for use in ratings list
-        if (user.username) {
-          const existingNames = JSON.parse(
-            localStorage.getItem("userNames") || "{}",
-          );
-          existingNames[userId] = user.username;
-          localStorage.setItem("userNames", JSON.stringify(existingNames));
-        }
-      } catch (e) {
-        console.error("Error parsing user:", e);
-      }
-    }
-  }, []);
-
-  // Fetch card after we have the user ID (to properly get user's personal rating)
+  // Fetch card after authentication
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
-    } else if (currentUserId !== undefined) {
-      // Only fetch after currentUserId is determined
+    } else {
       setIsAuthenticated(true);
       fetchCard();
     }
-  }, [router, id, currentUserId]);
+  }, [router, id]);
 
   const validateFile = (file: File): boolean => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -147,32 +122,6 @@ export default function EditCardPage() {
       const card = await cardsAPI.getById(id);
       setCurrentCard(card);
 
-      // Find current user's rating from the ratings array
-      let userRating = 0;
-      if (card.ratings && Array.isArray(card.ratings) && currentUserId) {
-        const userRatingObj = card.ratings.find(
-          (r) =>
-            r.userId === currentUserId ||
-            r.userId?.toString() === currentUserId,
-        );
-        if (userRatingObj) {
-          userRating = userRatingObj.value;
-        }
-      }
-
-      // Store all user names from ratings for display purposes
-      if (card.ratings && Array.isArray(card.ratings)) {
-        const existingNames = JSON.parse(
-          localStorage.getItem("userNames") || "{}",
-        );
-        card.ratings.forEach((r: any) => {
-          if (r.username && r.userId) {
-            existingNames[r.userId?.toString()] = r.username;
-          }
-        });
-        localStorage.setItem("userNames", JSON.stringify(existingNames));
-      }
-
       setFormData({
         name: card.name || "",
         type: card.type || "secco",
@@ -184,7 +133,6 @@ export default function EditCardPage() {
         anno: card.anno || card.year || new Date().getFullYear(),
         alcohol: card.alcohol || 12,
         price: typeof card.price === "number" ? card.price : 0,
-        rating: userRating, // Show current user's personal rating, not average
         description: card.description || "",
       });
       setExistingImage(card.img || "");
@@ -409,8 +357,8 @@ export default function EditCardPage() {
                 </div>
               </div>
 
-              {/* Year, Alcohol, Price and Rating Row */}
-              <div className="grid md:grid-cols-4 gap-6">
+              {/* Year, Alcohol and Price Row */}
+              <div className="grid md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Рік вина
@@ -462,27 +410,20 @@ export default function EditCardPage() {
                     placeholder="Наприклад: 25.50"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ваша оцінка (0-10)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    step="0.5"
-                    value={formData.rating}
-                    onChange={(e) =>
-                      handleChange("rating", parseFloat(e.target.value))
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                    placeholder="Наприклад: 8.5"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Середній рейтинг: {currentCard?.rating?.toFixed(1) || "0.0"}{" "}
-                    ({currentCard?.ratingCount || 0} оцінок)
-                  </p>
+              {/* Average Rating Display */}
+              <div className="bg-amber-50 rounded-lg p-4">
+                <div className="flex items-center gap-4">
+                  <div className="text-2xl font-bold text-amber-700">
+                    {currentCard?.rating?.toFixed(1) || "0.0"}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <div>Середній рейтинг</div>
+                    <div className="text-gray-500">
+                      ({currentCard?.ratingCount || 0} оцінок)
+                    </div>
+                  </div>
                 </div>
               </div>
 
