@@ -149,20 +149,23 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleRate = async (id: string, rating: number) => {
+  const handleRate = async (id: string, rating: number): Promise<void> => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
-      return;
+      throw new Error("No token");
     }
 
     try {
-      await cardsAPI.rate(id, rating);
-      fetchCards(); // Refresh to show updated rating
+      const response = await cardsAPI.rate(id, rating);
+      console.log("Rating response:", response);
+      await fetchCards(); // Refresh to show updated average rating and user rating
     } catch (err: any) {
+      console.error("Error rating card:", err);
       if (err.response?.status === 401) {
         router.push("/login");
       }
+      throw err; // Re-throw to let WineCard handle the error
     }
   };
 

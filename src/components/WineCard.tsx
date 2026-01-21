@@ -48,34 +48,78 @@ function StarIcon({
 }
 
 export default function WineCardComponent({ card, onRate }: WineCardProps) {
-  const [userRating, setUserRating] = useState(0);
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [pendingRating, setPendingRating] = useState<number | null>(null); // Track rating during server request
   const [hoverRating, setHoverRating] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isRatingLoading, setIsRatingLoading] = useState(false);
+  const [ratingSuccess, setRatingSuccess] = useState(false);
 
-  // Load rating from localStorage on mount
+  // Get current user ID from localStorage
   useEffect(() => {
-    const savedRatings = localStorage.getItem("wineRatings");
-    if (savedRatings) {
-      const ratings = JSON.parse(savedRatings);
-      const savedRating = ratings[card._id];
-      if (savedRating !== undefined) {
-        setUserRating(savedRating);
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        // Support both id and _id formats
+        setCurrentUserId(user.id?.toString() || user._id?.toString() || null);
+      } catch (e) {
+        console.error("Error parsing user:", e);
       }
     }
-  }, [card._id]);
+  }, []);
+
+  // Load user's rating from the card's ratings array
+  // Only load initial rating from server, don't overwrite pending local state
+  useEffect(() => {
+    // If we have a pending rating (user just rated), don't overwrite from server data
+    if (pendingRating !== null) {
+      return;
+    }
+
+    if (card.ratings && Array.isArray(card.ratings) && currentUserId) {
+      const userRatingObj = card.ratings.find(
+        (r) =>
+          r.userId === currentUserId || r.userId?.toString() === currentUserId,
+      );
+      if (userRatingObj) {
+        setUserRating(userRatingObj.value);
+      } else {
+        setUserRating(null);
+      }
+    } else if (
+      !card.ratings ||
+      (Array.isArray(card.ratings) && card.ratings.length === 0)
+    ) {
+      setUserRating(null);
+    }
+  }, [card.ratings, currentUserId, pendingRating]);
 
   const handleRate = useCallback(
-    (rating: number) => {
+    async (rating: number) => {
       setUserRating(rating);
-
-      // Save to localStorage
-      const savedRatings = localStorage.getItem("wineRatings");
-      const ratings = savedRatings ? JSON.parse(savedRatings) : {};
-      ratings[card._id] = rating;
-      localStorage.setItem("wineRatings", JSON.stringify(ratings));
+      setPendingRating(rating); // Set pending rating to prevent overwrite from server
+      setIsRatingLoading(true);
+      setRatingSuccess(false);
 
       if (onRate) {
-        onRate(card._id, rating);
+        try {
+          await onRate(card._id, rating);
+          setRatingSuccess(true);
+          // Reset success message after 2 seconds
+          setTimeout(() => {
+            setRatingSuccess(false);
+          }, 2000);
+        } catch (error) {
+          console.error("Rating failed:", error);
+          // On error, clear pending rating so it can be reloaded from server
+          setPendingRating(null);
+        } finally {
+          setIsRatingLoading(false);
+        }
+      } else {
+        setIsRatingLoading(false);
       }
     },
     [card._id, onRate],
@@ -108,13 +152,15 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     return colors[color] || color;
   };
 
-  // Calculate display rating
-  const displayRating = userRating > 0 ? userRating : card.rating;
-  const hasUserRating = userRating > 0;
-  const currentRating = hoverRating || userRating;
+  // Display average rating from server
+  const displayRating = card.rating || 0;
+  const hasUserRating = userRating !== null && userRating > 0;
+  // Use pendingRating during loading, otherwise use userRating or hoverRating
+  const currentRating = isRatingLoading
+    ? pendingRating || userRating || 0
+    : hoverRating || userRating || 0;
 
   // Generate 10 stars with 0.5 step
-  // Each star can be: empty, half (0.5), or full (1.0)
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
@@ -197,53 +243,99 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
             {card.description}
           </p>
 
-          {/* Rating - 10 stars with 0.5 step (with half stars) */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <div
-                className={`text-2xl font-bold ${getRatingColor(displayRating)}`}
-              >
-                {displayRating.toFixed(1)}
+          {/* Rating - 10 stars with 0.5 step */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div
+                  className={`text-2xl font-bold ${getRatingColor(displayRating)}`}
+                >
+                  {displayRating.toFixed(1)}
+                </div>
+                <span className="text-xs text-gray-400">середній</span>
               </div>
-              {hasUserRating && (
-                <span className="text-xs text-green-600 bg-green-50 px-1 rounded">
-                  Ваша
-                </span>
+              {(hasUserRating || isRatingLoading) && currentUserId && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-green-600">Ваш:</span>
+                  <span
+                    className={`text-lg font-bold ${getRatingColor(isRatingLoading && pendingRating ? pendingRating : userRating!)}`}
+                  >
+                    {(isRatingLoading && pendingRating
+                      ? pendingRating
+                      : userRating || 0
+                    ).toFixed(1)}
+                  </span>
+                </div>
               )}
-              <div className="flex items-center -space-x-0.5">
-                {stars.map((star) => {
-                  const starValue = star;
-                  const prevStarValue = star - 1;
-                  const isFull = currentRating >= starValue;
-                  const isHalf = !isFull && currentRating > prevStarValue;
-
-                  return (
-                    <div key={star} className="relative group/star">
-                      {/* Left half clickable */}
-                      <div
-                        className="absolute left-0 top-0 w-1/2 h-full z-10 cursor-pointer"
-                        style={{ width: "50%" }}
-                        onMouseEnter={() => setHoverRating(prevStarValue + 0.5)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => handleRate(prevStarValue + 0.5)}
-                      />
-                      {/* Right half clickable */}
-                      <div
-                        className="absolute right-0 top-0 w-1/2 h-full z-10 cursor-pointer"
-                        style={{ left: "50%" }}
-                        onMouseEnter={() => setHoverRating(starValue)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => handleRate(starValue)}
-                      />
-                      <StarIcon filled={isFull} half={isHalf} />
-                    </div>
-                  );
-                })}
-              </div>
             </div>
-            <span className="text-sm text-gray-500">
-              {card.ratingCount || card.ratings?.length || 0} оцінок
-            </span>
+
+            {/* Interactive Rating Stars */}
+            <div className="flex items-center gap-0.5">
+              {stars.map((star) => {
+                const starValue = star;
+                const prevStarValue = star - 1;
+                const isFull = currentRating >= starValue;
+                const isHalf = !isFull && currentRating > prevStarValue;
+
+                return (
+                  <div key={star} className="relative group/star">
+                    {/* Left half clickable */}
+                    <div
+                      className={`absolute left-0 top-0 w-1/2 h-full z-10 ${
+                        isRatingLoading
+                          ? "cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
+                      style={{ width: "50%" }}
+                      onMouseEnter={() =>
+                        !isRatingLoading && setHoverRating(prevStarValue + 0.5)
+                      }
+                      onMouseLeave={() => !isRatingLoading && setHoverRating(0)}
+                      onClick={() =>
+                        !isRatingLoading && handleRate(prevStarValue + 0.5)
+                      }
+                    />
+                    {/* Right half clickable */}
+                    <div
+                      className={`absolute right-0 top-0 w-1/2 h-full z-10 ${
+                        isRatingLoading
+                          ? "cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
+                      style={{ left: "50%" }}
+                      onMouseEnter={() =>
+                        !isRatingLoading && setHoverRating(starValue)
+                      }
+                      onMouseLeave={() => !isRatingLoading && setHoverRating(0)}
+                      onClick={() => !isRatingLoading && handleRate(starValue)}
+                    />
+                    <StarIcon filled={isFull} half={isHalf} />
+                  </div>
+                );
+              })}
+              {currentUserId && (
+                <div className="flex items-center gap-2 ml-2">
+                  {isRatingLoading && (
+                    <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {ratingSuccess && (
+                    <span className="text-xs text-green-600 font-medium">
+                      ✓ збережено
+                    </span>
+                  )}
+                  {!isRatingLoading && !ratingSuccess && (
+                    <span className="text-xs text-gray-400">
+                      {hasUserRating ? "змінити" : "оцінити"}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Rating Count */}
+          <div className="text-sm text-gray-500 mb-3">
+            {card.ratingCount || card.ratings?.length || 0} оцінок
           </div>
 
           {/* Additional Info */}

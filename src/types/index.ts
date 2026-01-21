@@ -11,9 +11,9 @@ export interface WineCard {
   anno?: number;
   year?: number;
   alcohol?: number;
-  rating: number;
+  rating: number; // Average rating from server
   ratingCount?: number;
-  ratings?: number[];
+  ratings?: Array<{ userId: string; value: number }>; // Array of individual ratings
   image: string;
   img?: string;
   description?: string;

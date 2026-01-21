@@ -1,33 +1,23 @@
-# TODO - Degustazione di Vino
+# Rating System Improvements
 
-## Changes Completed
+## Task
 
-### 1. Rating System (WineCard.tsx)
+1. Rating step 0.5 - Already implemented (10 stars with left/right halves)
+2. Visually show stars after server submission with confirmation
 
-- [x] Change from 5 to 10 stars
-- [x] Add 0.5 step rating
-- [x] Save rating to localStorage
-- [x] Update card numbers on rating
+## Changes Made
 
-### 2. Filters (FilterPanel.tsx)
+### WineCard.tsx
 
-- [x] Remove "sparkling" from color dropdown
-- [x] Add separate "Frizzante" checkbox
+- [x] Add `pendingRating` state to track rating during server request
+- [x] Modify `handleRate` to set `pendingRating` before API call
+- [x] Update `useEffect` to not overwrite from server when pending rating exists
+- [x] Keep stars visible during loading with `pendingRating`
+- [x] Show "Ваш:" rating during loading state
+- [x] After successful submission, show "✓ збережено" confirmation
+- [x] Reset success message after 2 seconds
+- [x] On error, clear `pendingRating` to reload from server
 
-### 3. Add/Edit Pages
+### CardsContent.tsx
 
-- [x] Remove "sparkling" from colors
-- [x] Add "Frizzante" checkbox
-
-### 4. Types (types/index.ts)
-
-- [x] Add `frizzante?: boolean` field
-
-### 5. API Service (services/api.ts)
-
-- [x] Add frizzante to create/update functions
-
-### 6. Cards Page (cards/page.tsx)
-
-- [x] Add frizzante filter support
-- [x] Add frizzante filter to URL params
+- [x] Update `handleRate` to return `Promise<void>` for proper async tracking

@@ -15,7 +15,9 @@ export default function EditCardPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(
+    undefined,
+  );
   const [uploadError, setUploadError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
@@ -117,6 +119,10 @@ export default function EditCardPage() {
   const fetchCard = async () => {
     try {
       const card = await cardsAPI.getById(id);
+
+      // Rating is already calculated by the server in card.rating
+      const avgRating = card.rating || 0;
+
       setFormData({
         name: card.name || "",
         type: card.type || "secco",
@@ -128,11 +134,11 @@ export default function EditCardPage() {
         anno: card.anno || card.year || new Date().getFullYear(),
         alcohol: card.alcohol || 12,
         price: typeof card.price === "number" ? card.price : 0,
-        rating: card.rating || 0,
+        rating: avgRating, // Show average rating from server
         description: card.description || "",
       });
       setExistingImage(card.img || "");
-      setImagePreview(card.img || null);
+      setImagePreview(card.img || undefined);
     } catch (err: any) {
       setError(err.response?.data?.message || "Помилка завантаження картки");
     } finally {

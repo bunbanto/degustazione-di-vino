@@ -193,8 +193,8 @@ export const cardsAPI = {
   rate: async (
     id: string,
     rating: number,
-  ): Promise<{ averageRating: number }> => {
-    const response = await api.post(`/cards/${id}/rate`, { rating });
+  ): Promise<{ averageRating: number; ratingCount: number }> => {
+    const response = await api.patch(`/cards/${id}/rate`, { rating });
     return response.data;
   },
 };
