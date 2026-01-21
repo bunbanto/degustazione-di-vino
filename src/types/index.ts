@@ -23,6 +23,7 @@ export interface WineCard {
   description?: string;
   price: number | string;
   authorId?: number;
+  owner?: { _id: string; email?: string; name?: string };
   createdAt?: string;
 }
 

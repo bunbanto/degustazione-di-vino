@@ -139,9 +139,12 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
       try {
         const user = JSON.parse(userStr);
         // Support both id and _id formats, fallback to email-based id
+        // Priority: id (from profile) > _id (from response) > id > _id > email-based
         const userId =
           user.id?.toString() ||
           user._id?.toString() ||
+          (user.id ? user.id.toString() : null) ||
+          (user._id ? user._id.toString() : null) ||
           btoa(user.email || "").slice(0, 24);
         setCurrentUserId(userId);
 
@@ -159,6 +162,70 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
       }
     }
   }, []);
+
+  // Get current user's email for owner comparison
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUserEmail(user.email || null);
+      } catch (e) {
+        console.error("Error parsing user email:", e);
+      }
+    }
+  }, []);
+
+  // Check if current user is the card author
+  // Backend uses 'owner' field, which is populated as { _id, email } object
+  const isCardAuthor = (() => {
+    if (!currentUserId && !currentUserEmail) {
+      console.log("[Debug] No currentUserId or currentUserEmail");
+      return false;
+    }
+
+    console.log("[Debug] currentUserId:", currentUserId);
+    console.log("[Debug] currentUserEmail:", currentUserEmail);
+    console.log("[Debug] card.owner:", card.owner);
+    console.log("[Debug] card.authorId:", card.authorId);
+
+    // Check card.owner (populated from backend)
+    if (card.owner) {
+      const ownerId =
+        typeof card.owner === "object" ? card.owner._id : card.owner;
+      const ownerEmail =
+        typeof card.owner === "object" ? card.owner.email : null;
+
+      console.log("[Debug] ownerId:", ownerId);
+      console.log("[Debug] ownerEmail:", ownerEmail);
+
+      // Compare by _id first
+      if (currentUserId && ownerId && currentUserId === ownerId.toString()) {
+        console.log("[Debug] isCardAuthor (via _id match):", true);
+        return true;
+      }
+
+      // Compare by email if available
+      if (currentUserEmail && ownerEmail && currentUserEmail === ownerEmail) {
+        console.log("[Debug] isCardAuthor (via email match):", true);
+        return true;
+      }
+
+      console.log("[Debug] isCardAuthor (via owner):", false);
+      return false;
+    }
+
+    // Fallback to authorId if exists
+    if (card.authorId) {
+      const isAuthor = currentUserId === card.authorId.toString();
+      console.log("[Debug] isCardAuthor (via authorId):", isAuthor);
+      return isAuthor;
+    }
+
+    console.log("[Debug] No owner or authorId found");
+    return false;
+  })();
 
   // Load all usernames from localStorage into Zustand store for compatibility
   useEffect(() => {
@@ -196,43 +263,46 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
   }, [card.ratings]);
 
   // Load user's rating from the card's ratings array
-  // Only load initial rating from server, don't overwrite pending local state
+  // Also keep track of the pending rating value for display
   useEffect(() => {
-    // If we have a pending rating (user just rated), don't overwrite from server data
-    if (pendingRating !== null) {
-      return;
-    }
-
     if (card.ratings && Array.isArray(card.ratings) && currentUserId) {
       const userRatingObj = card.ratings.find((r) => {
         const ratingUserIdStr = getUserIdString(r.userId);
         return ratingUserIdStr === currentUserId;
       });
+
       if (userRatingObj) {
         setUserRating(userRatingObj.value);
-      } else {
+        // Clear pending rating since we have the confirmed value from server
+        setPendingRating(null);
+      }
+      // If userRatingObj is not found and we don't have a pending rating, reset to null
+      else if (pendingRating === null) {
         setUserRating(null);
       }
     } else if (
       !card.ratings ||
       (Array.isArray(card.ratings) && card.ratings.length === 0)
     ) {
-      setUserRating(null);
+      if (pendingRating === null) {
+        setUserRating(null);
+      }
     }
-  }, [card.ratings, currentUserId, pendingRating]);
+  }, [card.ratings, currentUserId]);
 
   const handleRate = useCallback(
     async (rating: number) => {
       setUserRating(rating);
-      setPendingRating(rating); // Set pending rating to prevent overwrite from server
+      setPendingRating(rating); // Track for display purposes
       setIsRatingLoading(true);
 
       if (onRate) {
         try {
           await onRate(card._id, rating);
+          // Don't clear pendingRating here - it will be cleared when new data arrives
         } catch (error) {
           console.error("Rating failed:", error);
-          // On error, clear pending rating so it can be reloaded from server
+          // On error, clear pending rating
           setPendingRating(null);
         } finally {
           setIsRatingLoading(false);
@@ -312,26 +382,28 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
               Frizzante
             </div>
           )}
-          {/* Edit Button */}
-          <Link
-            href={`/cards/${card._id}`}
-            className="absolute bottom-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-50"
-            title="Редагувати"
-          >
-            <svg
-              className="w-5 h-5 text-rose-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {isCardAuthor && (
+            /* edit_file Button */
+            <Link
+              href={`/cards/${card._id}`}
+              className="absolute bottom-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-50"
+              title="Редагувати"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
-          </Link>
+              <svg
+                className="w-5 h-5 text-rose-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            </Link>
+          )}
         </div>
 
         {/* Content */}
@@ -373,19 +445,17 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
                 </div>
                 <span className="text-xs text-gray-400">середній</span>
               </div>
-              {(hasUserRating || isRatingLoading) && currentUserId && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-green-600">Ваш:</span>
-                  <span
-                    className={`text-lg font-bold ${getRatingColor(isRatingLoading && pendingRating ? pendingRating : userRating!)}`}
-                  >
-                    {(isRatingLoading && pendingRating
-                      ? pendingRating
-                      : userRating || 0
-                    ).toFixed(1)}
-                  </span>
-                </div>
-              )}
+              {currentUserId &&
+                (userRating !== null || pendingRating !== null) && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-green-600">Ваш:</span>
+                    <span
+                      className={`text-lg font-bold ${getRatingColor(pendingRating || userRating || 0)}`}
+                    >
+                      {(pendingRating || userRating || 0).toFixed(1)}
+                    </span>
+                  </div>
+                )}
             </div>
 
             {/* Interactive Rating Stars */}
@@ -715,25 +785,27 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
               )}
 
               {/* Edit Button */}
-              <Link
-                href={`/cards/${card._id}`}
-                className="mt-4 w-full py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {isCardAuthor && (
+                <Link
+                  href={`/cards/${card._id}`}
+                  className="mt-4 w-full py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors flex items-center justify-center gap-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-                Редагувати картку
-              </Link>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                  Редагувати картку
+                </Link>
+              )}
             </div>
           </div>
         </div>
