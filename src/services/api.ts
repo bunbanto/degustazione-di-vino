@@ -193,7 +193,16 @@ export const cardsAPI = {
     id: string,
     rating: number,
   ): Promise<{ averageRating: number; ratingCount: number }> => {
-    const response = await api.patch(`/cards/${id}/rate`, { rating });
+    // Get current user info from server
+    let username = "";
+    try {
+      const user = await authAPI.getProfile();
+      username = user.username || user.name || "";
+    } catch (e) {
+      console.error("Error getting user profile:", e);
+    }
+
+    const response = await api.patch(`/cards/${id}/rate`, { rating, username });
     return response.data;
   },
 };

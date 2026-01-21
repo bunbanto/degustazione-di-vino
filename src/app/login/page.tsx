@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/services/api";
+import { useUserStore } from "@/store/userStore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,6 +36,24 @@ export default function LoginPage() {
         const response = await authAPI.login(formData.email, formData.password);
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(response.user));
+
+        // Fetch user profile to get the actual ID
+        try {
+          const profile = await authAPI.getProfile();
+          const userWithId = {
+            ...response.user,
+            id: profile.id || profile._id,
+            username: profile.username || profile.name || response.user.name,
+          };
+          localStorage.setItem("user", JSON.stringify(userWithId));
+
+          // Sync user to Zustand store
+          useUserStore.getState().setCurrentUser(userWithId);
+        } catch (profileError) {
+          // If profile fetch fails, still sync what we have
+          useUserStore.getState().setCurrentUser(response.user);
+        }
+
         router.push("/cards");
       }
     } catch (err: any) {

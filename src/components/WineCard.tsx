@@ -3,6 +3,7 @@
 import { WineCard } from "@/types";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useUserStore } from "@/store/userStore";
 
 interface WineCardProps {
   card: WineCard;
@@ -16,7 +17,7 @@ function RatingListItem({
   rating,
   isCurrentUser,
 }: {
-  userId: string;
+  userId: string | { _id: string; name?: string };
   username: string;
   rating: number;
   isCurrentUser: boolean;
@@ -65,17 +66,24 @@ function RatingListItem({
   );
 }
 
-// Helper function to get username from localStorage
-function getUsername(userId: string): string {
-  try {
-    const userNames = JSON.parse(localStorage.getItem("userNames") || "{}");
-    if (userNames[userId]) {
-      return userNames[userId];
-    }
-  } catch (e) {
-    console.error("Error getting username:", e);
+// Helper function to get username from Zustand store
+function getUsername(userId: string | { _id: string; name?: string }): string {
+  // If userId is an object with name, use it directly
+  if (typeof userId === "object" && userId.name) {
+    return userId.name;
   }
-  return `Користувач ${userId.slice(-4)}`;
+
+  // Convert to string for store lookup
+  const userIdStr = typeof userId === "string" ? userId : userId._id;
+  const getUsernameFromStore = useUserStore.getState().getUsername;
+  return getUsernameFromStore(userIdStr);
+}
+
+// Helper to get userId string from various formats
+function getUserIdString(
+  userId: string | { _id: string; name?: string },
+): string {
+  return typeof userId === "string" ? userId : userId._id;
 }
 
 // SVG Star component with optional fill percentage
@@ -123,7 +131,6 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isRatingLoading, setIsRatingLoading] = useState(false);
-  const [ratingSuccess, setRatingSuccess] = useState(false);
 
   // Get current user ID from localStorage
   useEffect(() => {
@@ -131,13 +138,62 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
-        // Support both id and _id formats
-        setCurrentUserId(user.id?.toString() || user._id?.toString() || null);
+        // Support both id and _id formats, fallback to email-based id
+        const userId =
+          user.id?.toString() ||
+          user._id?.toString() ||
+          btoa(user.email || "").slice(0, 24);
+        setCurrentUserId(userId);
+
+        // Also sync to Zustand store
+        if (userId) {
+          useUserStore
+            .getState()
+            .setUserName(
+              userId,
+              user.username || user.name || `Користувач ${userId.slice(-4)}`,
+            );
+        }
       } catch (e) {
         console.error("Error parsing user:", e);
       }
     }
   }, []);
+
+  // Load all usernames from localStorage into Zustand store for compatibility
+  useEffect(() => {
+    try {
+      const userNamesFromStorage = JSON.parse(
+        localStorage.getItem("userNames") || "{}",
+      );
+      const setUserName = useUserStore.getState().setUserName;
+      Object.entries(userNamesFromStorage).forEach(([userId, username]) => {
+        setUserName(userId, username as string);
+      });
+    } catch (e) {
+      console.error("Error loading userNames from localStorage:", e);
+    }
+  }, []);
+
+  // Store all usernames from card ratings in Zustand store
+  useEffect(() => {
+    if (card.ratings && Array.isArray(card.ratings)) {
+      const setUserName = useUserStore.getState().setUserName;
+
+      card.ratings.forEach((rating) => {
+        if (rating.userId) {
+          const userIdStr = getUserIdString(rating.userId);
+
+          // Use name from object directly if available
+          if (typeof rating.userId === "object" && rating.userId.name) {
+            setUserName(userIdStr, rating.userId.name);
+          } else if (rating.username) {
+            setUserName(userIdStr, rating.username);
+          }
+        }
+      });
+    }
+  }, [card.ratings]);
 
   // Load user's rating from the card's ratings array
   // Only load initial rating from server, don't overwrite pending local state
@@ -148,10 +204,10 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     }
 
     if (card.ratings && Array.isArray(card.ratings) && currentUserId) {
-      const userRatingObj = card.ratings.find(
-        (r) =>
-          r.userId === currentUserId || r.userId?.toString() === currentUserId,
-      );
+      const userRatingObj = card.ratings.find((r) => {
+        const ratingUserIdStr = getUserIdString(r.userId);
+        return ratingUserIdStr === currentUserId;
+      });
       if (userRatingObj) {
         setUserRating(userRatingObj.value);
       } else {
@@ -170,16 +226,10 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
       setUserRating(rating);
       setPendingRating(rating); // Set pending rating to prevent overwrite from server
       setIsRatingLoading(true);
-      setRatingSuccess(false);
 
       if (onRate) {
         try {
           await onRate(card._id, rating);
-          setRatingSuccess(true);
-          // Reset success message after 2 seconds
-          setTimeout(() => {
-            setRatingSuccess(false);
-          }, 2000);
         } catch (error) {
           console.error("Rating failed:", error);
           // On error, clear pending rating so it can be reloaded from server
@@ -382,21 +432,9 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
                   </div>
                 );
               })}
-              {currentUserId && (
+              {currentUserId && isRatingLoading && (
                 <div className="flex items-center gap-2 ml-2">
-                  {isRatingLoading && (
-                    <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-                  )}
-                  {ratingSuccess && (
-                    <span className="text-xs text-green-600 font-medium">
-                      ✓ збережено
-                    </span>
-                  )}
-                  {!isRatingLoading && !ratingSuccess && (
-                    <span className="text-xs text-gray-400">
-                      {hasUserRating ? "змінити" : "оцінити"}
-                    </span>
-                  )}
+                  <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
             </div>
@@ -655,17 +693,23 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
                     Оцінки користувачів ({card.ratings.length})
                   </h4>
                   <div className="max-h-48 overflow-y-auto space-y-1">
-                    {card.ratings.map((rating, idx) => (
-                      <RatingListItem
-                        key={idx}
-                        userId={rating.userId || ""}
-                        username={
-                          rating.username || getUsername(rating.userId || "")
-                        }
-                        rating={rating.value}
-                        isCurrentUser={rating.userId === currentUserId}
-                      />
-                    ))}
+                    {card.ratings.map((rating, idx) => {
+                      const userIdStr = getUserIdString(rating.userId || "");
+                      const displayUsername =
+                        typeof rating.userId === "object" && rating.userId.name
+                          ? rating.userId.name
+                          : rating.username || getUsername(rating.userId || "");
+
+                      return (
+                        <RatingListItem
+                          key={idx}
+                          userId={rating.userId || ""}
+                          username={displayUsername}
+                          rating={rating.value}
+                          isCurrentUser={userIdStr === currentUserId}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}

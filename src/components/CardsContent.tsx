@@ -8,6 +8,7 @@ import FilterPanel from "@/components/FilterPanel";
 import Pagination from "@/components/Pagination";
 import { cardsAPI } from "@/services/api";
 import { WineCard, FilterParams } from "@/types";
+import { useUserStore } from "@/store/userStore";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -42,21 +43,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       const response = await cardsAPI.getAll({}, { page: 1, limit: 1000 });
       console.log("API response received:", response);
 
-      // Store all user names from ratings for display purposes
-      const existingNames = JSON.parse(
-        localStorage.getItem("userNames") || "{}",
-      );
-      response.cards.forEach((card: WineCard) => {
-        if (card.ratings && Array.isArray(card.ratings)) {
-          card.ratings.forEach((r: any) => {
-            if (r.username && r.userId) {
-              existingNames[r.userId?.toString()] = r.username;
-            }
-          });
-        }
-      });
-      localStorage.setItem("userNames", JSON.stringify(existingNames));
-
       setAllCards(response.cards);
       setDebugInfo(`Отримано ${response.cards.length} карток`);
     } catch (err: any) {
@@ -79,6 +65,34 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       setLoading(false);
     }
   }, [router]);
+
+  // Sync user names from cards to Zustand store
+  const setUserName = useUserStore((state) => state.setUserName);
+
+  useEffect(() => {
+    if (allCards.length > 0) {
+      allCards.forEach((card: WineCard) => {
+        if (card.ratings && Array.isArray(card.ratings)) {
+          card.ratings.forEach((r) => {
+            if (r.userId) {
+              const userIdStr =
+                typeof r.userId === "string" ? r.userId : r.userId._id;
+
+              // Get name from object or username field
+              const username =
+                typeof r.userId === "object" && r.userId.name
+                  ? r.userId.name
+                  : r.username;
+
+              if (userIdStr && username) {
+                setUserName(userIdStr, username);
+              }
+            }
+          });
+        }
+      });
+    }
+  }, [allCards, setUserName]);
 
   // Apply filters to all cards
   const applyFilters = useCallback(

@@ -1,25 +1,42 @@
-# Fix Issues TODO
+# TODO - Виправлення відображення імен користувачів
 
-## Issues Fixed:
+## Завдання
 
-1. [x] Issue 1: Country not displayed - Code verified, country rendering exists
-2. [x] Issue 2: Edit page shows average rating instead of personal rating - Fixed in src/app/cards/[id]/page.tsx
-3. [x] Issue 3: User ID shown instead of username - Fixed in src/components/WineCard.tsx, CardsContent.tsx
+Виправити відображення "Користувач d8d6" замість реального імені "Yurii Fishbakh" в інфо картках рейтингу.
 
-## Fix Details:
+## План
 
-### Issue 2: Fixed personal rating in edit page (src/app/cards/[id]/page.tsx)
+### Крок 1: Встановити Zustand
 
-- Changed fetchCard to initialize formData.rating with user's personal rating from card.ratings array
-- Added user names caching from ratings in localStorage
+- [x] `npm install zustand`
 
-### Issue 3: Show username instead of userId (src/components/WineCard.tsx, CardsContent.tsx)
+### Крок 2: Створити userStore
 
-- Added getUsername helper function to look up usernames from localStorage
-- Updated RatingListItem to receive userId and display username
-- Added username caching in CardsContent.tsx when fetching cards
+- [x] Створити `src/store/userStore.ts` з Zustand store
+  - Зберігати `currentUser` - поточного користувача
+  - Зберігати `userNames` - словник {userId: username}
 
-### Issue 1: Country display verified
+### Крок 3: Оновити WineCard.tsx
 
-- The country rendering code exists in WineCard.tsx (both in card view and modal)
-- If country is still not displaying, it may be a server data issue or field name mismatch
+- [x] Видалити функцію `getUsername` з localStorage
+- [x] Імпортувати userStore
+- [x] Використовувати store для отримання імен користувачів
+
+### Крок 4: Оновити login/page.tsx
+
+- [x] Імпортувати userStore
+- [x] Зберігати `userNames` у store при вході
+
+### Крок 5: Оновити CardsContent.tsx
+
+- [x] Синхронізувати імена користувачів з Zustand store
+
+## Статус
+
+- [x] Аналіз проблеми
+- [x] Виконано Крок 1
+- [x] Виконано Крок 2
+- [x] Виконано Крок 3
+- [x] Виконано Крок 4
+- [x] Виконано Крок 5
+- [x] Тестування (збірка успішна)
