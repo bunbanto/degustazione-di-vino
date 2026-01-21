@@ -42,6 +42,21 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       const response = await cardsAPI.getAll({}, { page: 1, limit: 1000 });
       console.log("API response received:", response);
 
+      // Store all user names from ratings for display purposes
+      const existingNames = JSON.parse(
+        localStorage.getItem("userNames") || "{}",
+      );
+      response.cards.forEach((card: WineCard) => {
+        if (card.ratings && Array.isArray(card.ratings)) {
+          card.ratings.forEach((r: any) => {
+            if (r.username && r.userId) {
+              existingNames[r.userId?.toString()] = r.username;
+            }
+          });
+        }
+      });
+      localStorage.setItem("userNames", JSON.stringify(existingNames));
+
       setAllCards(response.cards);
       setDebugInfo(`Отримано ${response.cards.length} карток`);
     } catch (err: any) {

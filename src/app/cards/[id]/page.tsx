@@ -39,6 +39,8 @@ export default function EditCardPage() {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentCard, setCurrentCard] = useState<WineCard | null>(null);
 
   // Drag & Drop handlers
   useEffect(() => {
@@ -76,15 +78,39 @@ export default function EditCardPage() {
     };
   }, []);
 
+  // Get current user ID and username from localStorage
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const userId = user.id?.toString() || user._id?.toString() || null;
+        setCurrentUserId(userId);
+        // Store username in localStorage for use in ratings list
+        if (user.username) {
+          const existingNames = JSON.parse(
+            localStorage.getItem("userNames") || "{}",
+          );
+          existingNames[userId] = user.username;
+          localStorage.setItem("userNames", JSON.stringify(existingNames));
+        }
+      } catch (e) {
+        console.error("Error parsing user:", e);
+      }
+    }
+  }, []);
+
+  // Fetch card after we have the user ID (to properly get user's personal rating)
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
-    } else {
+    } else if (currentUserId !== undefined) {
+      // Only fetch after currentUserId is determined
       setIsAuthenticated(true);
       fetchCard();
     }
-  }, [router, id]);
+  }, [router, id, currentUserId]);
 
   const validateFile = (file: File): boolean => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -119,9 +145,33 @@ export default function EditCardPage() {
   const fetchCard = async () => {
     try {
       const card = await cardsAPI.getById(id);
+      setCurrentCard(card);
 
-      // Rating is already calculated by the server in card.rating
-      const avgRating = card.rating || 0;
+      // Find current user's rating from the ratings array
+      let userRating = 0;
+      if (card.ratings && Array.isArray(card.ratings) && currentUserId) {
+        const userRatingObj = card.ratings.find(
+          (r) =>
+            r.userId === currentUserId ||
+            r.userId?.toString() === currentUserId,
+        );
+        if (userRatingObj) {
+          userRating = userRatingObj.value;
+        }
+      }
+
+      // Store all user names from ratings for display purposes
+      if (card.ratings && Array.isArray(card.ratings)) {
+        const existingNames = JSON.parse(
+          localStorage.getItem("userNames") || "{}",
+        );
+        card.ratings.forEach((r: any) => {
+          if (r.username && r.userId) {
+            existingNames[r.userId?.toString()] = r.username;
+          }
+        });
+        localStorage.setItem("userNames", JSON.stringify(existingNames));
+      }
 
       setFormData({
         name: card.name || "",
@@ -134,7 +184,7 @@ export default function EditCardPage() {
         anno: card.anno || card.year || new Date().getFullYear(),
         alcohol: card.alcohol || 12,
         price: typeof card.price === "number" ? card.price : 0,
-        rating: avgRating, // Show average rating from server
+        rating: userRating, // Show current user's personal rating, not average
         description: card.description || "",
       });
       setExistingImage(card.img || "");
@@ -415,13 +465,13 @@ export default function EditCardPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Рейтинг (0-10)
+                    Ваша оцінка (0-10)
                   </label>
                   <input
                     type="number"
                     min="0"
                     max="10"
-                    step="0.1"
+                    step="0.5"
                     value={formData.rating}
                     onChange={(e) =>
                       handleChange("rating", parseFloat(e.target.value))
@@ -429,6 +479,10 @@ export default function EditCardPage() {
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
                     placeholder="Наприклад: 8.5"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Середній рейтинг: {currentCard?.rating?.toFixed(1) || "0.0"}{" "}
+                    ({currentCard?.ratingCount || 0} оцінок)
+                  </p>
                 </div>
               </div>
 

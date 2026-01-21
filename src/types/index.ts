@@ -13,7 +13,7 @@ export interface WineCard {
   alcohol?: number;
   rating: number; // Average rating from server
   ratingCount?: number;
-  ratings?: Array<{ userId: string; value: number }>; // Array of individual ratings
+  ratings?: Array<{ userId: string; value: number; username?: string }>; // Array of individual ratings
   image: string;
   img?: string;
   description?: string;

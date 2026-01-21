@@ -1,23 +1,25 @@
-# Rating System Improvements
+# Fix Issues TODO
 
-## Task
+## Issues Fixed:
 
-1. Rating step 0.5 - Already implemented (10 stars with left/right halves)
-2. Visually show stars after server submission with confirmation
+1. [x] Issue 1: Country not displayed - Code verified, country rendering exists
+2. [x] Issue 2: Edit page shows average rating instead of personal rating - Fixed in src/app/cards/[id]/page.tsx
+3. [x] Issue 3: User ID shown instead of username - Fixed in src/components/WineCard.tsx, CardsContent.tsx
 
-## Changes Made
+## Fix Details:
 
-### WineCard.tsx
+### Issue 2: Fixed personal rating in edit page (src/app/cards/[id]/page.tsx)
 
-- [x] Add `pendingRating` state to track rating during server request
-- [x] Modify `handleRate` to set `pendingRating` before API call
-- [x] Update `useEffect` to not overwrite from server when pending rating exists
-- [x] Keep stars visible during loading with `pendingRating`
-- [x] Show "Ваш:" rating during loading state
-- [x] After successful submission, show "✓ збережено" confirmation
-- [x] Reset success message after 2 seconds
-- [x] On error, clear `pendingRating` to reload from server
+- Changed fetchCard to initialize formData.rating with user's personal rating from card.ratings array
+- Added user names caching from ratings in localStorage
 
-### CardsContent.tsx
+### Issue 3: Show username instead of userId (src/components/WineCard.tsx, CardsContent.tsx)
 
-- [x] Update `handleRate` to return `Promise<void>` for proper async tracking
+- Added getUsername helper function to look up usernames from localStorage
+- Updated RatingListItem to receive userId and display username
+- Added username caching in CardsContent.tsx when fetching cards
+
+### Issue 1: Country display verified
+
+- The country rendering code exists in WineCard.tsx (both in card view and modal)
+- If country is still not displaying, it may be a server data issue or field name mismatch

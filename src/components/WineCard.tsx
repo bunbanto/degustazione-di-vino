@@ -9,6 +9,75 @@ interface WineCardProps {
   onRate?: (id: string, rating: number) => void;
 }
 
+// Rating display component for showing individual ratings
+function RatingListItem({
+  userId,
+  username,
+  rating,
+  isCurrentUser,
+}: {
+  userId: string;
+  username: string;
+  rating: number;
+  isCurrentUser: boolean;
+}) {
+  const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center">
+          <span className="text-rose-600 font-medium text-sm">
+            {username.charAt(0).toUpperCase()}
+          </span>
+        </div>
+        <div>
+          <span className="text-sm font-medium text-gray-700">{username}</span>
+          {isCurrentUser && (
+            <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+              Ви
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-1">
+        {stars.map((star) => {
+          const isFull = rating >= star;
+          const isHalf = !isFull && rating >= star - 0.5;
+          return (
+            <svg
+              key={star}
+              className={`w-4 h-4 ${
+                isFull || isHalf ? "text-yellow-400" : "text-gray-200"
+              }`}
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          );
+        })}
+        <span className="ml-2 text-sm font-bold text-gray-700">
+          {rating.toFixed(1)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Helper function to get username from localStorage
+function getUsername(userId: string): string {
+  try {
+    const userNames = JSON.parse(localStorage.getItem("userNames") || "{}");
+    if (userNames[userId]) {
+      return userNames[userId];
+    }
+  } catch (e) {
+    console.error("Error getting username:", e);
+  }
+  return `Користувач ${userId.slice(-4)}`;
+}
+
 // SVG Star component with optional fill percentage
 function StarIcon({
   filled,
@@ -389,7 +458,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
       {/* Image Modal */}
       {isImageModalOpen && (
         <div
-          className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-0"
+          className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4"
           onClick={() => setIsImageModalOpen(false)}
         >
           <button
@@ -410,20 +479,217 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
               />
             </svg>
           </button>
-          <img
-            src={
-              card.img ||
-              card.image ||
-              "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
-            }
-            alt={card.name}
-            className="w-full h-full object-contain"
+
+          {/* Modal Content */}
+          <div
+            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
             onClick={(e) => e.stopPropagation()}
-          />
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-center">
-            <div className="bg-black/60 backdrop-blur-sm px-6 py-3 rounded-lg">
-              <h3 className="text-xl font-bold">{card.name}</h3>
-              {card.winery && <p className="text-rose-200">{card.winery}</p>}
+          >
+            {/* Left Side - Image */}
+            <div className="md:w-1/2 bg-gray-100 flex items-center justify-center">
+              <img
+                src={
+                  card.img ||
+                  card.image ||
+                  "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
+                }
+                alt={card.name}
+                className="w-full h-64 md:h-full object-contain"
+              />
+            </div>
+
+            {/* Right Side - Info */}
+            <div className="md:w-1/2 p-6 overflow-y-auto">
+              {/* Header */}
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold text-rose-900">
+                  {card.name}
+                </h2>
+                {card.winery && (
+                  <p className="text-rose-600 font-medium">{card.winery}</p>
+                )}
+              </div>
+
+              {/* Rating Summary */}
+              <div className="bg-amber-50 rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`text-3xl font-bold ${getRatingColor(displayRating)}`}
+                    >
+                      {displayRating.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      <div>із 10</div>
+                      <div>
+                        ({card.ratingCount || card.ratings?.length || 0} оцінок)
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => {
+                      const isFull = displayRating >= star;
+                      const isHalf = !isFull && displayRating >= star - 0.5;
+                      return (
+                        <svg
+                          key={star}
+                          className={`w-5 h-5 ${
+                            isFull || isHalf
+                              ? "text-yellow-400"
+                              : "text-gray-200"
+                          }`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Wine Details */}
+              <div className="space-y-3 mb-4">
+                <div className="flex flex-wrap gap-2">
+                  <span className="px-3 py-1 bg-rose-100 text-rose-800 rounded-full text-sm font-medium">
+                    {getTypeLabel(card.type)}
+                  </span>
+                  <span className="px-3 py-1 bg-rose-200 text-rose-800 rounded-full text-sm font-medium capitalize">
+                    {getColorLabel(card.color)}
+                  </span>
+                  {card.frizzante && (
+                    <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+                      Frizzante
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-sm">
+                  {(card.year || card.anno) && (
+                    <div className="bg-gray-50 p-2 rounded text-center">
+                      <div className="text-gray-500 text-xs">Рік</div>
+                      <div className="font-medium">
+                        {card.year || card.anno}
+                      </div>
+                    </div>
+                  )}
+                  {card.alcohol && (
+                    <div className="bg-gray-50 p-2 rounded text-center">
+                      <div className="text-gray-500 text-xs">Алкоголь</div>
+                      <div className="font-medium">{card.alcohol}%</div>
+                    </div>
+                  )}
+                  {card.price && (
+                    <div className="bg-gray-50 p-2 rounded text-center">
+                      <div className="text-gray-500 text-xs">Ціна</div>
+                      <div className="font-medium">
+                        {typeof card.price === "number"
+                          ? `€${card.price.toFixed(2)}`
+                          : card.price}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {(card.country || card.region) && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    {card.country && (
+                      <span className="flex items-center gap-1">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {card.country}
+                      </span>
+                    )}
+                    {card.region && (
+                      <span className="flex items-center gap-1">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        {card.region}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              {card.description && (
+                <div className="mb-4">
+                  <h4 className="font-medium text-gray-700 mb-2">Опис</h4>
+                  <p className="text-gray-600 text-sm">{card.description}</p>
+                </div>
+              )}
+
+              {/* All Ratings List */}
+              {card.ratings && card.ratings.length > 0 && (
+                <div className="border-t pt-4">
+                  <h4 className="font-medium text-gray-700 mb-3">
+                    Оцінки користувачів ({card.ratings.length})
+                  </h4>
+                  <div className="max-h-48 overflow-y-auto space-y-1">
+                    {card.ratings.map((rating, idx) => (
+                      <RatingListItem
+                        key={idx}
+                        userId={rating.userId || ""}
+                        username={
+                          rating.username || getUsername(rating.userId || "")
+                        }
+                        rating={rating.value}
+                        isCurrentUser={rating.userId === currentUserId}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Edit Button */}
+              <Link
+                href={`/cards/${card._id}`}
+                className="mt-4 w-full py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Редагувати картку
+              </Link>
             </div>
           </div>
         </div>
