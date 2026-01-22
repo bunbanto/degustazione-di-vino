@@ -575,11 +575,11 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
 
           {/* Modal Content */}
           <div
-            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
+            className="bg-white rounded-2xl w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Left Side - Image */}
-            <div className="md:w-1/2 bg-gray-100 flex items-center justify-center">
+            <div className="md:w-1/2 bg-gray-100 flex items-center justify-center min-h-[300px] md:min-h-[400px]">
               <img
                 src={
                   card.img ||
@@ -587,12 +587,12 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
                   "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
                 }
                 alt={card.name}
-                className="w-full h-64 md:h-full object-contain"
+                className="w-full h-full object-contain"
               />
             </div>
 
             {/* Right Side - Info */}
-            <div className="md:w-1/2 p-6 overflow-y-auto">
+            <div className="md:w-1/2 p-6 md:p-8 overflow-y-auto max-h-[60vh] md:max-h-[90vh]">
               {/* Header */}
               <div className="mb-4">
                 <h2 className="text-2xl font-bold text-rose-900">
@@ -747,7 +747,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
                   <h4 className="font-medium text-gray-700 mb-3">
                     Оцінки користувачів ({card.ratings.length})
                   </h4>
-                  <div className="max-h-32 overflow-y-auto space-y-1">
+                  <div className="max-h-48 overflow-y-auto space-y-1">
                     {card.ratings.map((rating, idx) => {
                       const userIdStr = getUserIdString(rating.userId || "");
                       const displayUsername =
