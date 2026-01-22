@@ -27,7 +27,6 @@ export default function AddCardPage() {
     anno: new Date().getFullYear(),
     alcohol: 12,
     price: 0,
-    rating: 0,
     description: "",
   });
 
@@ -300,8 +299,8 @@ export default function AddCardPage() {
                 />
               </div>
 
-              {/* Year, Alcohol, Price and Rating Row */}
-              <div className="grid md:grid-cols-4 gap-6">
+              {/* Year, Alcohol and Price Row */}
+              <div className="grid md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Рік вина
@@ -351,24 +350,6 @@ export default function AddCardPage() {
                     }
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
                     placeholder="Наприклад: 25.50"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Рейтинг (0-10)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    step="0.1"
-                    value={formData.rating}
-                    onChange={(e) =>
-                      handleChange("rating", parseFloat(e.target.value))
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                    placeholder="Наприклад: 8.5"
                   />
                 </div>
               </div>
