@@ -747,7 +747,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
                   <h4 className="font-medium text-gray-700 mb-3">
                     Оцінки користувачів ({card.ratings.length})
                   </h4>
-                  <div className="max-h-48 overflow-y-auto space-y-1">
+                  <div className="max-h-32 overflow-y-auto space-y-1">
                     {card.ratings.map((rating, idx) => {
                       const userIdStr = getUserIdString(rating.userId || "");
                       const displayUsername =
