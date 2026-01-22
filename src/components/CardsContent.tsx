@@ -20,58 +20,52 @@ interface CardsContentProps {
 function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   const router = useRouter();
 
-  const [allCards, setAllCards] = useState<WineCard[]>([]);
-  const [filteredCards, setFilteredCards] = useState<WineCard[]>([]);
+  const [cards, setCards] = useState<WineCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const [debugInfo, setDebugInfo] = useState<string>("");
+  const [totalPageCount, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [filters, setFilters] = useState<FilterParams>(initialFilters);
   const [currentPage, setCurrentPage] = useState(initialPage);
 
-  // Fetch all cards from server
+  // Fetch cards from server with server-side filtering
   const fetchCards = useCallback(async () => {
     setLoading(true);
     setError("");
-    setDebugInfo("");
 
     try {
-      console.log("Fetching cards from API...");
-      const token = localStorage.getItem("token");
-      console.log("Token exists:", !!token);
+      const response = await cardsAPI.getAll(filters, {
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+      });
 
-      const response = await cardsAPI.getAll({}, { page: 1, limit: 1000 });
-      console.log("API response received:", response);
-
-      setAllCards(response.cards);
-      setDebugInfo(`Отримано ${response.cards.length} карток`);
+      setCards(response.cards);
+      setTotalPages(response.totalPages);
+      setTotalCount(response.total);
     } catch (err: any) {
       console.error("Error fetching cards:", err);
-      console.error("Error response:", err.response);
 
       if (err.response?.status === 401) {
         setError("Потрібно увійти в систему");
-        setDebugInfo("Помилка 401 - токен недійсний");
         localStorage.removeItem("token");
         setTimeout(() => router.push("/login"), 2000);
       } else if (err.response?.status === 403) {
         setError("Доступ заборонено");
-        setDebugInfo("Помилка 403 - недостатньо прав");
       } else {
         setError(err.response?.data?.message || "Помилка завантаження карток");
-        setDebugInfo(`Помилка: ${err.message}`);
       }
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [filters, currentPage, router]);
 
   // Sync user names from cards to Zustand store
   const setUserName = useUserStore((state) => state.setUserName);
 
   useEffect(() => {
-    if (allCards.length > 0) {
-      allCards.forEach((card: WineCard) => {
+    if (cards.length > 0) {
+      cards.forEach((card: WineCard) => {
         if (card.ratings && Array.isArray(card.ratings)) {
           card.ratings.forEach((r) => {
             if (r.userId) {
@@ -92,60 +86,12 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         }
       });
     }
-  }, [allCards, setUserName]);
+  }, [cards, setUserName]);
 
-  // Apply filters to all cards
-  const applyFilters = useCallback(
-    (currentFilters: FilterParams) => {
-      let result = [...allCards];
-
-      if (currentFilters.type) {
-        result = result.filter((card) => card.type === currentFilters.type);
-      }
-
-      if (currentFilters.color) {
-        result = result.filter((card) => card.color === currentFilters.color);
-      }
-
-      if (currentFilters.frizzante) {
-        result = result.filter((card) => card.frizzante === true);
-      }
-
-      if (currentFilters.minRating) {
-        result = result.filter(
-          (card) => card.rating >= currentFilters.minRating!,
-        );
-      }
-
-      if (currentFilters.search) {
-        const searchLower = currentFilters.search.toLowerCase();
-        result = result.filter((card) => {
-          const nameMatch = card.name?.toLowerCase().includes(searchLower);
-          const wineryMatch = card.winery?.toLowerCase().includes(searchLower);
-          const countryMatch = card.country
-            ?.toLowerCase()
-            .includes(searchLower);
-          const regionMatch = card.region?.toLowerCase().includes(searchLower);
-          return nameMatch || wineryMatch || countryMatch || regionMatch;
-        });
-      }
-
-      setFilteredCards(result);
-    },
-    [allCards],
-  );
-
-  // Initial fetch
+  // Initial fetch and when filters/page change
   useEffect(() => {
     fetchCards();
   }, [fetchCards]);
-
-  // Apply filters when they change or allCards is loaded
-  useEffect(() => {
-    if (allCards.length > 0) {
-      applyFilters(filters);
-    }
-  }, [allCards, filters, applyFilters]);
 
   const handleFilterChange = (newFilters: FilterParams) => {
     setFilters(newFilters);
@@ -198,14 +144,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     }
   };
 
-  // Paginate filtered cards
-  const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedCards = filteredCards.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE,
-  );
-
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -217,7 +155,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
             Каталог вин
           </h1>
           <p className="text-rose-700">
-            Знайдіть своє ідеальне вино серед {filteredCards.length} пропозицій
+            Знайдіть своє ідеальне вино серед {totalCount} пропозицій
           </p>
         </div>
 
@@ -236,9 +174,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
               {error && (
                 <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
                   <p className="font-medium">{error}</p>
-                  {debugInfo && (
-                    <p className="text-sm mt-1 text-red-600">{debugInfo}</p>
-                  )}
                 </div>
               )}
 
@@ -246,7 +181,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                 <div className="flex items-center justify-center h-64">
                   <div className="text-rose-600 text-lg">Завантаження...</div>
                 </div>
-              ) : !paginatedCards || paginatedCards.length === 0 ? (
+              ) : !cards || cards.length === 0 ? (
                 <div className="flex items-center justify-center h-64 glass-card rounded-2xl">
                   <div className="text-center">
                     <div className="text-6xl mb-4">🍷</div>
@@ -254,15 +189,12 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                     <p className="text-rose-500 text-sm mt-2">
                       Спробуйте змінити фільтри
                     </p>
-                    {debugInfo && (
-                      <p className="text-xs text-gray-400 mt-2">{debugInfo}</p>
-                    )}
                   </div>
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {paginatedCards.map((card) => (
+                    {cards.map((card) => (
                       <WineCardComponent
                         key={card._id}
                         card={card}
@@ -271,10 +203,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                     ))}
                   </div>
 
-                  {totalPages > 1 && (
+                  {totalPageCount > 1 && (
                     <Pagination
                       currentPage={currentPage}
-                      totalPages={totalPages}
+                      totalPages={totalPageCount}
                       onPageChange={handlePageChange}
                     />
                   )}

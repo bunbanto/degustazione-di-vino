@@ -53,4 +53,7 @@ export interface FilterParams {
   minRating?: number;
   maxRating?: number;
   search?: string;
+  winery?: string;
+  country?: string;
+  region?: string;
 }

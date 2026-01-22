@@ -53,51 +53,49 @@ export const authAPI = {
 
 // Cards APIs
 export const cardsAPI = {
-  // Отримати всі картки (сервер не підтримує фільтрацію, отримуємо всі)
+  // Отримати всі картки з серверною фільтрацією та пагінацією
   getAll: async (
     filters?: FilterParams,
     pagination?: PaginationParams,
-  ): Promise<{ cards: WineCard[]; total: number }> => {
-    // Сервер не підтримує фільтрацію - отримуємо всі картки
-    // Використовуємо великий ліміт щоб отримати всі
-    const response = await api.get(`/cards?page=1&limit=1000`);
+  ): Promise<{
+    cards: WineCard[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  }> => {
+    // Будуємо параметри запиту
+    const params = new URLSearchParams();
 
-    let cards = response.data.result || [];
-    const total = response.data.total || 0;
-
-    // Фільтрація на клієнті (оскільки сервер не підтримує)
     if (filters) {
-      cards = cards.filter((card: WineCard) => {
-        if (filters.type && card.type !== filters.type) return false;
-        if (filters.color && card.color !== filters.color) return false;
-        if (filters.frizzante && card.frizzante !== true) return false;
-        if (filters.minRating && card.rating < filters.minRating) return false;
-        if (filters.search) {
-          const searchLower = filters.search.toLowerCase();
-          const nameMatch = card.name?.toLowerCase().includes(searchLower);
-          const wineryMatch = card.winery?.toLowerCase().includes(searchLower);
-          const countryMatch = card.country
-            ?.toLowerCase()
-            .includes(searchLower);
-          const regionMatch = card.region?.toLowerCase().includes(searchLower);
-          if (!nameMatch && !wineryMatch && !countryMatch && !regionMatch) {
-            return false;
-          }
-        }
-        return true;
-      });
+      if (filters.search) params.set("search", filters.search);
+      if (filters.type) params.set("type", filters.type);
+      if (filters.color) params.set("color", filters.color);
+      if (filters.frizzante) params.set("frizzante", "true");
+      if (filters.minRating)
+        params.set("minRating", filters.minRating.toString());
+      if (filters.winery) params.set("winery", filters.winery);
+      if (filters.country) params.set("country", filters.country);
+      if (filters.region) params.set("region", filters.region);
     }
 
-    // Пагінація на клієнті
     if (pagination) {
-      const start = (pagination.page - 1) * pagination.limit;
-      const end = start + pagination.limit;
-      cards = cards.slice(start, end);
+      params.set("page", pagination.page.toString());
+      params.set("limit", pagination.limit.toString());
     }
+
+    const response = await api.get(`/cards?${params.toString()}`);
 
     return {
-      cards,
-      total: cards.length,
+      cards: response.data.results || [],
+      total: response.data.total || 0,
+      page: response.data.page || 1,
+      limit: response.data.limit || 10,
+      totalPages: response.data.totalPages || 1,
+      hasNextPage: response.data.hasNextPage || false,
+      hasPrevPage: response.data.hasPrevPage || false,
     };
   },
 
