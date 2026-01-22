@@ -3,6 +3,7 @@
 import { WineCard } from "@/types";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import CommentsSection from "./CommentsSection";
 
 interface WineCardModalProps {
   card: WineCard;
@@ -370,6 +371,14 @@ export default function WineCardModal({
               </div>
             </div>
           )}
+
+          {/* Comments Section */}
+          <div className="border-t pt-4 mt-4">
+            <CommentsSection
+              cardId={card._id}
+              currentUserId={currentUserId || undefined}
+            />
+          </div>
 
           {/* Edit Button */}
           {isCardAuthor && (

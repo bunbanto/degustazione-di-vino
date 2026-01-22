@@ -1,3 +1,11 @@
+export interface Comment {
+  _id: string;
+  userId: { _id: string; name?: string } | string;
+  username?: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface WineCard {
   _id: string;
   id?: number;
@@ -18,6 +26,7 @@ export interface WineCard {
     value: number;
     username?: string;
   }>; // Array of individual ratings
+  comments?: Comment[]; // Array of comments
   image: string;
   img?: string;
   description?: string;
@@ -25,6 +34,16 @@ export interface WineCard {
   authorId?: number;
   owner?: { _id: string; email?: string; name?: string };
   createdAt?: string;
+}
+
+export interface CommentsResponse {
+  comments: Comment[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
 
 export interface User {

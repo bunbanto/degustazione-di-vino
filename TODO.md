@@ -1,36 +1,39 @@
-# TODO: Виправлення зміни фото при редагуванні картки
+# TODO - Реалізація коментарів
 
-## Проблема
+## Backend
 
-При редагуванні картки не можна змінити фото (видалити існуюче або замінити на нове).
+- [x] 1. Оновити модель Card (`../vine-server/src/models/card.js`)
+  - [x] Додати масив comments до схеми
 
-## План
+- [x] 2. Оновити контролер cards (`../vine-server/src/controllers/cards.js`)
+  - [x] Додати ендпоінт POST /cards/:id/comments - додати коментар
+  - [x] Додати ендпоінт GET /cards/:id/comments - отримати коментарі з пагінацією
+  - [x] Додати ендпоінт DELETE /cards/:id/comments/:commentId - видалити коментар
 
-### Крок 1: Оновити бекенд - контролер карток
+- [x] 3. Оновити роути (`../vine-server/src/routes/api/cards.js`)
+  - [x] Додати роути для коментарів
 
-**Файл:** `../vine-server/src/controllers/cards.js`
+## Frontend
 
-- [ ] Додати логіку для видалення зображення (коли `removeImage: true`)
-- [ ] Оновити функцію `update()` для обробки `removeImageFlag`
+- [x] 4. Оновити типи (`src/types/index.ts`)
+  - [x] Додати інтерфейс Comment
+  - [x] Додати поле comments до WineCard
 
-### Крок 2: Оновити API сервіс
+- [x] 5. Оновити API сервіс (`src/services/api.ts`)
+  - [x] Додати функцію getComments(cardId, page, limit)
+  - [x] Додати функцію addComment(cardId, text)
+  - [x] Додати функцію deleteComment(cardId, commentId)
 
-**Файл:** `src/services/api.ts`
+- [x] 6. Створити компонент CommentsSection (`src/components/CommentsSection.tsx`)
+  - [x] Відображення списку коментарів
+  - [x] Форма додавання коментаря
+  - [x] Логіка пагінації
+  - [x] Кнопка видалення коментаря
 
-- [ ] Оновити функцію `update()` для передачі `removeImageFlag`
-- [ ] Додати параметр `removeImageFlag?: boolean`
+- [x] 7. Інтегрувати компонент (`src/components/WineCardModal.tsx`)
+  - [x] Додати секцію коментарів до модального вікна
 
-### Крок 3: Оновити сторінку редагування картки
+## Запуск
 
-**Файл:** `src/app/cards/[id]/page.tsx`
-
-- [ ] Додати стан `removeImageFlag`
-- [ ] Оновити функцію `removeImage()` для встановлення прапорця
-- [ ] Передати `removeImageFlag` в `cardsAPI.update()`
-- [ ] Додати UI кнопку для видалення фото без завантаження нового
-
-## Статус
-
-- [x] Крок 1: Бекенд - контролер карток ✓
-- [x] Крок 2: API сервіс ✓
-- [x] Крок 3: Сторінка редагування картки ✓
+- [ ] Перезапустити сервер: `cd ../vine-server && npm start`
+- [ ] Перезапустити Next.js: `npm run dev`

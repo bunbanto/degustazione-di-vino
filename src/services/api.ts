@@ -4,6 +4,8 @@ import {
   AuthResponse,
   FilterParams,
   PaginationParams,
+  Comment,
+  CommentsResponse,
 } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -207,6 +209,31 @@ export const cardsAPI = {
     }
 
     const response = await api.patch(`/cards/${id}/rate`, { rating, username });
+    return response.data;
+  },
+
+  // Comments APIs
+  getComments: async (
+    cardId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<CommentsResponse> => {
+    const response = await api.get(
+      `/cards/${cardId}/comments?page=${page}&limit=${limit}`,
+    );
+    return response.data;
+  },
+
+  addComment: async (cardId: string, text: string): Promise<WineCard> => {
+    const response = await api.post(`/cards/${cardId}/comments`, { text });
+    return response.data;
+  },
+
+  deleteComment: async (
+    cardId: string,
+    commentId: string,
+  ): Promise<{ message: string; cardId: string }> => {
+    const response = await api.delete(`/cards/${cardId}/comments/${commentId}`);
     return response.data;
   },
 };
