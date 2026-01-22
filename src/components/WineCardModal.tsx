@@ -220,9 +220,9 @@ export default function WineCardModal({
                 </div>
                 <div className="text-sm text-gray-500">
                   <div>із 10</div>
-                  <div>
+                  {/* <div>
                     ({card.ratingCount || card.ratings?.length || 0} оцінок)
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className="flex gap-1">

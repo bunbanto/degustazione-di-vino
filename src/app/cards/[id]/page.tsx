@@ -426,10 +426,10 @@ export default function EditCardPage() {
                   <div className="text-2xl font-bold text-amber-700">
                     {currentCard?.rating?.toFixed(1) || "0.0"}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="flex gap-2 text-sm text-gray-600">
                     <div>Середній рейтинг</div>
                     <div className="text-gray-500">
-                      ({currentCard?.ratingCount || 0} оцінок)
+                      ({currentCard?.ratings?.length || 0} оцінок)
                     </div>
                   </div>
                 </div>
@@ -478,7 +478,7 @@ export default function EditCardPage() {
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-48 object-cover rounded-lg"
                     />
                     <button
                       type="button"
