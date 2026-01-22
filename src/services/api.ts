@@ -147,6 +147,7 @@ export const cardsAPI = {
     id: string,
     card: Partial<WineCard>,
     imageFile?: File,
+    removeImageFlag?: boolean,
   ): Promise<WineCard> => {
     const formData = new FormData();
 
@@ -168,6 +169,11 @@ export const cardsAPI = {
     if (card.description !== undefined)
       formData.append("description", card.description);
     // Rating should not be updated through card edit - it is updated only through the rate endpoint
+
+    // Додаємо прапорець видалення зображення
+    if (removeImageFlag) {
+      formData.append("removeImage", String(removeImageFlag));
+    }
 
     // Додаємо файл зображення
     if (imageFile) {

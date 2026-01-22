@@ -39,6 +39,7 @@ export default function EditCardPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState<string>("");
   const [currentCard, setCurrentCard] = useState<WineCard | null>(null);
+  const [removeImageFlag, setRemoveImageFlag] = useState(false);
 
   // Drag & Drop handlers
   useEffect(() => {
@@ -108,6 +109,7 @@ export default function EditCardPage() {
   const handleFile = (file: File) => {
     if (validateFile(file)) {
       setImageFile(file);
+      setRemoveImageFlag(false); // Скидаємо прапорець видалення при завантаженні нового файлу
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -150,7 +152,12 @@ export default function EditCardPage() {
     setError("");
 
     try {
-      await cardsAPI.update(id, formData, imageFile || undefined);
+      await cardsAPI.update(
+        id,
+        formData,
+        imageFile || undefined,
+        removeImageFlag,
+      );
       router.push("/cards");
     } catch (err: any) {
       setError(err.response?.data?.message || "Помилка збереження картки");
@@ -188,7 +195,8 @@ export default function EditCardPage() {
 
   const removeImage = () => {
     setImageFile(null);
-    setImagePreview(existingImage);
+    setImagePreview(undefined);
+    setRemoveImageFlag(true);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -434,6 +442,7 @@ export default function EditCardPage() {
                 </label>
                 {!imagePreview ? (
                   <div
+                    ref={dropZoneRef}
                     className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-rose-400 transition-colors cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                   >
@@ -441,7 +450,7 @@ export default function EditCardPage() {
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       className="hidden"
                     />
                     <div className="text-gray-500">
@@ -458,9 +467,9 @@ export default function EditCardPage() {
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      <p className="text-sm">Натисніть для завантаження фото</p>
+                      <p className="text-sm">Натисніть або перетягніть фото</p>
                       <p className="text-xs text-gray-400 mt-1">
-                        JPG, PNG, WebP
+                        JPG, PNG, WebP (до 5MB)
                       </p>
                     </div>
                   </div>
@@ -469,7 +478,7 @@ export default function EditCardPage() {
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      className="h-48 object-cover rounded-lg"
+                      className="w-full h-48 object-cover rounded-lg"
                     />
                     <button
                       type="button"
@@ -491,6 +500,9 @@ export default function EditCardPage() {
                       </svg>
                     </button>
                   </div>
+                )}
+                {uploadError && (
+                  <p className="text-red-500 text-sm mt-2">{uploadError}</p>
                 )}
               </div>
 
