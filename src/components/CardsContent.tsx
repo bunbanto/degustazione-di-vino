@@ -133,7 +133,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
     try {
       const response = await cardsAPI.rate(id, rating);
-      console.log("Rating response:", response);
       await fetchCards(); // Refresh to show updated average rating and user rating
     } catch (err: any) {
       console.error("Error rating card:", err);

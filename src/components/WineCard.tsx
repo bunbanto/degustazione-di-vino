@@ -181,14 +181,8 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
   // Backend uses 'owner' field, which is populated as { _id, email } object
   const isCardAuthor = (() => {
     if (!currentUserId && !currentUserEmail) {
-      console.log("[Debug] No currentUserId or currentUserEmail");
       return false;
     }
-
-    console.log("[Debug] currentUserId:", currentUserId);
-    console.log("[Debug] currentUserEmail:", currentUserEmail);
-    console.log("[Debug] card.owner:", card.owner);
-    console.log("[Debug] card.authorId:", card.authorId);
 
     // Check card.owner (populated from backend)
     if (card.owner) {
@@ -197,33 +191,24 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
       const ownerEmail =
         typeof card.owner === "object" ? card.owner.email : null;
 
-      console.log("[Debug] ownerId:", ownerId);
-      console.log("[Debug] ownerEmail:", ownerEmail);
-
       // Compare by _id first
       if (currentUserId && ownerId && currentUserId === ownerId.toString()) {
-        console.log("[Debug] isCardAuthor (via _id match):", true);
         return true;
       }
 
       // Compare by email if available
       if (currentUserEmail && ownerEmail && currentUserEmail === ownerEmail) {
-        console.log("[Debug] isCardAuthor (via email match):", true);
         return true;
       }
 
-      console.log("[Debug] isCardAuthor (via owner):", false);
       return false;
     }
 
     // Fallback to authorId if exists
     if (card.authorId) {
-      const isAuthor = currentUserId === card.authorId.toString();
-      console.log("[Debug] isCardAuthor (via authorId):", isAuthor);
-      return isAuthor;
+      return currentUserId === card.authorId.toString();
     }
 
-    console.log("[Debug] No owner or authorId found");
     return false;
   })();
 
