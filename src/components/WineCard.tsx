@@ -341,7 +341,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     <>
       <div className="glass-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
         {/* Image */}
-        <div className="relative h-48 overflow-hidden">
+        <div className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center">
           <img
             src={
               card.img ||
@@ -349,7 +349,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
               "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
             }
             alt={card.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
+            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500 cursor-pointer"
             onClick={() => setIsImageModalOpen(true)}
           />
           <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-semibold text-rose-700 shadow-md">
