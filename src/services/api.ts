@@ -328,6 +328,16 @@ export const cardsAPI = {
         rating,
         username,
       });
+
+      // Очищуємо кеш після успішного оцінювання
+      if (typeof window !== "undefined") {
+        // Очищуємо кеш цієї картки
+        hybridCache.remove(generateCacheKey("card", id));
+        // Очищуємо кеш списку карток
+        hybridCache.clearByType("cards");
+      }
+
+      // Повертаємо дані про рейтинг з відповіді сервера
       return response.data;
     } catch (error) {
       // Відкат при помилці

@@ -175,22 +175,63 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       previousCardsRef.current = [...cards];
     }
 
-    // Оптимістичне оновлення
-    const updatedCards = cards.map((card) =>
-      card._id === id
-        ? {
-            ...card,
-            rating: rating,
-            ratings: card.ratings
-              ? card.ratings.map((r) =>
-                  r.userId && typeof r.userId === "object"
-                    ? r
-                    : { ...r, value: rating },
-                )
-              : [{ userId: "current", value: rating, username: "" }],
-          }
-        : card,
-    );
+    // Отримуємо поточного користувача для ідентифікації
+    let currentUserId = null;
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        currentUserId = user.id?.toString() || user._id?.toString();
+      }
+    } catch (e) {
+      console.error("Error getting user:", e);
+    }
+
+    // Оптимістичне оновлення з правильним розрахунком середнього рейтингу
+    const updatedCards = cards.map((card) => {
+      if (card._id !== id) {
+        return card;
+      }
+
+      // Створюємо копію ratings
+      const newRatings = card.ratings ? [...card.ratings] : [];
+
+      // Знаходимо індекс існуючої оцінки користувача
+      const existingRatingIndex = currentUserId
+        ? newRatings.findIndex((r) => {
+            const rUserId =
+              typeof r.userId === "object" ? r.userId._id : r.userId;
+            return rUserId === currentUserId;
+          })
+        : -1;
+
+      // Оновлюємо або додаємо оцінку
+      if (existingRatingIndex !== -1) {
+        newRatings[existingRatingIndex] = {
+          ...newRatings[existingRatingIndex],
+          value: rating,
+        };
+      } else if (currentUserId) {
+        newRatings.push({
+          userId: { _id: currentUserId },
+          value: rating,
+          username: "",
+        });
+      }
+
+      // Перераховуємо середній рейтинг
+      const totalRating = newRatings.reduce((acc, curr) => acc + curr.value, 0);
+      const newAverageRating = parseFloat(
+        (totalRating / newRatings.length).toFixed(1),
+      );
+
+      return {
+        ...card,
+        rating: newAverageRating,
+        ratings: newRatings,
+      };
+    });
+
     setCards(updatedCards);
 
     try {

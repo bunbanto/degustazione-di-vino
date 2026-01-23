@@ -63,7 +63,6 @@ export default function WineCardComponent({
   onToggleFavorite,
 }: WineCardProps) {
   const [userRating, setUserRating] = useState<number | null>(null);
-  const [pendingRating, setPendingRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -76,6 +75,7 @@ export default function WineCardComponent({
   // Refs для відстеження стану
   const previousRatingRef = useRef<number | null>(null);
   const previousFavoriteRef = useRef<boolean>(false);
+  const isRatingRef = useRef(false); // Флаг для запобігання повторним запитам
 
   // Get current user ID from localStorage
   useEffect(() => {
@@ -183,6 +183,11 @@ export default function WineCardComponent({
 
   // Load user's rating from the card's ratings array
   useEffect(() => {
+    // Якщо зараз йде процес оцінювання - не оновлюємо з картки
+    if (isRatingRef.current) {
+      return;
+    }
+
     if (card.ratings && Array.isArray(card.ratings) && currentUserId) {
       const userRatingObj = card.ratings.find((r) => {
         const ratingUserIdStr = getUserIdString(r.userId);
@@ -191,19 +196,16 @@ export default function WineCardComponent({
 
       if (userRatingObj) {
         setUserRating(userRatingObj.value);
-        setPendingRating(null);
-      } else if (pendingRating === null) {
+      } else {
         setUserRating(null);
       }
     } else if (
       !card.ratings ||
       (Array.isArray(card.ratings) && card.ratings.length === 0)
     ) {
-      if (pendingRating === null) {
-        setUserRating(null);
-      }
+      setUserRating(null);
     }
-  }, [card.ratings, currentUserId, pendingRating]);
+  }, [card.ratings, currentUserId]);
 
   // Initialize favorite state from card data
   useEffect(() => {
@@ -245,32 +247,44 @@ export default function WineCardComponent({
 
   const handleRate = useCallback(
     async (rating: number) => {
+      // Запобігаємо повторним запитам
+      if (isRatingRef.current || isRatingLoading) {
+        return;
+      }
+
       // Зберігаємо попередній рейтинг
       if (previousRatingRef.current === null) {
         previousRatingRef.current = userRating;
       }
 
+      // Встановлюємо flag що йде процес оцінювання
+      isRatingRef.current = true;
       setUserRating(rating);
-      setPendingRating(rating);
       setIsRatingLoading(true);
 
       if (onRate) {
         try {
           await onRate(card._id, rating);
+          // При успіху - скидаємо flag після короткої затримки
+          // щоб useEffect міг оновити з новими даними з сервера
+          setTimeout(() => {
+            isRatingRef.current = false;
+          }, 100);
         } catch (error) {
           console.error("Rating failed:", error);
           // Відкат при помилці
-          setPendingRating(null);
+          isRatingRef.current = false;
           setUserRating(previousRatingRef.current);
           previousRatingRef.current = null;
         } finally {
           setIsRatingLoading(false);
         }
       } else {
+        isRatingRef.current = false;
         setIsRatingLoading(false);
       }
     },
-    [card._id, onRate, userRating],
+    [card._id, onRate, userRating, isRatingLoading],
   );
 
   const getRatingColor = (rating: number) => {
@@ -302,7 +316,7 @@ export default function WineCardComponent({
 
   const displayRating = card.rating || 0;
   const currentRating = isRatingLoading
-    ? pendingRating || userRating || 0
+    ? userRating || 0
     : hoverRating || userRating || 0;
 
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -430,17 +444,16 @@ export default function WineCardComponent({
                 </div>
                 <span className="text-xs text-gray-400">середній</span>
               </div>
-              {currentUserId &&
-                (userRating !== null || pendingRating !== null) && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-green-600">Ваш:</span>
-                    <span
-                      className={`text-lg font-bold ${getRatingColor(pendingRating || userRating || 0)}`}
-                    >
-                      {(pendingRating || userRating || 0).toFixed(1)}
-                    </span>
-                  </div>
-                )}
+              {currentUserId && userRating !== null && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-green-600">Ваш:</span>
+                  <span
+                    className={`text-lg font-bold ${getRatingColor(userRating)}`}
+                  >
+                    {userRating.toFixed(1)}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Interactive Rating Stars */}

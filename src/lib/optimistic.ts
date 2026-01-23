@@ -125,14 +125,62 @@ export function createOptimisticRatingUpdate(
 } {
   const previousCards = [...cards];
 
-  const updatedCards = cards.map((card) => {
-    if (card._id === cardId) {
-      return {
-        ...card,
-        rating: newRating,
-      };
+  // Отримуємо поточного користувача для ідентифікації
+  let currentUserId = null;
+  if (typeof window !== "undefined") {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        currentUserId = user.id?.toString() || user._id?.toString();
+      }
+    } catch (e) {
+      console.error("Error getting user:", e);
     }
-    return card;
+  }
+
+  const updatedCards = cards.map((card) => {
+    if (card._id !== cardId) {
+      return card;
+    }
+
+    // Створюємо копію ratings
+    const newRatings = card.ratings ? [...card.ratings] : [];
+
+    // Знаходимо індекс існуючої оцінки користувача
+    const existingRatingIndex = currentUserId
+      ? newRatings.findIndex((r) => {
+          const rUserId =
+            typeof r.userId === "object" ? r.userId._id : r.userId;
+          return rUserId === currentUserId;
+        })
+      : -1;
+
+    // Оновлюємо або додаємо оцінку
+    if (existingRatingIndex !== -1) {
+      newRatings[existingRatingIndex] = {
+        ...newRatings[existingRatingIndex],
+        value: newRating,
+      };
+    } else if (currentUserId) {
+      newRatings.push({
+        userId: { _id: currentUserId },
+        value: newRating,
+        username: "",
+      });
+    }
+
+    // Перераховуємо середній рейтинг
+    const totalRating = newRatings.reduce((acc, curr) => acc + curr.value, 0);
+    const newAverageRating = parseFloat(
+      (totalRating / newRatings.length).toFixed(1),
+    );
+
+    return {
+      ...card,
+      rating: newAverageRating,
+      ratings: newRatings,
+    };
   });
 
   return {
