@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
+import FilterPanel from "@/components/FilterPanel";
 import { cardsAPI, cacheUtils } from "@/services/api";
-import { WineCard } from "@/types";
+import { WineCard, FilterParams } from "@/types";
 
 function FavoritesPageContent() {
   const router = useRouter();
@@ -13,6 +14,7 @@ function FavoritesPageContent() {
   const [cards, setCards] = useState<WineCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [filters, setFilters] = useState<FilterParams>({});
 
   // Ref для оптимістичних оновлень
   const previousCardsRef = useRef<WineCard[] | null>(null);
@@ -168,14 +170,63 @@ function FavoritesPageContent() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {cards.map((card) => (
-                  <WineCardComponent
-                    key={card._id}
-                    card={card}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
-                ))}
+              <div className="flex flex-col lg:flex-row gap-8">
+                {/* Filter Panel - Left Sidebar */}
+                <aside className="lg:w-80 flex-shrink-0">
+                  <FilterPanel filters={filters} onFilterChange={setFilters} />
+                </aside>
+
+                {/* Cards Grid */}
+                <div className="flex-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {cards
+                      .filter((card) => {
+                        // Filter by search
+                        if (filters.search) {
+                          const searchLower = filters.search.toLowerCase();
+                          const nameMatch = card.name
+                            ?.toLowerCase()
+                            .includes(searchLower);
+                          const wineryMatch = card.winery
+                            ?.toLowerCase()
+                            .includes(searchLower);
+                          if (!nameMatch && !wineryMatch) return false;
+                        }
+
+                        // Filter by type
+                        if (filters.type && card.type !== filters.type) {
+                          return false;
+                        }
+
+                        // Filter by color
+                        if (filters.color && card.color !== filters.color) {
+                          return false;
+                        }
+
+                        // Filter by frizzante
+                        if (filters.frizzante && !card.frizzante) {
+                          return false;
+                        }
+
+                        // Filter by min rating
+                        if (
+                          filters.minRating &&
+                          (card.rating || 0) < filters.minRating
+                        ) {
+                          return false;
+                        }
+
+                        return true;
+                      })
+                      .map((card) => (
+                        <WineCardComponent
+                          key={card._id}
+                          card={card}
+                          onToggleFavorite={handleToggleFavorite}
+                        />
+                      ))}
+                  </div>
+                </div>
               </div>
             </>
           )}

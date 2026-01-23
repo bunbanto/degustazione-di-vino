@@ -322,11 +322,6 @@ export default function WineCardComponent({
             className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500 cursor-pointer"
             onClick={() => setIsImageModalOpen(true)}
           />
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-sm font-semibold text-rose-700 shadow-md">
-            {card.price && typeof card.price === "number"
-              ? `€${card.price.toFixed(2)}`
-              : ""}
-          </div>
           {card.color && (
             <div className="absolute top-3 left-3 bg-rose-600/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-white shadow-md capitalize">
               {getColorLabel(card.color)}
@@ -359,11 +354,11 @@ export default function WineCardComponent({
             </Link>
           )}
 
-          {/* Favorite Heart Button */}
+          {/* Favorite Heart Button - moved to where price was */}
           <button
             onClick={handleToggleFavorite}
             disabled={isFavoriteLoading}
-            className={`absolute top-3 right-20 bg-white/90 backdrop-blur p-2 rounded-full transition-all duration-300 shadow-md hover:bg-rose-50 ${
+            className={`absolute top-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full transition-all duration-300 shadow-md hover:bg-rose-50 ${
               isFavoriteLoading ? "opacity-50 cursor-wait" : ""
             }`}
             title={isFavorite ? "Видалити з улюблених" : "Додати до улюблених"}
@@ -405,6 +400,11 @@ export default function WineCardComponent({
             <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-md text-xs font-medium">
               {getTypeLabel(card.type)}
             </span>
+            {card.price && typeof card.price === "number" && (
+              <span className="bg-white/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 shadow-sm">
+                €{card.price.toFixed(2)}
+              </span>
+            )}
             {(card.year || card.anno) && (
               <span className="text-gray-500 text-sm">
                 {card.year || card.anno} р.
