@@ -1,7 +1,7 @@
 "use client";
 
 import { WineCard } from "@/types";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useUserStore } from "@/store/userStore";
 import WineCardModal from "@/components/WineCardModal";
@@ -9,6 +9,7 @@ import WineCardModal from "@/components/WineCardModal";
 interface WineCardProps {
   card: WineCard;
   onRate?: (id: string, rating: number) => void;
+  onToggleFavorite?: (id: string) => Promise<void>;
 }
 
 // SVG Star component with optional fill percentage
@@ -56,13 +57,25 @@ function getUserIdString(
   return typeof userId === "string" ? userId : userId._id;
 }
 
-export default function WineCardComponent({ card, onRate }: WineCardProps) {
+export default function WineCardComponent({
+  card,
+  onRate,
+  onToggleFavorite,
+}: WineCardProps) {
   const [userRating, setUserRating] = useState<number | null>(null);
-  const [pendingRating, setPendingRating] = useState<number | null>(null); // Track rating during server request
+  const [pendingRating, setPendingRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isRatingLoading, setIsRatingLoading] = useState(false);
+
+  // Favorite state
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+
+  // Refs для відстеження стану
+  const previousRatingRef = useRef<number | null>(null);
+  const previousFavoriteRef = useRef<boolean>(false);
 
   // Get current user ID from localStorage
   useEffect(() => {
@@ -70,17 +83,12 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
-        // Support both id and _id formats, fallback to email-based id
-        // Priority: id (from profile) > _id (from response) > id > _id > email-based
         const userId =
           user.id?.toString() ||
           user._id?.toString() ||
-          (user.id ? user.id.toString() : null) ||
-          (user._id ? user._id.toString() : null) ||
           btoa(user.email || "").slice(0, 24);
         setCurrentUserId(userId);
 
-        // Also sync to Zustand store
         if (userId) {
           useUserStore
             .getState()
@@ -110,25 +118,21 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
   }, []);
 
   // Check if current user is the card author
-  // Backend uses 'owner' field, which is populated as { _id, email } object
   const isCardAuthor = (() => {
     if (!currentUserId && !currentUserEmail) {
       return false;
     }
 
-    // Check card.owner (populated from backend)
     if (card.owner) {
       const ownerId =
         typeof card.owner === "object" ? card.owner._id : card.owner;
       const ownerEmail =
         typeof card.owner === "object" ? card.owner.email : null;
 
-      // Compare by _id first
       if (currentUserId && ownerId && currentUserId === ownerId.toString()) {
         return true;
       }
 
-      // Compare by email if available
       if (currentUserEmail && ownerEmail && currentUserEmail === ownerEmail) {
         return true;
       }
@@ -136,7 +140,6 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
       return false;
     }
 
-    // Fallback to authorId if exists
     if (card.authorId) {
       return currentUserId === card.authorId.toString();
     }
@@ -144,7 +147,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     return false;
   })();
 
-  // Load all usernames from localStorage into Zustand store for compatibility
+  // Load all usernames from localStorage into Zustand store
   useEffect(() => {
     try {
       const userNamesFromStorage = JSON.parse(
@@ -168,7 +171,6 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
         if (rating.userId) {
           const userIdStr = getUserIdString(rating.userId);
 
-          // Use name from object directly if available
           if (typeof rating.userId === "object" && rating.userId.name) {
             setUserName(userIdStr, rating.userId.name);
           } else if (rating.username) {
@@ -180,7 +182,6 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
   }, [card.ratings]);
 
   // Load user's rating from the card's ratings array
-  // Also keep track of the pending rating value for display
   useEffect(() => {
     if (card.ratings && Array.isArray(card.ratings) && currentUserId) {
       const userRatingObj = card.ratings.find((r) => {
@@ -190,11 +191,8 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
 
       if (userRatingObj) {
         setUserRating(userRatingObj.value);
-        // Clear pending rating since we have the confirmed value from server
         setPendingRating(null);
-      }
-      // If userRatingObj is not found and we don't have a pending rating, reset to null
-      else if (pendingRating === null) {
+      } else if (pendingRating === null) {
         setUserRating(null);
       }
     } else if (
@@ -205,22 +203,66 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
         setUserRating(null);
       }
     }
-  }, [card.ratings, currentUserId]);
+  }, [card.ratings, currentUserId, pendingRating]);
+
+  // Initialize favorite state from card data
+  useEffect(() => {
+    setIsFavorite(!!card.isFavorite);
+    previousFavoriteRef.current = !!card.isFavorite;
+  }, [card.isFavorite]);
+
+  // Handle toggle favorite з оптимістичним оновленням
+  const handleToggleFavorite = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return;
+    }
+
+    // Зберігаємо попередній стан
+    if (!previousFavoriteRef.current) {
+      previousFavoriteRef.current = isFavorite;
+    }
+
+    setIsFavoriteLoading(true);
+
+    // Оптимістичне оновлення
+    const newFavoriteState = !isFavorite;
+    setIsFavorite(newFavoriteState);
+
+    try {
+      if (onToggleFavorite) {
+        await onToggleFavorite(card._id);
+      }
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+      // Відкат при помилці
+      setIsFavorite(previousFavoriteRef.current);
+      previousFavoriteRef.current = false;
+    } finally {
+      setIsFavoriteLoading(false);
+    }
+  };
 
   const handleRate = useCallback(
     async (rating: number) => {
+      // Зберігаємо попередній рейтинг
+      if (previousRatingRef.current === null) {
+        previousRatingRef.current = userRating;
+      }
+
       setUserRating(rating);
-      setPendingRating(rating); // Track for display purposes
+      setPendingRating(rating);
       setIsRatingLoading(true);
 
       if (onRate) {
         try {
           await onRate(card._id, rating);
-          // Don't clear pendingRating here - it will be cleared when new data arrives
         } catch (error) {
           console.error("Rating failed:", error);
-          // On error, clear pending rating
+          // Відкат при помилці
           setPendingRating(null);
+          setUserRating(previousRatingRef.current);
+          previousRatingRef.current = null;
         } finally {
           setIsRatingLoading(false);
         }
@@ -228,7 +270,7 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
         setIsRatingLoading(false);
       }
     },
-    [card._id, onRate],
+    [card._id, onRate, userRating],
   );
 
   const getRatingColor = (rating: number) => {
@@ -258,14 +300,11 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
     return colors[color] || color;
   };
 
-  // Display average rating from server
   const displayRating = card.rating || 0;
-  // Use pendingRating during loading, otherwise use userRating or hoverRating
   const currentRating = isRatingLoading
     ? pendingRating || userRating || 0
     : hoverRating || userRating || 0;
 
-  // Generate 10 stars with 0.5 step
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
@@ -299,7 +338,6 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
             </div>
           )}
           {isCardAuthor && (
-            /* edit_file Button */
             <Link
               href={`/cards/${card._id}`}
               className="absolute bottom-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-50"
@@ -320,6 +358,37 @@ export default function WineCardComponent({ card, onRate }: WineCardProps) {
               </svg>
             </Link>
           )}
+
+          {/* Favorite Heart Button */}
+          <button
+            onClick={handleToggleFavorite}
+            disabled={isFavoriteLoading}
+            className={`absolute top-3 right-20 bg-white/90 backdrop-blur p-2 rounded-full transition-all duration-300 shadow-md hover:bg-rose-50 ${
+              isFavoriteLoading ? "opacity-50 cursor-wait" : ""
+            }`}
+            title={isFavorite ? "Видалити з улюблених" : "Додати до улюблених"}
+          >
+            <svg
+              className={`w-5 h-5 transition-transform duration-300 ${
+                isFavorite
+                  ? "text-rose-500 scale-110"
+                  : "text-gray-400 hover:text-rose-400"
+              }`}
+              fill={isFavorite ? "currentColor" : "none"}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              style={{
+                animation: isFavorite ? "heartBeat 0.6s ease-in-out" : "none",
+              }}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* Content */}

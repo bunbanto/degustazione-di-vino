@@ -34,6 +34,7 @@ export interface WineCard {
   authorId?: number;
   owner?: { _id: string; email?: string; name?: string };
   createdAt?: string;
+  isFavorite?: boolean; // Whether the current user has marked this card as favorite
 }
 
 export interface CommentsResponse {
@@ -58,6 +59,17 @@ export interface User {
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+export interface FavoritesResponse {
+  results: WineCard[];
+  total: number;
+}
+
+export interface ToggleFavoriteResponse {
+  card: WineCard;
+  isFavorite: boolean;
+  message: string;
 }
 
 export interface PaginationParams {

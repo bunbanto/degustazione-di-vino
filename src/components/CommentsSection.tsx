@@ -1,17 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Comment, CommentsResponse } from "@/types";
-import { cardsAPI } from "@/services/api";
+import { cardsAPI, cacheUtils } from "@/services/api";
 
 interface CommentsSectionProps {
   cardId: string;
   currentUserId?: string;
+  onCommentAdded?: () => void;
+  onCommentDeleted?: () => void;
 }
 
 export default function CommentsSection({
   cardId,
   currentUserId,
+  onCommentAdded,
+  onCommentDeleted,
 }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,10 +26,16 @@ export default function CommentsSection({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Ref для відстеження оптимістичних оновлень
+  const previousCommentsRef = useRef<Comment[] | null>(null);
+  const isAddingRef = useRef(false);
+
   const limit = 10;
 
-  const fetchComments = async (pageNum: number) => {
-    setLoading(true);
+  const fetchComments = async (pageNum: number, showLoading = true) => {
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
       const response: CommentsResponse = await cardsAPI.getComments(
         cardId,
@@ -36,12 +46,15 @@ export default function CommentsSection({
       setTotalPages(response.totalPages);
       setTotalComments(response.total);
       setPage(response.page);
+      previousCommentsRef.current = null;
     } catch (err: any) {
       setError(
         err.response?.data?.message || "Помилка завантаження коментарів",
       );
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -51,18 +64,47 @@ export default function CommentsSection({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || isAddingRef.current) return;
 
+    // Зберігаємо попередній стан
+    if (!previousCommentsRef.current) {
+      previousCommentsRef.current = [...comments];
+    }
+
+    isAddingRef.current = true;
     setSubmitting(true);
     setError("");
 
+    // Оптимістичне оновлення - додаємо коментар одразу
+    const optimisticComment: Comment = {
+      _id: `temp-${Date.now()}`,
+      userId: currentUserId || "temp",
+      username: "Ви",
+      text: newComment.trim(),
+      createdAt: new Date().toISOString(),
+    };
+    setComments((prev) => [optimisticComment, ...prev]);
+    setNewComment("");
+
     try {
       await cardsAPI.addComment(cardId, newComment.trim());
-      setNewComment("");
-      fetchComments(1); // Refresh comments from first page
+
+      // Очищуємо кеш коментарів
+      cacheUtils.clearCards();
+
+      // Перезавантажуємо з сервера
+      await fetchComments(1, false);
+
+      onCommentAdded?.();
     } catch (err: any) {
+      // Відкат при помилці
+      if (previousCommentsRef.current) {
+        setComments(previousCommentsRef.current);
+        previousCommentsRef.current = null;
+      }
       setError(err.response?.data?.message || "Помилка додавання коментаря");
     } finally {
+      isAddingRef.current = false;
       setSubmitting(false);
     }
   };
@@ -70,10 +112,30 @@ export default function CommentsSection({
   const handleDelete = async (commentId: string) => {
     if (!confirm("Ви впевнені, що хочете видалити цей коментар?")) return;
 
+    // Зберігаємо попередній стан
+    if (!previousCommentsRef.current) {
+      previousCommentsRef.current = [...comments];
+    }
+
+    // Оптимістичне оновлення - видаляємо коментар
+    const updatedComments = comments.filter((c) => c._id !== commentId);
+    setComments(updatedComments);
+    setTotalComments((prev) => Math.max(0, prev - 1));
+
     try {
       await cardsAPI.deleteComment(cardId, commentId);
-      fetchComments(page); // Refresh current page
+
+      // Очищуємо кеш
+      cacheUtils.clearCards();
+
+      onCommentDeleted?.();
     } catch (err: any) {
+      // Відкат при помилці
+      if (previousCommentsRef.current) {
+        setComments(previousCommentsRef.current);
+        setTotalComments(previousCommentsRef.current.length);
+        previousCommentsRef.current = null;
+      }
       alert(err.response?.data?.message || "Помилка видалення коментаря");
     }
   };
@@ -94,6 +156,10 @@ export default function CommentsSection({
     const userId =
       typeof comment.userId === "object" ? comment.userId._id : comment.userId;
     return userId === currentUserId;
+  };
+
+  const isTempComment = (commentId: string) => {
+    return commentId.startsWith("temp-");
   };
 
   const getUserInitial = (username?: string) => {
@@ -127,6 +193,7 @@ export default function CommentsSection({
               placeholder="Напишіть свій коментар..."
               rows={3}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50 resize-none"
+              disabled={submitting}
             />
             <div className="flex justify-end mt-2">
               <button
@@ -168,7 +235,9 @@ export default function CommentsSection({
           {comments.map((comment) => (
             <div
               key={comment._id}
-              className="flex gap-4 p-4 bg-white/50 rounded-xl"
+              className={`flex gap-4 p-4 bg-white/50 rounded-xl ${
+                isTempComment(comment._id) ? "opacity-60 animate-pulse" : ""
+              }`}
             >
               <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-rose-300 to-amber-300 rounded-full flex items-center justify-center text-white font-bold">
                 {getUserInitial(comment.username)}
@@ -179,20 +248,24 @@ export default function CommentsSection({
                     {comment.username || "Анонім"}
                   </span>
                   <span className="text-sm text-gray-400">
-                    {formatDate(comment.createdAt)}
+                    {isTempComment(comment._id)
+                      ? "Відправляється..."
+                      : formatDate(comment.createdAt)}
                   </span>
                 </div>
                 <p className="text-gray-700 whitespace-pre-wrap">
                   {comment.text}
                 </p>
-                {currentUserId && isOwnComment(comment) && (
-                  <button
-                    onClick={() => handleDelete(comment._id)}
-                    className="mt-2 text-sm text-red-500 hover:text-red-700 transition-colors"
-                  >
-                    Видалити
-                  </button>
-                )}
+                {currentUserId &&
+                  isOwnComment(comment) &&
+                  !isTempComment(comment._id) && (
+                    <button
+                      onClick={() => handleDelete(comment._id)}
+                      className="mt-2 text-sm text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      Видалити
+                    </button>
+                  )}
               </div>
             </div>
           ))}

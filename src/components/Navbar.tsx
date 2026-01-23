@@ -64,6 +64,16 @@ export default function Navbar() {
             {isLoggedIn ? (
               <>
                 <Link
+                  href="/favorites"
+                  className={`font-medium transition-colors ${
+                    pathname === "/favorites"
+                      ? "text-rose-700"
+                      : "text-gray-600 hover:text-rose-600"
+                  }`}
+                >
+                  Мої улюблені
+                </Link>
+                <Link
                   href="/add-card"
                   className={`font-medium transition-colors ${
                     pathname === "/add-card"
@@ -140,6 +150,13 @@ export default function Navbar() {
               </Link>
               {isLoggedIn ? (
                 <>
+                  <Link
+                    href="/favorites"
+                    className="font-medium text-gray-600 hover:text-rose-600"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Мої улюблені
+                  </Link>
                   {userEmail && (
                     <div className="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
                       {userEmail}

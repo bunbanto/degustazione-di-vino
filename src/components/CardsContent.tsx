@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
 import Pagination from "@/components/Pagination";
-import { cardsAPI } from "@/services/api";
+import { cardsAPI, cacheUtils } from "@/services/api";
 import { WineCard, FilterParams } from "@/types";
 import { useUserStore } from "@/store/userStore";
 
@@ -29,36 +29,73 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   const [filters, setFilters] = useState<FilterParams>(initialFilters);
   const [currentPage, setCurrentPage] = useState(initialPage);
 
-  // Fetch cards from server with server-side filtering
-  const fetchCards = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  // Refs для оптимістичних оновлень
+  const previousCardsRef = useRef<WineCard[] | null>(null);
+  const isUpdatingRef = useRef(false);
 
-    try {
-      const response = await cardsAPI.getAll(filters, {
-        page: currentPage,
-        limit: ITEMS_PER_PAGE,
-      });
+  // Fetch cards з кешуванням та fallback
+  const fetchCards = useCallback(
+    async (showLoading = true) => {
+      if (isUpdatingRef.current && !showLoading) return;
 
-      setCards(response.cards);
-      setTotalPages(response.totalPages);
-      setTotalCount(response.total);
-    } catch (err: any) {
-      console.error("Error fetching cards:", err);
-
-      if (err.response?.status === 401) {
-        setError("Потрібно увійти в систему");
-        localStorage.removeItem("token");
-        setTimeout(() => router.push("/login"), 2000);
-      } else if (err.response?.status === 403) {
-        setError("Доступ заборонено");
-      } else {
-        setError(err.response?.data?.message || "Помилка завантаження карток");
+      if (showLoading) {
+        setLoading(true);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, currentPage, router]);
+      setError("");
+
+      try {
+        const response = await cardsAPI.getAll(filters, {
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        });
+
+        setCards(response.cards);
+        setTotalPages(response.totalPages);
+        setTotalCount(response.total);
+        previousCardsRef.current = null;
+      } catch (err: any) {
+        console.error("Error fetching cards:", err);
+
+        // При помилці мережі, пробуємо отримати з кешу
+        if (!navigator.onLine) {
+          const cacheKey = `wine-cache:cards:${JSON.stringify({
+            filters,
+            pagination: { page: currentPage, limit: ITEMS_PER_PAGE },
+          })}`;
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            try {
+              const cachedData = JSON.parse(cached);
+              setCards(cachedData.cards || []);
+              setTotalPages(cachedData.totalPages || 1);
+              setTotalCount(cachedData.total || 0);
+              setError("Офлайн режим - показані кешовані дані");
+              return;
+            } catch (e) {
+              console.error("Cache parse error:", e);
+            }
+          }
+        }
+
+        if (err.response?.status === 401) {
+          setError("Потрібно увійти в систему");
+          localStorage.removeItem("token");
+          setTimeout(() => router.push("/login"), 2000);
+        } else if (err.response?.status === 403) {
+          setError("Доступ заборонено");
+        } else {
+          setError(
+            err.response?.data?.message || "Помилка завантаження карток",
+          );
+        }
+      } finally {
+        if (showLoading) {
+          setLoading(false);
+        }
+      }
+    },
+    [filters, currentPage, router],
+  );
 
   // Sync user names from cards to Zustand store
   const setUserName = useUserStore((state) => state.setUserName);
@@ -72,7 +109,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
               const userIdStr =
                 typeof r.userId === "string" ? r.userId : r.userId._id;
 
-              // Get name from object or username field
               const username =
                 typeof r.userId === "object" && r.userId.name
                   ? r.userId.name
@@ -96,6 +132,9 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   const handleFilterChange = (newFilters: FilterParams) => {
     setFilters(newFilters);
     setCurrentPage(1);
+
+    // Очищуємо кеш фільтрів
+    cacheUtils.clearCards();
 
     // Update URL
     const params = new URLSearchParams();
@@ -131,15 +170,82 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       throw new Error("No token");
     }
 
+    // Зберігаємо попередній стан для відкату
+    if (!previousCardsRef.current) {
+      previousCardsRef.current = [...cards];
+    }
+
+    // Оптимістичне оновлення
+    const updatedCards = cards.map((card) =>
+      card._id === id
+        ? {
+            ...card,
+            rating: rating,
+            ratings: card.ratings
+              ? card.ratings.map((r) =>
+                  r.userId && typeof r.userId === "object"
+                    ? r
+                    : { ...r, value: rating },
+                )
+              : [{ userId: "current", value: rating, username: "" }],
+          }
+        : card,
+    );
+    setCards(updatedCards);
+
     try {
-      const response = await cardsAPI.rate(id, rating);
-      await fetchCards(); // Refresh to show updated average rating and user rating
+      await cardsAPI.rate(id, rating, cards, (newCards) => {
+        setCards(newCards);
+      });
+      // Після успіху, оновлюємо з сервера
+      await fetchCards(false);
     } catch (err: any) {
       console.error("Error rating card:", err);
+      // Відкат при помилці
+      if (previousCardsRef.current) {
+        setCards(previousCardsRef.current);
+        previousCardsRef.current = null;
+      }
       if (err.response?.status === 401) {
         router.push("/login");
       }
-      throw err; // Re-throw to let WineCard handle the error
+      throw err;
+    }
+  };
+
+  const handleToggleFavorite = async (cardId: string): Promise<void> => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      throw new Error("No token");
+    }
+
+    // Зберігаємо попередній стан
+    if (!previousCardsRef.current) {
+      previousCardsRef.current = [...cards];
+    }
+
+    // Оптимістичне оновлення
+    const updatedCards = cards.map((card) =>
+      card._id === cardId ? { ...card, isFavorite: !card.isFavorite } : card,
+    );
+    setCards(updatedCards);
+
+    try {
+      await cardsAPI.toggleFavorite(cardId, cards, (newCards) => {
+        setCards(newCards);
+      });
+    } catch (err: any) {
+      console.error("Error toggling favorite:", err);
+      // Відкат при помилці
+      if (previousCardsRef.current) {
+        setCards(previousCardsRef.current);
+        previousCardsRef.current = null;
+      }
+      if (err.response?.status === 401) {
+        router.push("/login");
+      }
+      throw err;
     }
   };
 
@@ -171,7 +277,13 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
             {/* Cards Grid */}
             <div className="flex-1">
               {error && (
-                <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
+                <div
+                  className={`p-4 rounded-lg mb-6 ${
+                    error.includes("Офлайн")
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
                   <p className="font-medium">{error}</p>
                 </div>
               )}
@@ -198,6 +310,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                         key={card._id}
                         card={card}
                         onRate={handleRate}
+                        onToggleFavorite={handleToggleFavorite}
                       />
                     ))}
                   </div>
