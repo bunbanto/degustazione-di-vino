@@ -154,6 +154,23 @@ export default function WineCardModal({
     return colors[color] || color;
   };
 
+  const getColorBadgeStyle = (color: string) => {
+    const styles: Record<
+      string,
+      { bg: string; text: string; border?: string }
+    > = {
+      rosso: { bg: "bg-red-600", text: "text-white" },
+      bianco: {
+        bg: "bg-yellow-50",
+        text: "text-gray-800",
+        border: "border border-gray-200",
+      },
+      rosato: { bg: "bg-pink-100", text: "text-gray-800" },
+      sparkling: { bg: "bg-sky-200", text: "text-gray-800" },
+    };
+    return styles[color] || { bg: "bg-gray-200", text: "text-gray-800" };
+  };
+
   const displayRating = card.rating || 0;
 
   if (!isOpen) return null;
@@ -253,7 +270,9 @@ export default function WineCardModal({
               <span className="px-3 py-1 bg-rose-100 text-rose-800 rounded-full text-sm font-medium">
                 {getTypeLabel(card.type)}
               </span>
-              <span className="px-3 py-1 bg-rose-200 text-rose-800 rounded-full text-sm font-medium capitalize">
+              <span
+                className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
+              >
                 {getColorLabel(card.color)}
               </span>
               {card.frizzante && (

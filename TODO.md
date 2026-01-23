@@ -1,28 +1,9 @@
-# План редагування WineCard.tsx
+# TODO
 
-## Завдання
+## Current Task: Apply getColorBadgeStyle to WineCardModal
 
-1. Перемістити цінник на правий край у рядку (в межах того ж flex-контейнера) ✅
-2. Змінити кольори бейджів кольорів вин:
-   - Червоне (rosso): червоний фон, білий текст ✅
-   - Біле (bianco): білий фон, темний текст ✅
-   - Рожеве (rosato): рожевий фон, темний текст ✅
-   - Ігристе (sparkling): блакитний фон, темний текст ✅
-
-## Виконано ✅
-
-### Крок 1: Додано функцію getColorBadgeStyle
-
-Додано нову функцію `getColorBadgeStyle` з динамічними стилями для кожного кольору вина.
-
-### Крок 2: Оновлено бейдж кольору
-
-Бейдж тепер використовує динамічні стилі з функції `getColorBadgeStyle`.
-
-### Крок 3: Оновлено flex-контейнер з тегами
-
-Додано `justify-between` та `ml-auto` для вирівнювання цінника справа.
-
-## Файли для редагування
-
-- `src/components/WineCard.tsx` ✅
+- [x] Read WineCard.tsx to understand getColorBadgeStyle function
+- [x] Read WineCardModal.tsx to understand current implementation
+- [x] Create plan and get user confirmation
+- [x] Add getColorBadgeStyle function to WineCardModal.tsx
+- [x] Replace hardcoded color badge with styled badge in modal

@@ -214,16 +214,16 @@ export default function EditCardPage() {
   }
 
   const wineTypes = [
-    { value: "secco", label: "Сухе" },
-    { value: "abboccato", label: "Напівсухе" },
-    { value: "amabile", label: "Напівсолодке" },
-    { value: "dolce", label: "Солодке" },
+    { value: "secco", label: "Secco" },
+    { value: "abboccato", label: "Abboccato" },
+    { value: "amabile", label: "Amabile" },
+    { value: "dolce", label: "Dolce" },
   ];
 
   const wineColors = [
-    { value: "bianco", label: "Біле" },
-    { value: "rosso", label: "Червоне" },
-    { value: "rosato", label: "Рожеве" },
+    { value: "bianco", label: "Bianco" },
+    { value: "rosso", label: "Rosso" },
+    { value: "rosato", label: "Rosato" },
   ];
 
   return (

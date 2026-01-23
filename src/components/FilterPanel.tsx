@@ -53,19 +53,19 @@ export default function FilterPanel({
   // Translation helpers
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      secco: "Сухе",
-      abboccato: "Напівсухе",
-      amabile: "Напівсолодке",
-      dolce: "Солодке",
+      secco: "Secco",
+      abboccato: "Abboccato",
+      amabile: "Amabile",
+      dolce: "Dolce",
     };
     return labels[type] || type;
   };
 
   const getColorLabel = (color: string) => {
     const labels: Record<string, string> = {
-      bianco: "Біле",
-      rosso: "Червоне",
-      rosato: "Рожеве",
+      bianco: "Bianco",
+      rosso: "Rosso",
+      rosato: "Rosato",
     };
     return labels[color] || color;
   };

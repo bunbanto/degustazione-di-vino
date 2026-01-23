@@ -146,16 +146,16 @@ export default function AddCardPage() {
   }
 
   const wineTypes = [
-    { value: "secco", label: "Сухе" },
-    { value: "abboccato", label: "Напівсухе" },
-    { value: "amabile", label: "Напівсолодке" },
-    { value: "dolce", label: "Солодке" },
+    { value: "secco", label: "Secco" },
+    { value: "abboccato", label: "Abboccato" },
+    { value: "amabile", label: "Amabile" },
+    { value: "dolce", label: "Dolce" },
   ];
 
   const wineColors = [
-    { value: "bianco", label: "Біле" },
-    { value: "rosso", label: "Червоне" },
-    { value: "rosato", label: "Рожеве" },
+    { value: "bianco", label: "Bianco" },
+    { value: "rosso", label: "Rosso" },
+    { value: "rosato", label: "Rosato" },
   ];
 
   return (
@@ -266,7 +266,7 @@ export default function AddCardPage() {
                     value={formData.country}
                     onChange={(e) => handleChange("country", e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                    placeholder="Наприклад: Франція"
+                    placeholder="Наприклад: Італія"
                   />
                 </div>
 
@@ -279,7 +279,7 @@ export default function AddCardPage() {
                     value={formData.region}
                     onChange={(e) => handleChange("region", e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                    placeholder="Наприклад: Бордо"
+                    placeholder="Наприклад: Тоскана"
                   />
                 </div>
               </div>
