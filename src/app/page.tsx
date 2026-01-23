@@ -13,7 +13,7 @@ export default function Home() {
             Degustazione di Vino
           </h1>
           <p className="text-xl md:text-2xl text-rose-800 mb-8 italic font-serif">
-            Відкрийте для себе світ винразом з нами
+            Відкрийте для себе світ вин разом з нами
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

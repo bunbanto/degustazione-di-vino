@@ -417,6 +417,11 @@ export default function WineCardComponent({
               />
             </svg>
           </button>
+          {card.price && typeof card.price === "number" && (
+            <span className="absolute top-14 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 shadow-sm">
+              €{card.price.toFixed(2)}
+            </span>
+          )}
         </div>
 
         {/* Content */}
@@ -443,11 +448,6 @@ export default function WineCardComponent({
                 <span className="text-gray-500 text-sm">{card.alcohol}%</span>
               )}
             </div>
-            {card.price && typeof card.price === "number" && (
-              <span className="bg-white/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 shadow-sm ml-auto">
-                €{card.price.toFixed(2)}
-              </span>
-            )}
           </div>
 
           <p className="text-gray-600 text-sm mb-4 line-clamp-2">
