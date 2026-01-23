@@ -296,22 +296,39 @@ export default function WineCardComponent({
 
   const getTypeLabel = (type: string) => {
     const types: Record<string, string> = {
-      secco: "Сухе",
-      abboccato: "Напівсухе",
-      amabile: "Напівсолодке",
-      dolce: "Солодке",
+      secco: "Secco",
+      abboccato: "Abboccato",
+      amabile: "Amabile",
+      dolce: "Dolce",
     };
     return types[type] || type;
   };
 
   const getColorLabel = (color: string) => {
     const colors: Record<string, string> = {
-      bianco: "Біле",
-      rosso: "Червоне",
-      rosato: "Рожеве",
+      bianco: "Bianco",
+      rosso: "Rosso",
+      rosato: "Rosato",
       sparkling: "Ігристе",
     };
     return colors[color] || color;
+  };
+
+  const getColorBadgeStyle = (color: string) => {
+    const styles: Record<
+      string,
+      { bg: string; text: string; border?: string }
+    > = {
+      rosso: { bg: "bg-red-600", text: "text-white" },
+      bianco: {
+        bg: "bg-yellow-50",
+        text: "text-gray-800",
+        border: "border border-gray-200",
+      },
+      rosato: { bg: "bg-pink-100", text: "text-gray-800" },
+      sparkling: { bg: "bg-sky-200", text: "text-gray-800" },
+    };
+    return styles[color] || { bg: "bg-gray-200", text: "text-gray-800" };
   };
 
   const displayRating = card.rating || 0;
@@ -337,7 +354,9 @@ export default function WineCardComponent({
             onClick={() => setIsImageModalOpen(true)}
           />
           {card.color && (
-            <div className="absolute top-3 left-3 bg-rose-600/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-white shadow-md capitalize">
+            <div
+              className={`absolute top-3 left-3 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur px-3 py-1 rounded-full text-sm font-medium shadow-md capitalize ${getColorBadgeStyle(card.color).border || ""}`}
+            >
               {getColorLabel(card.color)}
             </div>
           )}
@@ -410,22 +429,24 @@ export default function WineCardComponent({
             <p className="text-gray-500 text-sm mb-2">{card.winery}</p>
           )}
 
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-md text-xs font-medium">
-              {getTypeLabel(card.type)}
-            </span>
+          <div className="flex items-center gap-2 mb-3 flex-wrap justify-between">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-md text-xs font-medium">
+                {getTypeLabel(card.type)}
+              </span>
+              {(card.year || card.anno) && (
+                <span className="text-gray-500 text-sm">
+                  {card.year || card.anno} р.
+                </span>
+              )}
+              {card.alcohol && (
+                <span className="text-gray-500 text-sm">{card.alcohol}%</span>
+              )}
+            </div>
             {card.price && typeof card.price === "number" && (
-              <span className="bg-white/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 shadow-sm">
+              <span className="bg-white/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 shadow-sm ml-auto">
                 €{card.price.toFixed(2)}
               </span>
-            )}
-            {(card.year || card.anno) && (
-              <span className="text-gray-500 text-sm">
-                {card.year || card.anno} р.
-              </span>
-            )}
-            {card.alcohol && (
-              <span className="text-gray-500 text-sm">{card.alcohol}%</span>
             )}
           </div>
 
