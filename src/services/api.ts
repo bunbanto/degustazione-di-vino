@@ -447,10 +447,18 @@ export const cardsAPI = {
   toggleFavorite: async (
     cardId: string,
     currentFavorites?: WineCard[],
-    onOptimisticUpdate?: (newFavorites: WineCard[]) => void,
+    onOptimisticUpdate?: (
+      newFavorites: WineCard[],
+      confirmedIsFavorite?: boolean,
+    ) => void,
   ): Promise<ToggleFavoriteResponse> => {
     // Зберігаємо попередній стан
     const previousFavorites = currentFavorites ? [...currentFavorites] : null;
+
+    // Визначаємо очікуваний новий стан для оптимістичного оновлення
+    const expectedIsFavorite = currentFavorites
+      ? !currentFavorites.find((c) => c._id === cardId)?.isFavorite
+      : true;
 
     // Оптимістичне оновлення
     if (currentFavorites && onOptimisticUpdate) {
@@ -458,15 +466,29 @@ export const cardsAPI = {
         currentFavorites,
         cardId,
       );
-      onOptimisticUpdate(optimistic.updatedCards);
+      onOptimisticUpdate(optimistic.updatedCards, expectedIsFavorite);
     }
 
     try {
-      const response = await api.post(`/favorites/${cardId}`);
+      const response = await api.post<ToggleFavoriteResponse>(
+        `/favorites/${cardId}`,
+      );
+      const { isFavorite: confirmedIsFavorite } = response.data;
 
       // Оновлюємо кеш
       if (typeof window !== "undefined") {
         hybridCache.clearByType("favorites");
+      }
+
+      // Повторно викликаємо callback з підтвердженим станом від сервера
+      // щоб компонент міг оновити UI правильним станом
+      if (currentFavorites && onOptimisticUpdate) {
+        const updatedFavorites = currentFavorites.map((card) =>
+          card._id === cardId
+            ? { ...card, isFavorite: confirmedIsFavorite }
+            : card,
+        );
+        onOptimisticUpdate(updatedFavorites, confirmedIsFavorite);
       }
 
       return response.data;

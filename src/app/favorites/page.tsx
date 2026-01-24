@@ -92,17 +92,40 @@ function FavoritesPageContent() {
       throw new Error("No token");
     }
 
-    // Зберігаємо попередній стан
+    // Зберігаємо попередній стан для відкату
     if (!previousCardsRef.current) {
       previousCardsRef.current = [...cards];
     }
 
-    // Оптимістичне оновлення - видаляємо картку зі списку
-    setCards((prev) => prev.filter((card) => card._id !== cardId));
-
     try {
-      await cardsAPI.toggleFavorite(cardId);
-      // Очищуємо кеш
+      await cardsAPI.toggleFavorite(
+        cardId,
+        cards,
+        (newCards, confirmedIsFavorite) => {
+          // На сторінці улюблених, якщо картку видалено з улюблених,
+          // вона більше не повинна відображатися
+          if (newCards) {
+            setCards(newCards);
+          } else if (confirmedIsFavorite !== undefined) {
+            // Якщо підтверджено isFavorite = false, видаляємо картку зі списку
+            if (!confirmedIsFavorite) {
+              setCards((prevCards) =>
+                prevCards.filter((card) => card._id !== cardId),
+              );
+            } else {
+              // Якщо isFavorite = true (додано назад), оновлюємо картку
+              setCards((prevCards) =>
+                prevCards.map((card) =>
+                  card._id === cardId
+                    ? { ...card, isFavorite: confirmedIsFavorite }
+                    : card,
+                ),
+              );
+            }
+          }
+        },
+      );
+      // Очищуємо кеш улюблених
       cacheUtils.clearFavorites();
     } catch (err: any) {
       console.error("Error toggling favorite:", err);

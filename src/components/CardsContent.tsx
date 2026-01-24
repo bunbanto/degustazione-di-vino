@@ -261,24 +261,36 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       throw new Error("No token");
     }
 
-    // Зберігаємо попередній стан
+    // Зберігаємо попередній стан для відкату
     if (!previousCardsRef.current) {
       previousCardsRef.current = [...cards];
     }
 
-    // Оптимістичне оновлення
-    const updatedCards = cards.map((card) =>
-      card._id === cardId ? { ...card, isFavorite: !card.isFavorite } : card,
-    );
-    setCards(updatedCards);
-
     try {
-      await cardsAPI.toggleFavorite(cardId, cards, (newCards) => {
-        setCards(newCards);
-      });
-      // Очищуємо кеш і оновлюємо з сервера
+      await cardsAPI.toggleFavorite(
+        cardId,
+        cards,
+        (newCards, confirmedIsFavorite) => {
+          // Використовуємо підтверджений сервером стан isFavorite
+          // Це забезпечує правильну візуалізацію після відповіді сервера
+          if (newCards) {
+            setCards(newCards);
+          } else if (confirmedIsFavorite !== undefined) {
+            // Якщо newCards не передано, але є підтверджений стан,
+            // оновлюємо тільки цю картку
+            setCards((prevCards) =>
+              prevCards.map((card) =>
+                card._id === cardId
+                  ? { ...card, isFavorite: confirmedIsFavorite }
+                  : card,
+              ),
+            );
+          }
+        },
+      );
+      // Очищуємо кеш улюблених
       cacheUtils.clearFavorites();
-      await fetchCards(false);
+      // НЕ викликаємо fetchCards() - використовуємо підтверджений стан від сервера
     } catch (err: any) {
       console.error("Error toggling favorite:", err);
       // Відкат при помилці
