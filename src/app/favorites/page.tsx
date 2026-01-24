@@ -18,16 +18,23 @@ function FavoritesPageContent() {
 
   // Ref для оптимістичних оновлень
   const previousCardsRef = useRef<WineCard[] | null>(null);
+  // Ref для відстеження зміни користувача
+  const previousUserIdRef = useRef<string | null>(null);
 
-  // Fetch favorites з кешуванням
+  // Fetch favorites з очищенням кешу при зміні користувача
   const fetchFavorites = useCallback(
-    async (showLoading = true) => {
+    async (showLoading = true, forceRefresh = false) => {
       if (showLoading) {
         setLoading(true);
       }
       setError("");
 
       try {
+        // Якщо forceRefresh - очищуємо кеш улюблених перед запитом
+        if (forceRefresh) {
+          cacheUtils.clearFavorites();
+        }
+
         const response = await cardsAPI.getFavorites();
         // Mark all cards as favorites
         const favoritesWithFlag = response.results.map((card) => ({
@@ -80,9 +87,32 @@ function FavoritesPageContent() {
     [router],
   );
 
-  // Initial fetch
+  // Initial fetch + перевірка зміни користувача
   useEffect(() => {
-    fetchFavorites();
+    // Отримуємо поточного userId
+    const getCurrentUserId = () => {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          return user.id?.toString() || user._id?.toString() || null;
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    };
+
+    const currentUserId = getCurrentUserId();
+
+    // Якщо userId змінився (інший акаунт), очищуємо кеш і робимо fresh fetch
+    if (previousUserIdRef.current !== currentUserId) {
+      cacheUtils.clearFavorites();
+      fetchFavorites(true, true);
+      previousUserIdRef.current = currentUserId;
+    } else {
+      fetchFavorites();
+    }
   }, [fetchFavorites]);
 
   const handleToggleFavorite = async (cardId: string): Promise<void> => {

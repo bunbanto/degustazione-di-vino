@@ -32,6 +32,8 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   // Refs для оптимістичних оновлень
   const previousCardsRef = useRef<WineCard[] | null>(null);
   const isUpdatingRef = useRef(false);
+  // Ref для відстеження зміни користувача
+  const previousUserIdRef = useRef<string | null>(null);
 
   // Fetch cards з кешуванням та fallback
   const fetchCards = useCallback(
@@ -126,7 +128,30 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
   // Initial fetch and when filters/page change
   useEffect(() => {
-    fetchCards();
+    // Отримуємо поточного userId
+    const getCurrentUserId = () => {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          return user.id?.toString() || user._id?.toString() || null;
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    };
+
+    const currentUserId = getCurrentUserId();
+
+    // Якщо userId змінився (інший акаунт), очищуємо весь кеш і робимо fresh fetch
+    if (previousUserIdRef.current !== currentUserId) {
+      cacheUtils.clearAll();
+      fetchCards(true);
+      previousUserIdRef.current = currentUserId;
+    } else {
+      fetchCards();
+    }
   }, [fetchCards]);
 
   const handleFilterChange = (newFilters: FilterParams) => {

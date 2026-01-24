@@ -3,24 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { cacheUtils } from "@/services/api";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
 
-    // Get user email from localStorage
+    // Get user email and id from localStorage
     if (token) {
       const userStr = localStorage.getItem("user");
       if (userStr) {
         try {
           const user = JSON.parse(userStr);
           setUserEmail(user.email || "");
+          const userId = user.id?.toString() || user._id?.toString() || null;
+          setCurrentUserId(userId);
         } catch (e) {
           console.error("Error parsing user from localStorage:", e);
         }
@@ -33,6 +37,11 @@ export default function Navbar() {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
     setUserEmail("");
+    setCurrentUserId(null);
+
+    // Очищуємо весь кеш при виході, включаючи улюблені
+    cacheUtils.clearAll();
+
     window.location.href = "/";
   };
 
