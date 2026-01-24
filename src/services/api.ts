@@ -451,7 +451,7 @@ export const cardsAPI = {
       newFavorites: WineCard[],
       confirmedIsFavorite?: boolean,
     ) => void,
-  ): Promise<ToggleFavoriteResponse> => {
+  ): Promise<{ isFavorite: boolean; cardId: string; message: string }> => {
     // Зберігаємо попередній стан
     const previousFavorites = currentFavorites ? [...currentFavorites] : null;
 
@@ -470,10 +470,12 @@ export const cardsAPI = {
     }
 
     try {
-      const response = await api.post<ToggleFavoriteResponse>(
-        `/favorites/${cardId}`,
-      );
-      const { isFavorite: confirmedIsFavorite } = response.data;
+      const response = await api.post<{
+        isFavorite: boolean;
+        cardId: string;
+        message: string;
+      }>(`/favorites/${cardId}`);
+      const confirmedIsFavorite = response.data.isFavorite;
 
       // Оновлюємо кеш
       if (typeof window !== "undefined") {

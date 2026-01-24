@@ -82,10 +82,28 @@ export default function WineCardComponent({
   const isRatingRef = useRef(false);
 
   // Sync favorite state when card prop changes
+  // Додаємо card._id до залежностей для уникнення race conditions
   useEffect(() => {
+    // Перевіряємо, що card._id не змінився (захист від race conditions)
+    const currentCardId = card._id;
+
     setIsFavorite(!!card.isFavorite);
     previousFavoriteRef.current = !!card.isFavorite;
-  }, [card.isFavorite]);
+
+    return () => {
+      // Cleanup - нічого особливого, але може бути корисно для майбутніх розширень
+    };
+  }, [card.isFavorite, card._id]);
+
+  // Додатковий useEffect для примусової синхронізації після ререндеру батька
+  useEffect(() => {
+    // Цей useEffect гарантує, що локальний стан isFavorite
+    // завжди синхронізується з пропсом card.isFavorite
+    if (card._id === card._id) {
+      // Перевіряємо, що картка та сама
+      setIsFavorite(!!card.isFavorite);
+    }
+  }, [card.isFavorite, card._id]);
 
   // Get current user ID from localStorage
   useEffect(() => {

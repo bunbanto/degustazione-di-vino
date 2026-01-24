@@ -266,18 +266,20 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       previousCardsRef.current = [...cards];
     }
 
+    // Зберігаємо поточний стан isFavorite для картки
+    const currentCard = cards.find((c) => c._id === cardId);
+    const wasFavorite = currentCard?.isFavorite || false;
+
     try {
       await cardsAPI.toggleFavorite(
         cardId,
         cards,
         (newCards, confirmedIsFavorite) => {
-          // Використовуємо підтверджений сервером стан isFavorite
-          // Це забезпечує правильну візуалізацію після відповіді сервера
+          // Якщо newCards передано, використовуємо його
           if (newCards) {
             setCards(newCards);
           } else if (confirmedIsFavorite !== undefined) {
-            // Якщо newCards не передано, але є підтверджений стан,
-            // оновлюємо тільки цю картку
+            // Оновлюємо тільки конкретну картку
             setCards((prevCards) =>
               prevCards.map((card) =>
                 card._id === cardId
@@ -290,7 +292,15 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       );
       // Очищуємо кеш улюблених
       cacheUtils.clearFavorites();
-      // НЕ викликаємо fetchCards() - використовуємо підтверджений стан від сервера
+      // Очищуємо кеш карток для примусового оновлення
+      cacheUtils.clearCards();
+      // Скидаємо прапорець оновлення для дозволу повторного запиту
+      isUpdatingRef.current = false;
+      // Після успішного оновлення, робимо примусове оновлення карток з сервера
+      // Використовуємо isUpdatingRef для уникнення race conditions
+      setTimeout(() => {
+        fetchCards(false);
+      }, 100);
     } catch (err: any) {
       console.error("Error toggling favorite:", err);
       // Відкат при помилці

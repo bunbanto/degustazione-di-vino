@@ -97,6 +97,10 @@ function FavoritesPageContent() {
       previousCardsRef.current = [...cards];
     }
 
+    // Зберігаємо поточний стан isFavorite для картки
+    const currentCard = cards.find((c) => c._id === cardId);
+    const wasFavorite = currentCard?.isFavorite || false;
+
     try {
       await cardsAPI.toggleFavorite(
         cardId,
@@ -127,6 +131,12 @@ function FavoritesPageContent() {
       );
       // Очищуємо кеш улюблених
       cacheUtils.clearFavorites();
+      // Очищуємо кеш карток для примусового оновлення
+      cacheUtils.clearCards();
+      // Після успішного оновлення, робимо примусове оновлення з сервера
+      setTimeout(() => {
+        fetchFavorites(false);
+      }, 100);
     } catch (err: any) {
       console.error("Error toggling favorite:", err);
       // Відкат при помилці
