@@ -339,10 +339,10 @@ export default function WineCardComponent({
   return (
     <>
       <div className="glass-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-        {/* Image with click to navigate */}
+        {/* Image container */}
         <div
-          className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center cursor-pointer"
-          onClick={() => router.push(`/cards/${card._id}`)}
+          className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center"
+          style={{ cursor: "default" }}
         >
           <img
             src={
@@ -410,10 +410,13 @@ export default function WineCardComponent({
           )}
 
           {/* Overlay with "Детальніше" text */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-semibold bg-black/50 px-4 py-2 rounded-full">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+            <Link
+              href={`/cards/${card._id}`}
+              className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-semibold bg-black/50 px-4 py-2 rounded-full pointer-events-auto hover:bg-black/70"
+            >
               Детальніше →
-            </span>
+            </Link>
           </div>
         </div>
 
