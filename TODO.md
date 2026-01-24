@@ -1,9 +1,53 @@
-# TODO
+# TODO - Рефакторинг: Модалка ↔ Сторінка
 
-## Current Task: Apply getColorBadgeStyle to WineCardModal
+## ✅ Етап 1: Створити EditCardModal
 
-- [x] Read WineCard.tsx to understand getColorBadgeStyle function
-- [x] Read WineCardModal.tsx to understand current implementation
-- [x] Create plan and get user confirmation
-- [x] Add getColorBadgeStyle function to WineCardModal.tsx
-- [x] Replace hardcoded color badge with styled badge in modal
+- [x] 1.1 Створити `src/components/EditCardModal.tsx` з формою редагування
+- [x] 1.2 Перенести логіку з `cards/[id]/page.tsx` (fetch, save, delete, upload)
+
+## ✅ Етап 2: Оновити сторінку /cards/[id] на перегляд
+
+- [x] 2.1 Оновити `src/app/cards/[id]/page.tsx` - показати інфо про картку
+- [x] 2.2 Додати рейтинг та список оцінок
+- [x] 2.3 Додати секцію коментарів
+- [x] 2.4 Додати кнопку "Редагувати" (відкриває EditCardModal) для автора
+
+## ✅ Етап 3: Оновити WineCard
+
+- [x] 3.1 Змінити перехід при кліку на картку → на /cards/[id]
+- [x] 3.2 Змінити кнопку редагування → відкриває EditCardModal
+
+## ✅ Етап 4: Спростити WineCardModal
+
+- [x] 4.1 WineCardModal більше не використовується (залишається у коді про запас)
+
+## ✅ Етап 5: Тестування
+
+- [ ] 5.1 Перевірити відкриття картки /cards/[id]
+- [ ] 5.2 Перевірити редагування через модалку
+- [ ] 5.3 Перевірити коментарі та рейтинги
+
+---
+
+## Внесені зміни:
+
+### 1. `src/components/EditCardModal.tsx` (НОВИЙ)
+
+- Модалка з формою редагування вина
+- Перенесено функціонал зі сторінки [id]: fetch, save, delete, upload
+- Працює з card prop та callback onSaved
+
+### 2. `src/app/cards/[id]/page.tsx` (ОНОВЛЕНО)
+
+- Тепер це сторінка ПЕРЕГЛЯДУ інформації про вино
+- Показує: фото, назву, виноробню, тип, колір, рік, алкоголь, ціну, регіон, опис
+- Показує середній рейтинг + всі оцінки користувачів
+- Показує секцію коментарів
+- Кнопка "Редагувати картку" (для автора) відкриває EditCardModal
+
+### 3. `src/components/WineCard.tsx` (ОНОВЛЕНО)
+
+- Клік на картку/фото → перехід на /cards/[id]
+- Видалено WineCardModal (модалка більше не відкривається)
+- Кнопка "Редагувати" → відкриває EditCardModal
+- Додано оверлей "Детальніше →" при hover

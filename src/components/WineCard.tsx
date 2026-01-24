@@ -1,13 +1,14 @@
 "use client";
 
-import { WineCard } from "@/types";
+import { WineCard as WineCardType } from "@/types";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
-import WineCardModal from "@/components/WineCardModal";
+import EditCardModal from "@/components/EditCardModal";
 
 interface WineCardProps {
-  card: WineCard;
+  card: WineCardType;
   onRate?: (id: string, rating: number) => void;
   onToggleFavorite?: (id: string) => Promise<void>;
 }
@@ -62,20 +63,29 @@ export default function WineCardComponent({
   onRate,
   onToggleFavorite,
 }: WineCardProps) {
+  const router = useRouter();
   const [userRating, setUserRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isRatingLoading, setIsRatingLoading] = useState(false);
 
-  // Favorite state
-  const [isFavorite, setIsFavorite] = useState(false);
+  // Favorite state - initialize from card prop
+  const [isFavorite, setIsFavorite] = useState(!!card.isFavorite);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+
+  // Edit modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Refs для відстеження стану
   const previousRatingRef = useRef<number | null>(null);
   const previousFavoriteRef = useRef<boolean>(false);
-  const isRatingRef = useRef(false); // Флаг для запобігання повторним запитам
+  const isRatingRef = useRef(false);
+
+  // Sync favorite state when card prop changes
+  useEffect(() => {
+    setIsFavorite(!!card.isFavorite);
+    previousFavoriteRef.current = !!card.isFavorite;
+  }, [card.isFavorite]);
 
   // Get current user ID from localStorage
   useEffect(() => {
@@ -183,7 +193,6 @@ export default function WineCardComponent({
 
   // Load user's rating from the card's ratings array
   useEffect(() => {
-    // Якщо зараз йде процес оцінювання - не оновлюємо з картки
     if (isRatingRef.current) {
       return;
     }
@@ -207,27 +216,22 @@ export default function WineCardComponent({
     }
   }, [card.ratings, currentUserId]);
 
-  // Initialize favorite state from card data
-  useEffect(() => {
-    setIsFavorite(!!card.isFavorite);
-    previousFavoriteRef.current = !!card.isFavorite;
-  }, [card.isFavorite]);
-
   // Handle toggle favorite з оптимістичним оновленням
-  const handleToggleFavorite = async () => {
+  const handleToggleFavorite = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
+      router.push("/login");
       return;
     }
 
-    // Зберігаємо попередній стан
+    // Зберігаємо попередній стан для відкату
     if (!previousFavoriteRef.current) {
       previousFavoriteRef.current = isFavorite;
     }
 
     setIsFavoriteLoading(true);
 
-    // Оптимістичне оновлення
+    // Оптимістичне оновлення - одразу змінюємо стан
     const newFavoriteState = !isFavorite;
     setIsFavorite(newFavoriteState);
 
@@ -243,21 +247,18 @@ export default function WineCardComponent({
     } finally {
       setIsFavoriteLoading(false);
     }
-  };
+  }, [card._id, isFavorite, onToggleFavorite, router]);
 
   const handleRate = useCallback(
     async (rating: number) => {
-      // Запобігаємо повторним запитам
       if (isRatingRef.current || isRatingLoading) {
         return;
       }
 
-      // Зберігаємо попередній рейтинг
       if (previousRatingRef.current === null) {
         previousRatingRef.current = userRating;
       }
 
-      // Встановлюємо flag що йде процес оцінювання
       isRatingRef.current = true;
       setUserRating(rating);
       setIsRatingLoading(true);
@@ -265,14 +266,11 @@ export default function WineCardComponent({
       if (onRate) {
         try {
           await onRate(card._id, rating);
-          // При успіху - скидаємо flag після короткої затримки
-          // щоб useEffect міг оновити з новими даними з сервера
           setTimeout(() => {
             isRatingRef.current = false;
           }, 100);
         } catch (error) {
           console.error("Rating failed:", error);
-          // Відкат при помилці
           isRatingRef.current = false;
           setUserRating(previousRatingRef.current);
           previousRatingRef.current = null;
@@ -341,8 +339,11 @@ export default function WineCardComponent({
   return (
     <>
       <div className="glass-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-        {/* Image */}
-        <div className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center">
+        {/* Image with click to navigate */}
+        <div
+          className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center cursor-pointer"
+          onClick={() => router.push(`/cards/${card._id}`)}
+        >
           <img
             src={
               card.img ||
@@ -350,8 +351,7 @@ export default function WineCardComponent({
               "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
             }
             alt={card.name}
-            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500 cursor-pointer"
-            onClick={() => setIsImageModalOpen(true)}
+            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
           />
           {card.color && (
             <div
@@ -365,31 +365,15 @@ export default function WineCardComponent({
               Frizzante
             </div>
           )}
-          {isCardAuthor && (
-            <Link
-              href={`/cards/${card._id}`}
-              className="absolute bottom-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-50"
-              title="Редагувати"
-            >
-              <svg
-                className="w-5 h-5 text-rose-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-            </Link>
-          )}
 
-          {/* Favorite Heart Button - moved to where price was */}
+          {/* Favorite Heart Button */}
           <button
-            onClick={handleToggleFavorite}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              handleToggleFavorite();
+            }}
             disabled={isFavoriteLoading}
             className={`absolute top-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full transition-all duration-300 shadow-md hover:bg-rose-50 ${
               isFavoriteLoading ? "opacity-50 cursor-wait" : ""
@@ -417,16 +401,28 @@ export default function WineCardComponent({
               />
             </svg>
           </button>
+
+          {/* Price badge */}
           {card.price && typeof card.price === "number" && (
             <span className="absolute top-14 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 shadow-sm">
               €{card.price.toFixed(2)}
             </span>
           )}
+
+          {/* Overlay with "Детальніше" text */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-semibold bg-black/50 px-4 py-2 rounded-full">
+              Детальніше →
+            </span>
+          </div>
         </div>
 
         {/* Content */}
         <div className="p-5">
-          <h3 className="text-xl font-bold text-rose-900 mb-1 line-clamp-1">
+          <h3
+            className="text-xl font-bold text-rose-900 mb-1 line-clamp-1 cursor-pointer hover:text-rose-700 transition-colors"
+            onClick={() => router.push(`/cards/${card._id}`)}
+          >
             {card.name}
           </h3>
 
@@ -579,14 +575,40 @@ export default function WineCardComponent({
               </span>
             )}
           </div>
+
+          {/* Edit Button for Author */}
+          {isCardAuthor && (
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="mt-4 w-full py-3 bg-rose-100 text-rose-700 rounded-lg font-semibold hover:bg-rose-200 transition-colors flex items-center justify-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              Редагувати
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Image Modal */}
-      <WineCardModal
+      {/* Edit Modal */}
+      <EditCardModal
         card={card}
-        isOpen={isImageModalOpen}
-        onClose={() => setIsImageModalOpen(false)}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSaved={() => {
+          // Trigger refresh - the parent component will handle this via onRate or similar
+        }}
       />
     </>
   );

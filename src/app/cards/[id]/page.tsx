@@ -2,207 +2,214 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { cardsAPI } from "@/services/api";
+import { cardsAPI, cacheUtils } from "@/services/api";
 import { WineCard } from "@/types";
+import CommentsSection from "@/components/CommentsSection";
+import EditCardModal from "@/components/EditCardModal";
 
-export default function EditCardPage() {
+export default function CardViewPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | undefined>(
-    undefined,
-  );
-  const [uploadError, setUploadError] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [card, setCard] = useState<WineCard | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    type: "secco",
-    color: "bianco",
-    frizzante: false,
-    winery: "",
-    country: "",
-    region: "",
-    anno: new Date().getFullYear(),
-    alcohol: 12,
-    price: 0,
-    description: "",
-  });
+  // Favorite state
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+  const previousFavoriteRef = useRef<boolean>(false);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [existingImage, setExistingImage] = useState<string>("");
-  const [currentCard, setCurrentCard] = useState<WineCard | null>(null);
-  const [removeImageFlag, setRemoveImageFlag] = useState(false);
-
-  // Drag & Drop handlers
+  // Fetch card data - only on mount and id change
   useEffect(() => {
-    const dropZone = dropZoneRef.current;
-    if (!dropZone) return;
+    let isMounted = true;
 
-    const handleDragOver = (e: DragEvent) => {
-      e.preventDefault();
-      dropZone.classList.add("border-rose-400", "bg-rose-50");
-    };
+    const fetchCard = async () => {
+      try {
+        // Clear cache before fetching to get fresh data
+        cacheUtils.clearCards();
+        cacheUtils.clearFavorites();
 
-    const handleDragLeave = (e: DragEvent) => {
-      e.preventDefault();
-      dropZone.classList.remove("border-rose-400", "bg-rose-50");
-    };
+        const cardData = await cardsAPI.getById(id);
 
-    const handleDrop = (e: DragEvent) => {
-      e.preventDefault();
-      dropZone.classList.remove("border-rose-400", "bg-rose-50");
+        // Also check if this card is in favorites
+        let isCardFavorite = !!cardData.isFavorite;
+        try {
+          const favoriteCheck = await cardsAPI.checkFavorite(id);
+          isCardFavorite = favoriteCheck.isFavorite;
+        } catch (favErr) {
+          // If checkFavorite fails, card might not be in favorites
+          console.log("Could not check favorite status:", favErr);
+        }
 
-      const files = e.dataTransfer?.files;
-      if (files && files.length > 0) {
-        handleFile(files[0]);
+        if (isMounted) {
+          setCard(cardData);
+          setIsFavorite(isCardFavorite);
+          previousFavoriteRef.current = isCardFavorite;
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(
+            err.response?.data?.message || "Помилка завантаження картки",
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    dropZone.addEventListener("dragover", handleDragOver);
-    dropZone.addEventListener("dragleave", handleDragLeave);
-    dropZone.addEventListener("drop", handleDrop);
+    fetchCard();
 
     return () => {
-      dropZone.removeEventListener("dragover", handleDragOver);
-      dropZone.removeEventListener("dragleave", handleDragLeave);
-      dropZone.removeEventListener("drop", handleDrop);
+      isMounted = false;
     };
+  }, [id]);
+
+  // Get current user ID
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const userId =
+          user.id?.toString() ||
+          user._id?.toString() ||
+          btoa(user.email || "").slice(0, 24);
+        setCurrentUserId(userId);
+      } catch (e) {
+        console.error("Error parsing user:", e);
+      }
+    }
   }, []);
 
-  // Fetch card after authentication
-  useEffect(() => {
+  // Check if current user is the card author
+  const isCardAuthor = (() => {
+    if (!currentUserId || !card) return false;
+
+    if (card.owner) {
+      const ownerId =
+        typeof card.owner === "object" ? card.owner._id : card.owner;
+      if (currentUserId && ownerId && currentUserId === ownerId.toString()) {
+        return true;
+      }
+    }
+
+    if (card.authorId) {
+      return currentUserId === card.authorId.toString();
+    }
+
+    return false;
+  })();
+
+  // Handle toggle favorite
+  const handleToggleFavorite = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
-    } else {
-      setIsAuthenticated(true);
-      fetchCard();
-    }
-  }, [router, id]);
-
-  const validateFile = (file: File): boolean => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError("Дозволені формати: JPG, PNG, WebP");
-      return false;
+      return;
     }
 
-    if (file.size > maxSize) {
-      setUploadError("Максимальний розмір файлу: 5MB");
-      return false;
+    if (!previousFavoriteRef.current) {
+      previousFavoriteRef.current = isFavorite;
     }
 
-    setUploadError("");
-    return true;
-  };
-
-  const handleFile = (file: File) => {
-    if (validateFile(file)) {
-      setImageFile(file);
-      setRemoveImageFlag(false); // Скидаємо прапорець видалення при завантаженні нового файлу
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const fetchCard = async () => {
-    try {
-      const card = await cardsAPI.getById(id);
-      setCurrentCard(card);
-
-      setFormData({
-        name: card.name || "",
-        type: card.type || "secco",
-        color: card.color || "bianco",
-        frizzante: card.frizzante || false,
-        winery: card.winery || "",
-        country: card.country || "",
-        region: card.region || "",
-        anno: card.anno || card.year || new Date().getFullYear(),
-        alcohol: card.alcohol || 12,
-        price: typeof card.price === "number" ? card.price : 0,
-        description: card.description || "",
-      });
-      setExistingImage(card.img || "");
-      setImagePreview(card.img || undefined);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Помилка завантаження картки");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
+    setIsFavoriteLoading(true);
+    const newFavoriteState = !isFavorite;
+    setIsFavorite(newFavoriteState);
 
     try {
-      await cardsAPI.update(
-        id,
-        formData,
-        imageFile || undefined,
-        removeImageFlag,
-      );
-      router.push("/cards");
+      await cardsAPI.toggleFavorite(id);
+      // Clear cache
+      cacheUtils.clearFavorites();
+
+      // Verify the actual state from server
+      try {
+        const favoriteCheck = await cardsAPI.checkFavorite(id);
+        setIsFavorite(favoriteCheck.isFavorite);
+        previousFavoriteRef.current = favoriteCheck.isFavorite;
+      } catch (checkErr) {
+        console.log("Could not verify favorite status:", checkErr);
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Помилка збереження картки");
+      console.error("Error toggling favorite:", err);
+      // Revert on error
+      setIsFavorite(previousFavoriteRef.current);
+      previousFavoriteRef.current = false;
     } finally {
-      setSaving(false);
+      setIsFavoriteLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Ви впевнені, що хочете видалити цю картку?")) return;
-
-    setSaving(true);
-    setError("");
-
-    try {
-      await cardsAPI.delete(id);
-      router.push("/cards");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Помилка видалення картки");
-    } finally {
-      setSaving(false);
-    }
+  const getRatingColor = (rating: number) => {
+    if (rating >= 8) return "text-green-600";
+    if (rating >= 6) return "text-yellow-600";
+    if (rating >= 4) return "text-orange-500";
+    return "text-red-500";
   };
 
-  const handleChange = (field: string, value: string | number | boolean) => {
-    setFormData({ ...formData, [field]: value });
+  const getTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      secco: "Сухе",
+      abboccato: "Напівсухе",
+      amabile: "Напівсолодке",
+      dolce: "Солодке",
+    };
+    return types[type] || type;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFile(file);
-    }
+  const getColorLabel = (color: string) => {
+    const colors: Record<string, string> = {
+      bianco: "Біле",
+      rosso: "Червоне",
+      rosato: "Рожеве",
+      sparkling: "Ігристе",
+    };
+    return colors[color] || color;
   };
 
-  const removeImage = () => {
-    setImageFile(null);
-    setImagePreview(undefined);
-    setRemoveImageFlag(true);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const getColorBadgeStyle = (color: string) => {
+    const styles: Record<
+      string,
+      { bg: string; text: string; border?: string }
+    > = {
+      rosso: { bg: "bg-red-600", text: "text-white" },
+      bianco: {
+        bg: "bg-yellow-50",
+        text: "text-gray-800",
+        border: "border border-gray-200",
+      },
+      rosato: { bg: "bg-pink-100", text: "text-gray-800" },
+      sparkling: { bg: "bg-sky-200", text: "text-gray-800" },
+    };
+    return styles[color] || { bg: "bg-gray-200", text: "text-gray-800" };
   };
 
-  if (!isAuthenticated || loading) {
+  const handleCardSaved = () => {
+    const fetchCard = async () => {
+      try {
+        const cardData = await cardsAPI.getById(id);
+        setCard(cardData);
+      } catch (err: any) {
+        console.error("Error refreshing card:", err);
+      }
+    };
+    fetchCard();
+  };
+
+  function getUserIdString(
+    userId: string | { _id: string; name?: string },
+  ): string {
+    return typeof userId === "string" ? userId : userId._id;
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -213,336 +220,38 @@ export default function EditCardPage() {
     );
   }
 
-  const wineTypes = [
-    { value: "secco", label: "Secco" },
-    { value: "abboccato", label: "Abboccato" },
-    { value: "amabile", label: "Amabile" },
-    { value: "dolce", label: "Dolce" },
-  ];
+  if (error || !card) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="flex items-center justify-center h-64 pt-24">
+          <div className="text-center">
+            <div className="text-red-600 text-lg mb-4">
+              {error || "Картка не знайдена"}
+            </div>
+            <Link
+              href="/cards"
+              className="text-rose-600 hover:text-rose-800 underline"
+            >
+              ← Повернутися до каталогу
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const wineColors = [
-    { value: "bianco", label: "Bianco" },
-    { value: "rosso", label: "Rosso" },
-    { value: "rosato", label: "Rosato" },
-  ];
+  const displayRating = card.rating || 0;
+  const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
     <div className="min-h-screen">
       <Navbar />
 
       <main className="pt-24 pb-12 px-4">
-        <div className="max-w-3xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-serif font-bold text-rose-900 mb-2">
-              Редагувати вино
-            </h1>
-            <p className="text-rose-700">Змініть інформацію про вино</p>
-          </div>
-
-          {/* Form Card */}
-          <div className="glass-card rounded-2xl p-8 shadow-xl">
-            {error && (
-              <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Назва вина *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                  placeholder="Наприклад: Chateau Margaux 2015"
-                />
-              </div>
-
-              {/* Type and Color Row */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Тип вина *
-                  </label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => handleChange("type", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                  >
-                    {wineTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Колір *
-                  </label>
-                  <select
-                    value={formData.color}
-                    onChange={(e) => handleChange("color", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                  >
-                    {wineColors.map((color) => (
-                      <option key={color.value} value={color.value}>
-                        {color.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Frizzante Checkbox */}
-              <div>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={formData.frizzante}
-                      onChange={(e) =>
-                        handleChange("frizzante", e.target.checked)
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700 transition-colors">
-                    Frizzante
-                  </span>
-                </label>
-              </div>
-
-              {/* Winery */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Виноробня *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.winery}
-                  onChange={(e) => handleChange("winery", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                  placeholder="Наприклад: Masso Antico"
-                />
-              </div>
-
-              {/* Country and Region Row */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Країна
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.country}
-                    onChange={(e) => handleChange("country", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                    placeholder="Наприклад: Італія"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Регіон
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.region}
-                    onChange={(e) => handleChange("region", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                    placeholder="Наприклад: Південна Італія"
-                  />
-                </div>
-              </div>
-
-              {/* Year, Alcohol and Price Row */}
-              <div className="grid md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Рік вина
-                  </label>
-                  <input
-                    type="number"
-                    min="1900"
-                    max="2030"
-                    value={formData.anno}
-                    onChange={(e) =>
-                      handleChange("anno", parseInt(e.target.value))
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Алкоголь (%) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    max="20"
-                    step="0.5"
-                    value={formData.alcohol}
-                    onChange={(e) =>
-                      handleChange("alcohol", parseFloat(e.target.value))
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ціна (€) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) =>
-                      handleChange("price", parseFloat(e.target.value))
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
-                    placeholder="Наприклад: 25.50"
-                  />
-                </div>
-              </div>
-
-              {/* Average Rating Display */}
-              <div className="bg-amber-50 rounded-lg p-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl font-bold text-amber-700">
-                    {currentCard?.rating?.toFixed(1) || "0.0"}
-                  </div>
-                  <div className="flex gap-2 text-sm text-gray-600">
-                    <div>Середній рейтинг</div>
-                    <div className="text-gray-500">
-                      ({currentCard?.ratings?.length || 0} оцінок)
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Зображення
-                </label>
-                {!imagePreview ? (
-                  <div
-                    ref={dropZoneRef}
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-rose-400 transition-colors cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
-                    />
-                    <div className="text-gray-500">
-                      <svg
-                        className="w-12 h-12 mx-auto mb-2 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <p className="text-sm">Натисніть або перетягніть фото</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        JPG, PNG, WebP (до 5MB)
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-48 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={removeImage}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
-                {uploadError && (
-                  <p className="text-red-500 text-sm mt-2">{uploadError}</p>
-                )}
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Опис
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50 resize-none"
-                  placeholder="Розкажіть про це вино..."
-                />
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-4">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 py-4 bg-gradient-to-r from-rose-600 to-rose-500 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 transition-all shadow-md disabled:opacity-50"
-                >
-                  {saving ? "Збереження..." : "Зберегти зміни"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={saving}
-                  className="px-6 py-4 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition-all disabled:opacity-50"
-                >
-                  Видалити
-                </button>
-              </div>
-            </form>
-          </div>
-
+        <div className="max-w-6xl mx-auto">
           {/* Back Link */}
-          <div className="text-center mt-6">
+          <div className="mb-6">
             <button
               onClick={() => router.back()}
               className="text-rose-600 hover:text-rose-800 underline text-sm"
@@ -550,8 +259,360 @@ export default function EditCardPage() {
               ← Повернутися назад
             </button>
           </div>
+
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Left Column - Image with Ratings */}
+            <div className="lg:w-5/12 space-y-6">
+              {/* Image */}
+              <div className="glass-card rounded-2xl overflow-hidden shadow-lg relative">
+                <img
+                  src={
+                    card.img ||
+                    card.image ||
+                    "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
+                  }
+                  alt={card.name}
+                  className="w-full h-auto object-contain bg-gray-100"
+                />
+                {/* Favorite Button */}
+                <button
+                  onClick={handleToggleFavorite}
+                  disabled={isFavoriteLoading}
+                  className={`absolute top-4 right-4 bg-white/90 backdrop-blur p-3 rounded-full transition-all duration-300 shadow-lg hover:bg-rose-50 ${
+                    isFavoriteLoading ? "opacity-50 cursor-wait" : ""
+                  }`}
+                  title={
+                    isFavorite ? "Видалити з улюблених" : "Додати до улюблених"
+                  }
+                >
+                  <svg
+                    className={`w-6 h-6 transition-transform duration-300 ${
+                      isFavorite
+                        ? "text-rose-500 scale-110"
+                        : "text-gray-400 hover:text-rose-400"
+                    }`}
+                    fill={isFavorite ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    style={{
+                      animation: isFavorite
+                        ? "heartBeat 0.6s ease-in-out"
+                        : "none",
+                    }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Rating Summary & User Ratings - under the image */}
+              <div className="bg-amber-50 rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`text-4xl font-bold ${getRatingColor(displayRating)}`}
+                    >
+                      {displayRating.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      <div>із 10</div>
+                      <div>({card.ratings?.length || 0} оцінок)</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {stars.map((star) => {
+                      const isFull = displayRating >= star;
+                      const isHalf = !isFull && displayRating >= star - 0.5;
+                      return (
+                        <svg
+                          key={star}
+                          className={`w-5 h-5 ${
+                            isFull || isHalf
+                              ? "text-yellow-400"
+                              : "text-gray-200"
+                          }`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Individual Ratings */}
+                {card.ratings && card.ratings.length > 0 && (
+                  <div className="border-t border-amber-200 pt-4">
+                    <h3 className="font-medium text-gray-700 mb-3">
+                      Оцінки користувачів
+                    </h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                      {card.ratings.map((rating, idx) => {
+                        const userIdStr = getUserIdString(rating.userId || "");
+                        const displayUsername =
+                          (typeof rating.userId === "object" &&
+                            rating.userId.name) ||
+                          rating.username ||
+                          "";
+
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between py-2 border-b border-amber-100 last:border-0"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 bg-rose-100 rounded-full flex items-center justify-center">
+                                <span className="text-rose-600 font-medium text-xs">
+                                  {displayUsername.charAt(0).toUpperCase() ||
+                                    "?"}
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium text-gray-700 truncate max-w-[100px]">
+                                {displayUsername || "Користувач"}
+                              </span>
+                              {userIdStr === currentUserId && (
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                  Ви
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                                <svg
+                                  key={star}
+                                  className={`w-3.5 h-3.5 ${
+                                    rating.value >= star
+                                      ? "text-yellow-400"
+                                      : "text-gray-200"
+                                  }`}
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              ))}
+                              <span className="ml-1.5 text-sm font-bold text-gray-700">
+                                {rating.value.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column - Info */}
+            <div className="lg:w-7/12 space-y-6">
+              {/* Header */}
+              <div>
+                <h1 className="text-4xl font-serif font-bold text-rose-900 mb-2">
+                  {card.name}
+                </h1>
+                {card.winery && (
+                  <p className="text-xl text-rose-600 font-medium">
+                    {card.winery}
+                  </p>
+                )}
+              </div>
+
+              {/* Wine Details */}
+              <div className="glass-card rounded-2xl p-6 shadow-lg">
+                <h2 className="text-xl font-serif font-bold text-rose-900 mb-4">
+                  Деталі
+                </h2>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-rose-100 text-rose-800 rounded-full text-sm font-medium">
+                    {getTypeLabel(card.type)}
+                  </span>
+                  <span
+                    className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
+                  >
+                    {getColorLabel(card.color)}
+                  </span>
+                  {card.frizzante && (
+                    <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+                      Frizzante
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  {(card.year || card.anno) && (
+                    <div className="bg-gray-50 p-3 rounded-lg text-center">
+                      <div className="text-gray-500 text-xs">Рік</div>
+                      <div className="font-semibold">
+                        {card.year || card.anno}
+                      </div>
+                    </div>
+                  )}
+                  {card.alcohol && (
+                    <div className="bg-gray-50 p-3 rounded-lg text-center">
+                      <div className="text-gray-500 text-xs">Алкоголь</div>
+                      <div className="font-semibold">{card.alcohol}%</div>
+                    </div>
+                  )}
+                  {card.price && (
+                    <div className="bg-gray-50 p-3 rounded-lg text-center">
+                      <div className="text-gray-500 text-xs">Ціна</div>
+                      <div className="font-semibold">
+                        {typeof card.price === "number"
+                          ? `€${card.price.toFixed(2)}`
+                          : card.price}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {(card.country || card.region) && (
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    {card.country && (
+                      <span className="flex items-center gap-1">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {card.country}
+                      </span>
+                    )}
+                    {card.region && (
+                      <span className="flex items-center gap-1">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        {card.region}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              {card.description && (
+                <div className="glass-card rounded-2xl p-6 shadow-lg">
+                  <h2 className="text-xl font-serif font-bold text-rose-900 mb-3">
+                    Опис
+                  </h2>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {card.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-4">
+                {/* Favorite Button */}
+                <button
+                  onClick={handleToggleFavorite}
+                  disabled={isFavoriteLoading}
+                  className={`flex-1 py-4 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${
+                    isFavorite
+                      ? "bg-rose-100 text-rose-700 hover:bg-rose-200"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  } ${isFavoriteLoading ? "opacity-50 cursor-wait" : ""}`}
+                >
+                  <svg
+                    className={`w-5 h-5 ${
+                      isFavorite ? "text-rose-500" : "text-gray-400"
+                    }`}
+                    fill={isFavorite ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    style={{
+                      animation: isFavorite
+                        ? "heartBeat 0.6s ease-in-out"
+                        : "none",
+                    }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                  {isFavorite ? "В улюблених" : "До улюблених"}
+                </button>
+
+                {/* Edit Button for Author */}
+                {isCardAuthor && (
+                  <button
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="flex-1 py-4 bg-gradient-to-r from-rose-600 to-rose-500 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-rose-600 transition-all shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    Редагувати картку
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="mt-12">
+            <CommentsSection
+              cardId={card._id}
+              currentUserId={currentUserId || undefined}
+            />
+          </div>
         </div>
       </main>
+
+      {/* Edit Modal */}
+      {card && (
+        <EditCardModal
+          card={card}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSaved={handleCardSaved}
+        />
+      )}
     </div>
   );
 }

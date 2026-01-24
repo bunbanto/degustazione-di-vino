@@ -276,6 +276,9 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       await cardsAPI.toggleFavorite(cardId, cards, (newCards) => {
         setCards(newCards);
       });
+      // Очищуємо кеш і оновлюємо з сервера
+      cacheUtils.clearFavorites();
+      await fetchCards(false);
     } catch (err: any) {
       console.error("Error toggling favorite:", err);
       // Відкат при помилці
