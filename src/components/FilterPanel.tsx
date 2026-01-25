@@ -73,10 +73,12 @@ export default function FilterPanel({
   return (
     <div className="glass-card rounded-2xl p-6 shadow-lg sticky top-24">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-rose-900">Фільтри</h2>
+        <h2 className="text-xl font-bold text-rose-900 dark:text-rose-300">
+          Фільтри
+        </h2>
         <button
           onClick={clearFilters}
-          className="text-sm text-rose-600 hover:text-rose-800 underline"
+          className="text-sm text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline"
         >
           Очистити
         </button>
@@ -84,7 +86,7 @@ export default function FilterPanel({
 
       {/* Search */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Пошук
         </label>
         <input
@@ -92,19 +94,19 @@ export default function FilterPanel({
           placeholder="Назва вина..."
           value={localFilters.search || ""}
           onChange={(e) => handleChange("search", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50 backdrop-blur"
+          className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 backdrop-blur"
         />
       </div>
 
       {/* Wine Type */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Тип вина
         </label>
         <select
           value={localFilters.type || ""}
           onChange={(e) => handleChange("type", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50 backdrop-blur"
+          className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 backdrop-blur"
         >
           <option value="">Усі типи</option>
           {wineTypes.map((type) => (
@@ -117,13 +119,13 @@ export default function FilterPanel({
 
       {/* Wine Color */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Колір
         </label>
         <select
           value={localFilters.color || ""}
           onChange={(e) => handleChange("color", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50 backdrop-blur"
+          className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 backdrop-blur"
         >
           <option value="">Усі кольори</option>
           {wineColors.map((color) => (
@@ -146,9 +148,9 @@ export default function FilterPanel({
               }
               className="sr-only peer"
             />
-            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+            <div className="w-10 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
           </div>
-          <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700 transition-colors">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
             Frizzante
           </span>
         </label>
@@ -156,7 +158,7 @@ export default function FilterPanel({
 
       {/* Minimum Rating */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Мінімальний рейтинг
         </label>
         <div className="flex items-center gap-3">
@@ -169,9 +171,9 @@ export default function FilterPanel({
             onChange={(e) =>
               handleChange("minRating", parseFloat(e.target.value))
             }
-            className="flex-1 accent-rose-600"
+            className="flex-1 accent-rose-600 dark:accent-rose-500"
           />
-          <span className="text-rose-700 font-semibold min-w-[3ch]">
+          <span className="text-rose-700 dark:text-rose-400 font-semibold min-w-[3ch]">
             {localFilters.minRating || 0}
           </span>
         </div>
@@ -180,7 +182,7 @@ export default function FilterPanel({
       {/* Apply Button */}
       <button
         onClick={applyFilters}
-        className="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 transition-all shadow-md"
+        className="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all shadow-md"
       >
         Застосувати
       </button>

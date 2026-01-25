@@ -8,6 +8,12 @@
   --background-end-rgb: 253, 244, 244;
 }
 
+.dark {
+  --foreground-rgb: 248, 250, 252;
+  --background-start-rgb: 15, 23, 42;
+  --background-end-rgb: 30, 41, 59;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -17,6 +23,17 @@ body {
     )
     rgb(var(--background-start-rgb));
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode specific body styles */
+.dark body {
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
 }
 
 /* Remove default browser outline and use custom focus styles */
@@ -40,10 +57,24 @@ body {
   }
 }
 
+/* Glass card - light theme */
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Glass card - dark theme */
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Force light theme on main page glass cards */
+main .glass-card,
+:global(.dark) main .glass-card {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 .wine-gradient {
@@ -71,5 +102,31 @@ body {
   70% {
     transform: scale(1);
   }
+}
+
+/* Dark mode transitions */
+.dark,
+.dark * {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Input styles for dark mode */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  color: rgb(248, 250, 252) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark input::placeholder,
+.dark select::placeholder,
+.dark textarea::placeholder {
+  color: rgba(148, 163, 184, 0.7) !important;
+}
+
+.dark option {
+  background-color: rgb(15, 23, 42) !important;
+  color: rgb(248, 250, 252) !important;
 }
 

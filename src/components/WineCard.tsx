@@ -25,7 +25,7 @@ function StarIcon({
     <div className="relative w-5 h-5">
       {/* Background (empty star) */}
       <svg
-        className="absolute top-0 left-0 w-full h-full text-gray-300"
+        className="absolute top-0 left-0 w-full h-full text-gray-300 dark:text-gray-600"
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -304,10 +304,10 @@ export default function WineCardComponent({
   );
 
   const getRatingColor = (rating: number) => {
-    if (rating >= 8) return "text-green-600";
-    if (rating >= 6) return "text-yellow-600";
+    if (rating >= 8) return "text-green-500 dark:text-green-400";
+    if (rating >= 6) return "text-yellow-600 dark:text-yellow-500";
     if (rating >= 4) return "text-orange-500";
-    return "text-red-500";
+    return "text-red-500 dark:text-red-400";
   };
 
   const getTypeLabel = (type: string) => {
@@ -337,14 +337,25 @@ export default function WineCardComponent({
     > = {
       rosso: { bg: "bg-red-600", text: "text-white" },
       bianco: {
-        bg: "bg-yellow-50",
-        text: "text-gray-800",
-        border: "border border-gray-200",
+        bg: "bg-yellow-50 dark:bg-yellow-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+        border: "border border-gray-200 dark:border-gray-700",
       },
-      rosato: { bg: "bg-pink-100", text: "text-gray-800" },
-      sparkling: { bg: "bg-sky-200", text: "text-gray-800" },
+      rosato: {
+        bg: "bg-pink-100 dark:bg-pink-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+      },
+      sparkling: {
+        bg: "bg-sky-200 dark:bg-sky-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+      },
     };
-    return styles[color] || { bg: "bg-gray-200", text: "text-gray-800" };
+    return (
+      styles[color] || {
+        bg: "bg-gray-200 dark:bg-gray-700",
+        text: "text-gray-800 dark:text-gray-200",
+      }
+    );
   };
 
   const displayRating = card.rating || 0;
@@ -359,7 +370,7 @@ export default function WineCardComponent({
       <div className="glass-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
         {/* Image container */}
         <div
-          className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center"
+          className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-dark-800 flex items-center justify-center"
           style={{ cursor: "default" }}
         >
           <img
@@ -393,7 +404,7 @@ export default function WineCardComponent({
               handleToggleFavorite();
             }}
             disabled={isFavoriteLoading}
-            className={`absolute top-3 right-3 bg-white/90 backdrop-blur p-2 rounded-full transition-all duration-300 shadow-md hover:bg-rose-50 ${
+            className={`absolute top-3 right-3 bg-white/90 dark:bg-dark-800/90 backdrop-blur p-2 rounded-full transition-all duration-300 shadow-md hover:bg-rose-50 dark:hover:bg-dark-700 ${
               isFavoriteLoading ? "opacity-50 cursor-wait" : ""
             }`}
             title={isFavorite ? "Видалити з улюблених" : "Додати до улюблених"}
@@ -402,7 +413,7 @@ export default function WineCardComponent({
               className={`w-5 h-5 transition-transform duration-300 ${
                 isFavorite
                   ? "text-rose-500 scale-110"
-                  : "text-gray-400 hover:text-rose-400"
+                  : "text-gray-400 dark:text-gray-500 hover:text-rose-400"
               }`}
               fill={isFavorite ? "currentColor" : "none"}
               stroke="currentColor"
@@ -422,16 +433,16 @@ export default function WineCardComponent({
 
           {/* Price badge */}
           {card.price && typeof card.price === "number" && (
-            <span className="absolute top-14 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 shadow-sm">
+            <span className="absolute top-14 right-3 bg-white/90 dark:bg-dark-800/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 dark:text-rose-400 shadow-sm">
               €{card.price.toFixed(2)}
             </span>
           )}
 
           {/* Overlay with "Детальніше" text */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-black/0 dark:bg-black/20 group-hover:bg-black/10 dark:group-hover:bg-black/30 transition-colors flex items-center justify-center pointer-events-none">
             <Link
               href={`/cards/${card._id}`}
-              className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-semibold bg-black/50 px-4 py-2 rounded-full pointer-events-auto hover:bg-black/70"
+              className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-semibold bg-black/50 dark:bg-black/70 px-4 py-2 rounded-full pointer-events-auto hover:bg-black/70 dark:hover:bg-black/80"
             >
               Детальніше →
             </Link>
@@ -441,33 +452,37 @@ export default function WineCardComponent({
         {/* Content */}
         <div className="p-5">
           <h3
-            className="text-xl font-bold text-rose-900 mb-1 line-clamp-1 cursor-pointer hover:text-rose-700 transition-colors"
+            className="text-xl font-bold text-rose-900 dark:text-rose-300 mb-1 line-clamp-1 cursor-pointer hover:text-rose-700 dark:hover:text-rose-400 transition-colors"
             onClick={() => router.push(`/cards/${card._id}`)}
           >
             {card.name}
           </h3>
 
           {card.winery && (
-            <p className="text-gray-500 text-sm mb-2">{card.winery}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+              {card.winery}
+            </p>
           )}
 
           <div className="flex items-center gap-2 mb-3 flex-wrap justify-between">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-md text-xs font-medium">
+              <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-md text-xs font-medium">
                 {getTypeLabel(card.type)}
               </span>
               {(card.year || card.anno) && (
-                <span className="text-gray-500 text-sm">
+                <span className="text-gray-500 dark:text-gray-400 text-sm">
                   {card.year || card.anno} р.
                 </span>
               )}
               {card.alcohol && (
-                <span className="text-gray-500 text-sm">{card.alcohol}%</span>
+                <span className="text-gray-500 dark:text-gray-400 text-sm">
+                  {card.alcohol}%
+                </span>
               )}
             </div>
           </div>
 
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
             {card.description}
           </p>
 
@@ -480,11 +495,15 @@ export default function WineCardComponent({
                 >
                   {displayRating.toFixed(1)}
                 </div>
-                <span className="text-xs text-gray-400">середній</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  середній
+                </span>
               </div>
               {currentUserId && userRating !== null && (
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-green-600">Ваш:</span>
+                  <span className="text-xs text-green-600 dark:text-green-400">
+                    Ваш:
+                  </span>
                   <span
                     className={`text-lg font-bold ${getRatingColor(userRating)}`}
                   >
@@ -547,12 +566,12 @@ export default function WineCardComponent({
           </div>
 
           {/* Rating Count */}
-          <div className="text-sm text-gray-500 mb-3">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">
             {card.ratingCount || card.ratings?.length || 0} оцінок
           </div>
 
           {/* Additional Info */}
-          <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+          <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
             {card.country && (
               <span className="flex items-center gap-1">
                 <svg
@@ -601,7 +620,7 @@ export default function WineCardComponent({
           {isCardAuthor && (
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="mt-4 w-full py-3 bg-rose-100 text-rose-700 rounded-lg font-semibold hover:bg-rose-200 transition-colors flex items-center justify-center gap-2"
+              className="mt-4 w-full py-3 bg-rose-100 dark:bg-dark-700 text-rose-700 dark:text-rose-400 rounded-lg font-semibold hover:bg-rose-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center gap-2"
             >
               <svg
                 className="w-5 h-5"

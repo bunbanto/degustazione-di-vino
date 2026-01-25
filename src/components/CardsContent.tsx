@@ -347,10 +347,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       <main className="pt-24 pb-12 px-4">
         {/* Header */}
         <div className="max-w-7xl mx-auto mb-8">
-          <h1 className="text-4xl font-serif font-bold text-rose-900 mb-2">
+          <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
             Каталог вин
           </h1>
-          <p className="text-rose-700">
+          <p className="text-rose-700 dark:text-rose-400">
             Знайдіть своє ідеальне вино серед {totalCount} пропозицій
           </p>
         </div>
@@ -371,8 +371,8 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                 <div
                   className={`p-4 rounded-lg mb-6 ${
                     error.includes("Офлайн")
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-red-100 text-red-700"
+                      ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
+                      : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
                   }`}
                 >
                   <p className="font-medium">{error}</p>
@@ -387,8 +387,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                 <div className="flex items-center justify-center h-64 glass-card rounded-2xl">
                   <div className="text-center">
                     <div className="text-6xl mb-4">🍷</div>
-                    <p className="text-rose-700 text-lg">Вина не знайдено</p>
-                    <p className="text-rose-500 text-sm mt-2">
+                    <p className="text-rose-700 dark:text-rose-400 text-lg">
+                      Вина не знайдено
+                    </p>
+                    <p className="text-rose-500 dark:text-rose-500 text-sm mt-2">
                       Спробуйте змінити фільтри
                     </p>
                   </div>

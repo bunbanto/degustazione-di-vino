@@ -2,9 +2,9 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen !bg-amber-50">
       {/* Hero Section */}
-      <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[70vh] flex items-center justify-center overflow-hidden !bg-amber-50">
         <div className="absolute inset-0 bg-gradient-to-b from-rose-900/20 to-amber-50/90 z-0" />
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1920')] bg-cover bg-center opacity-20" />
 
@@ -33,7 +33,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 bg-white/50">
+      <section className="py-20 px-4 !bg-white/40">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-serif text-center text-rose-900 mb-12">
             Наші переваги

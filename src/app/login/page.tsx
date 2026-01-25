@@ -72,11 +72,11 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link
             href="/"
-            className="text-4xl font-serif font-bold text-rose-800 hover:text-rose-700 transition-colors"
+            className="text-4xl font-serif font-bold text-rose-800 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
           >
             🍷 Degustazione
           </Link>
-          <p className="text-rose-600 mt-2">
+          <p className="text-rose-600 dark:text-rose-400 mt-2">
             {isRegister ? "Створіть акаунт" : "Увійдіть до акаунту"}
           </p>
         </div>
@@ -87,8 +87,8 @@ export default function LoginPage() {
             <div
               className={`mb-6 p-4 rounded-lg text-sm ${
                 error.includes("успішна")
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400"
+                  : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
               }`}
             >
               {error}
@@ -98,7 +98,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {isRegister && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Ваше ім&apos;я
                 </label>
                 <input
@@ -108,14 +108,14 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
                   placeholder="Ваше ім'я"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email
               </label>
               <input
@@ -125,13 +125,13 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
                 placeholder="your@email.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Пароль
               </label>
               <input
@@ -142,7 +142,7 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-300 focus:border-transparent bg-white/50"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
                 placeholder="••••••••"
               />
             </div>
@@ -150,7 +150,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading
                 ? "Завантаження..."
@@ -167,7 +167,7 @@ export default function LoginPage() {
                 setIsRegister(!isRegister);
                 setError("");
               }}
-              className="text-rose-600 hover:text-rose-800 underline text-sm"
+              className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm"
             >
               {isRegister
                 ? "Вже маєте акаунт? Увійдіть"
@@ -180,7 +180,7 @@ export default function LoginPage() {
         <div className="text-center mt-6">
           <Link
             href="/"
-            className="text-rose-600 hover:text-rose-800 underline text-sm"
+            className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm"
           >
             ← Повернутися на головну
           </Link>
