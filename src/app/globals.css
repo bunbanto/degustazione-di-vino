@@ -66,15 +66,77 @@ body {
 
 /* Glass card - dark theme */
 .dark .glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Force light theme on main page glass cards */
-main .glass-card,
-:global(.dark) main .glass-card {
-  background: rgba(255, 255, 255, 0.7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+/* Force light theme on body for main page */
+body:has(main),
+:global(.dark) body:has(main) {
+  background: linear-gradient(to bottom, transparent, rgb(255, 251, 235)) rgb(255, 251, 235) !important;
+}
+
+/* Force light theme on Navbar for main page */
+body:has(main) nav,
+:global(.dark) body:has(main) nav {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+body:has(main) nav a,
+body:has(main) nav span,
+:global(.dark) body:has(main) nav a,
+:global(.dark) body:has(main) nav span {
+  color: #9f1239 !important;
+}
+
+body:has(main) nav button,
+:global(.dark) body:has(main) nav button {
+  background: rgb(255, 240, 245) !important;
+  color: #9f1239 !important;
+}
+
+body:has(main) nav .text-gray-600,
+body:has(main) nav .text-gray-500,
+:global(.dark) body:has(main) nav .text-gray-600,
+:global(.dark) body:has(main) nav .text-gray-500 {
+  color: #9f1239 !important;
+}
+
+body:has(main) nav .bg-gray-100,
+:global(.dark) body:has(main) nav .bg-gray-100 {
+  background-color: rgb(255, 240, 245) !important;
+}
+
+body:has(main) nav .border-gray-100,
+:global(.dark) body:has(main) nav .border-gray-100 {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+body:has(main) nav .text-gray-300,
+:global(.dark) body:has(main) nav .text-gray-300 {
+  color: #9f1239 !important;
+}
+
+/* Force light theme on Features section for main page */
+body:has(main) section h2,
+body:has(main) section h3,
+body:has(main) section p,
+:global(.dark) body:has(main) section h2,
+:global(.dark) body:has(main) section h3,
+:global(.dark) body:has(main) section p {
+  color: #9f1239 !important;
+}
+
+body:has(main) section h2 {
+  color: #742228 !important;
+}
+
+body:has(main) section h3 {
+  color: #9f1239 !important;
+}
+
+body:has(main) section p {
+  color: #be123c !important;
 }
 
 .wine-gradient {

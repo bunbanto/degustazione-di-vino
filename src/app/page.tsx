@@ -39,7 +39,14 @@ export default function Home() {
             Наші переваги
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="glass-card p-8 rounded-2xl text-center hover:transform hover:scale-105 transition-all">
+            <div
+              className="p-8 rounded-2xl text-center hover:transform hover:scale-105 transition-all"
+              style={{
+                background: "rgba(255, 255, 255, 0.85)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255, 255, 255, 0.5)",
+              }}
+            >
               <div className="text-6xl mb-4">🍷</div>
               <h3 className="text-2xl font-semibold text-rose-800 mb-4">
                 Великий вибір
@@ -48,7 +55,14 @@ export default function Home() {
                 Колекція найкращих вин з усього світу
               </p>
             </div>
-            <div className="glass-card p-8 rounded-2xl text-center hover:transform hover:scale-105 transition-all">
+            <div
+              className="p-8 rounded-2xl text-center hover:transform hover:scale-105 transition-all"
+              style={{
+                background: "rgba(255, 255, 255, 0.85)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255, 255, 255, 0.5)",
+              }}
+            >
               <div className="text-6xl mb-4">⭐</div>
               <h3 className="text-2xl font-semibold text-rose-800 mb-4">
                 Рейтинги
@@ -57,7 +71,14 @@ export default function Home() {
                 Діліться своїми враженнями та оцінюйте вина
               </p>
             </div>
-            <div className="glass-card p-8 rounded-2xl text-center hover:transform hover:scale-105 transition-all">
+            <div
+              className="p-8 rounded-2xl text-center hover:transform hover:scale-105 transition-all"
+              style={{
+                background: "rgba(255, 255, 255, 0.85)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255, 255, 255, 0.5)",
+              }}
+            >
               <div className="text-6xl mb-4">👥</div>
               <h3 className="text-2xl font-semibold text-rose-800 mb-4">
                 Спільнота
