@@ -206,15 +206,17 @@ export default function WineCardModal({
       >
         {/* Left Side - Image */}
         <div className="md:w-1/2 bg-gray-100 flex items-center justify-center min-h-[300px] md:min-h-[400px]">
-          <img
-            src={
-              card.img ||
-              card.image ||
-              "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
-            }
-            alt={card.name}
-            className="w-full h-full object-contain"
-          />
+          <div className="aspect-[4/3] w-full h-full flex items-center justify-center bg-gray-100 dark:bg-dark-800">
+            <img
+              src={
+                card.img ||
+                card.image ||
+                "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
+              }
+              alt={card.name}
+              className="w-full h-full object-contain"
+            />
+          </div>
         </div>
 
         {/* Right Side - Info */}

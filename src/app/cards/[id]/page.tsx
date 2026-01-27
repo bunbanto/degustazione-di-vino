@@ -278,15 +278,17 @@ export default function CardViewPage() {
             <div className="lg:w-5/12 space-y-6">
               {/* Image */}
               <div className="glass-card rounded-2xl overflow-hidden shadow-lg relative">
-                <img
-                  src={
-                    card.img ||
-                    card.image ||
-                    "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
-                  }
-                  alt={card.name}
-                  className="w-full h-auto object-contain bg-gray-100 dark:bg-dark-800"
-                />
+                <div className="aspect-[4/3] w-full bg-gray-100 dark:bg-dark-800">
+                  <img
+                    src={
+                      card.img ||
+                      card.image ||
+                      "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
+                    }
+                    alt={card.name}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
                 {/* Favorite Button */}
                 <button
                   onClick={handleToggleFavorite}

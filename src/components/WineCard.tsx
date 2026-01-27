@@ -370,7 +370,7 @@ export default function WineCardComponent({
       <div className="glass-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
         {/* Image container */}
         <div
-          className="relative h-48 overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-dark-800 flex items-center justify-center"
+          className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-dark-800 flex items-center justify-center"
           style={{ cursor: "default" }}
         >
           <img
@@ -380,7 +380,7 @@ export default function WineCardComponent({
               "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
             }
             alt={card.name}
-            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
           />
           {card.color && (
             <div
