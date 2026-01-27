@@ -7,8 +7,9 @@ import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
 import { cardsAPI, cacheUtils } from "@/services/api";
 import { WineCard, FilterParams } from "@/types";
+import { withAuth } from "@/components/withAuth";
 
-function FavoritesPageContent() {
+function FavoritesPage() {
   const router = useRouter();
 
   const [cards, setCards] = useState<WineCard[]>([]);
@@ -394,6 +395,4 @@ function FavoritesPageContent() {
   );
 }
 
-export default function FavoritesPage() {
-  return <FavoritesPageContent />;
-}
+export default withAuth(FavoritesPage);

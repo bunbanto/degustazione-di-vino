@@ -5,47 +5,37 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cacheUtils } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useUserStore } from "@/store/userStore";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { currentUser, checkAuth, logout } = useUserStore();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-
-    // Get user email and id from localStorage
-    if (token) {
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          setUserEmail(user.email || "");
-          const userId = user.id?.toString() || user._id?.toString() || null;
-          setCurrentUserId(userId);
-        } catch (e) {
-          console.error("Error parsing user from localStorage:", e);
-        }
-      }
-    }
-  }, []);
+    // Перевіряємо авторизацію при завантаженні
+    setIsAuthenticated(checkAuth());
+  }, [checkAuth]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setUserEmail("");
-    setCurrentUserId(null);
-
-    // Очищуємо весь кеш при виході, включаючи улюблені
     cacheUtils.clearAll();
-
+    logout();
+    setIsAuthenticated(false);
     window.location.href = "/";
   };
+
+  // Показуємо loading поки перевіряємо auth
+  if (currentUser === undefined && !isAuthenticated) {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-dark-800/80 backdrop-blur-md shadow-sm h-16">
+        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-rose-600"></div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-dark-800/80 backdrop-blur-md shadow-sm">
@@ -72,7 +62,7 @@ export default function Navbar() {
               Каталог вин
             </Link>
 
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <>
                 <Link
                   href="/favorites"
@@ -138,13 +128,25 @@ export default function Navbar() {
               )}
             </button>
 
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <div className="flex items-center gap-3">
-                {userEmail && (
-                  <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-700 px-3 py-1 rounded-full">
-                    {userEmail}
+                {/* Profile Link */}
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 hover:bg-rose-100 dark:hover:bg-dark-700 rounded-full px-3 py-1 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white text-sm font-medium">
+                    {currentUser?.name?.[0]?.toUpperCase() ||
+                      currentUser?.username?.[0]?.toUpperCase() ||
+                      currentUser?.email?.[0].toUpperCase() ||
+                      "?"}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">
+                    {currentUser?.name ||
+                      currentUser?.username ||
+                      currentUser?.email}
                   </span>
-                )}
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 bg-rose-100 dark:bg-dark-700 text-rose-700 dark:text-rose-400 rounded-full font-medium hover:bg-rose-200 dark:hover:bg-dark-600 transition-colors"
@@ -203,7 +205,7 @@ export default function Navbar() {
               >
                 Каталог вин
               </Link>
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <>
                   <Link
                     href="/favorites"
@@ -219,11 +221,13 @@ export default function Navbar() {
                   >
                     Додати вино
                   </Link>
-                  {userEmail && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-dark-700 px-3 py-2 rounded-lg">
-                      {userEmail}
-                    </div>
-                  )}
+                  <Link
+                    href="/profile"
+                    className="font-medium text-gray-600 dark:text-gray-300 hover:text-rose-600 dark:hover:text-rose-400"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Мій профіль
+                  </Link>
                   <button
                     onClick={() => {
                       handleLogout();

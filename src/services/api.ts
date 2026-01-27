@@ -85,6 +85,11 @@ export const authAPI = {
     const response = await api.get("/auth/profile");
     return response.data;
   },
+
+  updateProfile: async (data: { name?: string; email?: string }) => {
+    const response = await api.put("/auth/profile", data);
+    return response.data;
+  },
 };
 
 // Cards APIs з кешуванням

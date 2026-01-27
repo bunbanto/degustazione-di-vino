@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface User {
   id?: string | number;
@@ -8,6 +8,7 @@ interface User {
   name?: string;
   email: string;
   role: string;
+  createdAt?: string;
 }
 
 interface UserStore {
@@ -19,6 +20,12 @@ interface UserStore {
   userNames: Record<string, string>;
   setUserName: (userId: string, username: string) => void;
   getUsername: (userId: string) => string;
+
+  // Check if user is authenticated
+  checkAuth: () => boolean;
+
+  // Logout
+  logout: () => void;
 }
 
 // Create store with persistence to localStorage
@@ -63,9 +70,39 @@ export const useUserStore = create<UserStore>()(
         // Fallback: show last 4 characters of userId
         return `Користувач ${userIdStr.slice(-4)}`;
       },
+
+      checkAuth: () => {
+        if (typeof window === "undefined") return false;
+
+        const token = localStorage.getItem("token");
+        const userStr = localStorage.getItem("user");
+
+        if (token && userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            // Sync user to store
+            set({ currentUser: user });
+            return true;
+          } catch (e) {
+            console.error("Error parsing user from localStorage:", e);
+            return false;
+          }
+        }
+
+        return false;
+      },
+
+      logout: () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+        set({ currentUser: null });
+      },
     }),
     {
       name: "user-storage", // unique name for localStorage
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 );

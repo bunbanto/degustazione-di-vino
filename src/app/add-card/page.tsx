@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { cardsAPI } from "@/services/api";
 import { WineCard } from "@/types";
+import { withAuth } from "@/components/withAuth";
 
-export default function AddCardPage() {
+function AddCardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,15 +80,6 @@ export default function AddCardPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-    } else {
-      setIsAuthenticated(true);
-    }
-  }, [router]);
-
   const validateFile = (file: File): boolean => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -152,10 +143,6 @@ export default function AddCardPage() {
       fileInputRef.current.value = "";
     }
   };
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   const wineTypes = [
     { value: "secco", label: "Secco" },
@@ -476,3 +463,5 @@ export default function AddCardPage() {
     </div>
   );
 }
+
+export default withAuth(AddCardPage);

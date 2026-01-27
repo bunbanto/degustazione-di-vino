@@ -34,25 +34,23 @@ export default function LoginPage() {
         setError("Реєстрація успішна! Тепер увійдіть.");
       } else {
         const response = await authAPI.login(formData.email, formData.password);
+
+        // Зберігаємо дані з відповіді сервера
+        const serverUser = response.user;
+        const userData = {
+          ...serverUser,
+          name: serverUser.name || formData.name || "Користувач",
+          username: serverUser.username || formData.name || "Користувач",
+        };
+
+        console.log("Server user:", serverUser);
+        console.log("Final user data:", userData);
+
         localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("user", JSON.stringify(userData));
 
-        // Fetch user profile to get the actual ID
-        try {
-          const profile = await authAPI.getProfile();
-          const userWithId = {
-            ...response.user,
-            id: profile.id || profile._id,
-            username: profile.username || profile.name || response.user.name,
-          };
-          localStorage.setItem("user", JSON.stringify(userWithId));
-
-          // Sync user to Zustand store
-          useUserStore.getState().setCurrentUser(userWithId);
-        } catch (profileError) {
-          // If profile fetch fails, still sync what we have
-          useUserStore.getState().setCurrentUser(response.user);
-        }
+        // Sync user to Zustand store
+        useUserStore.getState().setCurrentUser(userData);
 
         router.push("/cards");
       }
