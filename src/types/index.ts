@@ -54,6 +54,9 @@ export interface User {
   name?: string;
   email: string;
   role: string;
+  createdAt?: string;
+  cardCount?: number;
+  favoritesCount?: number;
 }
 
 export interface AuthResponse {

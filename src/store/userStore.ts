@@ -9,6 +9,8 @@ interface User {
   email: string;
   role: string;
   createdAt?: string;
+  cardCount?: number;
+  favoritesCount?: number;
 }
 
 interface UserStore {
@@ -48,6 +50,10 @@ export const useUserStore = create<UserStore>()(
                 [userId]: username,
               },
             }));
+          }
+          // Update localStorage with user data including stats
+          if (typeof window !== "undefined") {
+            localStorage.setItem("user", JSON.stringify(user));
           }
         }
       },

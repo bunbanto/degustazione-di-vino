@@ -38,13 +38,20 @@ export default function LoginPage() {
         // Зберігаємо дані з відповіді сервера
         const serverUser = response.user;
         const userData = {
-          ...serverUser,
+          _id: serverUser._id,
+          id: serverUser.id || serverUser._id,
           name: serverUser.name || formData.name || "Користувач",
-          username: serverUser.username || formData.name || "Користувач",
+          username:
+            serverUser.username ||
+            serverUser.name ||
+            formData.name ||
+            "Користувач",
+          email: serverUser.email || formData.email,
+          role: serverUser.role || "user",
+          createdAt: serverUser.createdAt,
+          cardCount: serverUser.cardCount ?? 0,
+          favoritesCount: serverUser.favoritesCount ?? 0,
         };
-
-        console.log("Server user:", serverUser);
-        console.log("Final user data:", userData);
 
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(userData));

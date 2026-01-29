@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { authAPI } from "@/services/api";
 import { cacheUtils } from "@/services/api";
+import { useUserStore } from "@/store/userStore";
 
 interface UserData {
   id?: string | number;
@@ -14,6 +15,8 @@ interface UserData {
   email: string;
   role: string;
   createdAt?: string;
+  cardCount?: number;
+  favoritesCount?: number;
 }
 
 export default function ProfilePage() {
@@ -21,6 +24,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const { setCurrentUser } = useUserStore();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -35,6 +39,13 @@ export default function ProfilePage() {
         try {
           const parsedUser = JSON.parse(userStr);
           setUser(parsedUser);
+          // Sync to store if stats are available
+          if (
+            parsedUser.cardCount !== undefined ||
+            parsedUser.favoritesCount !== undefined
+          ) {
+            setCurrentUser(parsedUser);
+          }
         } catch (e) {
           console.error("Error parsing user:", e);
         }
@@ -52,9 +63,12 @@ export default function ProfilePage() {
           email: profileData.email || "",
           role: profileData.role || "user",
           createdAt: profileData.createdAt,
+          cardCount: profileData.cardCount ?? 0,
+          favoritesCount: profileData.favoritesCount ?? 0,
         };
 
         setUser(userWithId);
+        setCurrentUser(userWithId);
         localStorage.setItem("user", JSON.stringify(userWithId));
       } catch (err: any) {
         console.error("Error loading profile:", err);
@@ -69,7 +83,7 @@ export default function ProfilePage() {
     };
 
     loadUser();
-  }, [router]);
+  }, [router, setCurrentUser]);
 
   const handleLogout = () => {
     cacheUtils.clearAll();
@@ -132,7 +146,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
                 <div className="text-3xl font-bold text-rose-600 dark:text-rose-400">
-                  -
+                  {user?.favoritesCount ?? "-"}
                 </div>
                 <div className="text-sm text-rose-700 dark:text-rose-400">
                   Улюблені
@@ -140,7 +154,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
                 <div className="text-3xl font-bold text-rose-600 dark:text-rose-400">
-                  -
+                  {user?.cardCount ?? "-"}
                 </div>
                 <div className="text-sm text-rose-700 dark:text-rose-400">
                   Мої вина
