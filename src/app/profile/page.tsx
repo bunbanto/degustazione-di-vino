@@ -143,30 +143,45 @@ export default function ProfilePage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="text-center p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
-                <div className="text-3xl font-bold text-rose-600 dark:text-rose-400">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+              <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
+                <div className="text-2xl sm:text-3xl font-bold text-rose-600 dark:text-rose-400 truncate">
                   {user?.favoritesCount ?? "-"}
                 </div>
-                <div className="text-sm text-rose-700 dark:text-rose-400">
+                <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
                   Улюблені
                 </div>
               </div>
-              <div className="text-center p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
-                <div className="text-3xl font-bold text-rose-600 dark:text-rose-400">
+              <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
+                <div className="text-2xl sm:text-3xl font-bold text-rose-600 dark:text-rose-400 truncate">
                   {user?.cardCount ?? "-"}
                 </div>
-                <div className="text-sm text-rose-700 dark:text-rose-400">
+                <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
                   Мої вина
                 </div>
               </div>
-              <div className="text-center p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
-                <div className="text-3xl font-bold text-rose-600 dark:text-rose-400">
+              <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
+                <div
+                  className="text-xl sm:text-3xl font-bold text-rose-600 dark:text-rose-400 truncate"
+                  title={
+                    user?.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString("uk-UA", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : undefined
+                  }
+                >
                   {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString()
+                    ? new Date(user.createdAt).toLocaleDateString("uk-UA", {
+                        year: "2-digit",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
                     : "-"}
                 </div>
-                <div className="text-sm text-rose-700 dark:text-rose-400">
+                <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
                   Дата реєстрації
                 </div>
               </div>
