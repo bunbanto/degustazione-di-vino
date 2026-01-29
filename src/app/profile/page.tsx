@@ -149,11 +149,11 @@ export default function ProfilePage() {
               <div className="text-center p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
                 <div className="text-3xl font-bold text-rose-600 dark:text-rose-400">
                   {user?.createdAt
-                    ? new Date(user.createdAt).getFullYear()
+                    ? new Date(user.createdAt).toLocaleDateString()
                     : "-"}
                 </div>
                 <div className="text-sm text-rose-700 dark:text-rose-400">
-                  Рік реєстрації
+                  Дата реєстрації
                 </div>
               </div>
             </div>
