@@ -145,7 +145,7 @@ export default function ProfilePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
               <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
-                <div className="text-2xl sm:text-3xl font-bold text-rose-600 dark:text-rose-400 truncate">
+                <div className="text-lg sm:text-3xl font-bold text-rose-600 dark:text-rose-400">
                   {user?.favoritesCount ?? "-"}
                 </div>
                 <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
@@ -153,7 +153,7 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
-                <div className="text-2xl sm:text-3xl font-bold text-rose-600 dark:text-rose-400 truncate">
+                <div className="text-lg sm:text-3xl font-bold text-rose-600 dark:text-rose-400">
                   {user?.cardCount ?? "-"}
                 </div>
                 <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
@@ -161,23 +161,12 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
-                <div
-                  className="text-xl sm:text-3xl font-bold text-rose-600 dark:text-rose-400 truncate"
-                  title={
-                    user?.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString("uk-UA", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
-                      : undefined
-                  }
-                >
+                <div className="text-lg sm:text-3xl font-bold text-rose-600 dark:text-rose-400">
                   {user?.createdAt
                     ? new Date(user.createdAt).toLocaleDateString("uk-UA", {
-                        year: "2-digit",
-                        month: "2-digit",
                         day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
                       })
                     : "-"}
                 </div>
