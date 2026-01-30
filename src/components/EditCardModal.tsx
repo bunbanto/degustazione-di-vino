@@ -9,6 +9,7 @@ interface EditCardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaved: () => void;
+  onDeleted?: () => void;
 }
 
 export default function EditCardModal({
@@ -16,6 +17,7 @@ export default function EditCardModal({
   isOpen,
   onClose,
   onSaved,
+  onDeleted,
 }: EditCardModalProps) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -174,6 +176,9 @@ export default function EditCardModal({
     try {
       await cardsAPI.delete(card._id);
       onSaved();
+      if (onDeleted) {
+        onDeleted();
+      }
       onClose();
     } catch (err: any) {
       setError(err.response?.data?.message || "Помилка видалення картки");

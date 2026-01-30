@@ -340,6 +340,48 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     }
   };
 
+  // Handle delete card
+  const handleDelete = async (cardId: string): Promise<void> => {
+    try {
+      // Спочатку видаляємо картку з локального стану для миттєвого відгуку
+      setCards((prevCards) => prevCards.filter((card) => card._id !== cardId));
+      setTotalCount((prev) => prev - 1);
+
+      // Видаляємо з API
+      await cardsAPI.delete(cardId);
+
+      // Очищуємо кеш
+      cacheUtils.clearCards();
+
+      // Якщо після видалення поточна сторінка порожня і це не перша сторінка,
+      // повертаємося на попередню сторінку
+      const remainingCards = cards.filter((card) => card._id !== cardId);
+      if (remainingCards.length === 0 && currentPage > 1) {
+        const newPage = currentPage - 1;
+        setCurrentPage(newPage);
+
+        // Update URL
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) params.set(key, value.toString());
+        });
+        params.set("page", newPage.toString());
+        router.push(`/cards?${params.toString()}`);
+      }
+
+      // Оновлюємо дані з сервера
+      fetchCards(false);
+    } catch (err: any) {
+      console.error("Error deleting card:", err);
+      // Відновлюємо картки при помилці
+      fetchCards(false);
+      if (err.response?.status === 401) {
+        router.push("/login");
+      }
+      throw err;
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -404,6 +446,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                         card={card}
                         onRate={handleRate}
                         onToggleFavorite={handleToggleFavorite}
+                        onDelete={handleDelete}
                       />
                     ))}
                   </div>

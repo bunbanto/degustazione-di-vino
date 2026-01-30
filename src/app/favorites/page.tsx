@@ -274,6 +274,32 @@ function FavoritesPage() {
     }
   };
 
+  // Handle delete card
+  const handleDelete = async (cardId: string): Promise<void> => {
+    try {
+      // Спочатку видаляємо картку з локального стану для миттєвого відгуку
+      setCards((prevCards) => prevCards.filter((card) => card._id !== cardId));
+
+      // Видаляємо з API
+      await cardsAPI.delete(cardId);
+
+      // Очищуємо кеш
+      cacheUtils.clearCards();
+      cacheUtils.clearFavorites();
+
+      // Оновлюємо дані з сервера
+      fetchFavorites(false);
+    } catch (err: any) {
+      console.error("Error deleting card:", err);
+      // Відновлюємо картки при помилці
+      fetchFavorites(false);
+      if (err.response?.status === 401) {
+        router.push("/login");
+      }
+      throw err;
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -382,6 +408,7 @@ function FavoritesPage() {
                           card={card}
                           onRate={handleRate}
                           onToggleFavorite={handleToggleFavorite}
+                          onDelete={handleDelete}
                         />
                       ))}
                   </div>

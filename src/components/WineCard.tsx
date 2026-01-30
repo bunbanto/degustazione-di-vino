@@ -11,6 +11,7 @@ interface WineCardProps {
   card: WineCardType;
   onRate?: (id: string, rating: number) => void;
   onToggleFavorite?: (id: string) => Promise<void>;
+  onDelete?: (id: string) => void;
 }
 
 // SVG Star component with optional fill percentage
@@ -62,6 +63,7 @@ export default function WineCardComponent({
   card,
   onRate,
   onToggleFavorite,
+  onDelete,
 }: WineCardProps) {
   const router = useRouter();
   const [userRating, setUserRating] = useState<number | null>(null);
@@ -648,6 +650,11 @@ export default function WineCardComponent({
         onClose={() => setIsEditModalOpen(false)}
         onSaved={() => {
           // Trigger refresh - the parent component will handle this via onRate or similar
+        }}
+        onDeleted={() => {
+          if (onDelete) {
+            onDelete(card._id);
+          }
         }}
       />
     </>
