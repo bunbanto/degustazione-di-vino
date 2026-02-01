@@ -2,7 +2,7 @@
  * Custom hooks для гібридного кешування та оптимістичних оновлень
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { hybridCache, CacheConfig, CacheResult } from "@/lib/cache";
 import { optimisticManager } from "@/lib/optimistic";
 
@@ -23,6 +23,16 @@ export function useHybridCache<T>(
   const [error, setError] = useState("");
   const [isStale, setIsStale] = useState(false);
   const fetchingRef = useRef(false);
+
+  // Declare fetchDataInBackground first to avoid hoisting issues
+  const fetchDataInBackground = useCallback(async () => {
+    try {
+      const result = await fetcher();
+      hybridCache.set(key, result, ttl);
+    } catch (err) {
+      console.error("Background fetch failed:", err);
+    }
+  }, [key, fetcher, ttl]);
 
   const fetchData = useCallback(
     async (showLoading = true) => {
@@ -78,17 +88,8 @@ export function useHybridCache<T>(
         }
       }
     },
-    [key, fetcher, ttl, data],
+    [key, fetcher, ttl, data, fetchDataInBackground],
   );
-
-  const fetchDataInBackground = useCallback(async () => {
-    try {
-      const result = await fetcher();
-      hybridCache.set(key, result, ttl);
-    } catch (err) {
-      console.error("Background fetch failed:", err);
-    }
-  }, [key, fetcher, ttl]);
 
   useEffect(() => {
     fetchData();

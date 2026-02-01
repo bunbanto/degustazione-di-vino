@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Comment, CommentsResponse } from "@/types";
 import { cardsAPI, cacheUtils } from "@/services/api";
 
@@ -32,35 +32,38 @@ export default function CommentsSection({
 
   const limit = 10;
 
-  const fetchComments = async (pageNum: number, showLoading = true) => {
-    if (showLoading) {
-      setLoading(true);
-    }
-    try {
-      const response: CommentsResponse = await cardsAPI.getComments(
-        cardId,
-        pageNum,
-        limit,
-      );
-      setComments(response.comments);
-      setTotalPages(response.totalPages);
-      setTotalComments(response.total);
-      setPage(response.page);
-      previousCommentsRef.current = null;
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Помилка завантаження коментарів",
-      );
-    } finally {
+  const fetchComments = useCallback(
+    async (pageNum: number, showLoading = true) => {
       if (showLoading) {
-        setLoading(false);
+        setLoading(true);
       }
-    }
-  };
+      try {
+        const response: CommentsResponse = await cardsAPI.getComments(
+          cardId,
+          pageNum,
+          limit,
+        );
+        setComments(response.comments);
+        setTotalPages(response.totalPages);
+        setTotalComments(response.total);
+        setPage(response.page);
+        previousCommentsRef.current = null;
+      } catch (err: any) {
+        setError(
+          err.response?.data?.message || "Помилка завантаження коментарів",
+        );
+      } finally {
+        if (showLoading) {
+          setLoading(false);
+        }
+      }
+    },
+    [cardId, limit],
+  );
 
   useEffect(() => {
     fetchComments(1);
-  }, [cardId]);
+  }, [fetchComments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

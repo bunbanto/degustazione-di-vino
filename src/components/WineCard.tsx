@@ -68,8 +68,12 @@ export default function WineCardComponent({
   const router = useRouter();
   const [userRating, setUserRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isRatingLoading, setIsRatingLoading] = useState(false);
+
+  // Get current user from userStore
+  const currentUser = useUserStore((state) => state.currentUser);
+  const getUsername = useUserStore((state) => state.getUsername);
+  const setUserName = useUserStore((state) => state.setUserName);
 
   // Favorite state - initialize from card prop
   const [isFavorite, setIsFavorite] = useState(!!card.isFavorite);
@@ -83,69 +87,15 @@ export default function WineCardComponent({
   const previousFavoriteRef = useRef<boolean>(false);
   const isRatingRef = useRef(false);
 
-  // Sync favorite state when card prop changes
-  // Додаємо card._id до залежностей для уникнення race conditions
-  useEffect(() => {
-    // Перевіряємо, що card._id не змінився (захист від race conditions)
-    const currentCardId = card._id;
+  // Get current user ID from userStore
+  const currentUserId = currentUser?.id?.toString() || currentUser?._id || null;
+  const currentUserEmail = currentUser?.email || null;
 
+  // Sync favorite state when card prop changes
+  useEffect(() => {
     setIsFavorite(!!card.isFavorite);
     previousFavoriteRef.current = !!card.isFavorite;
-
-    return () => {
-      // Cleanup - нічого особливого, але може бути корисно для майбутніх розширень
-    };
   }, [card.isFavorite, card._id]);
-
-  // Додатковий useEffect для примусової синхронізації після ререндеру батька
-  useEffect(() => {
-    // Цей useEffect гарантує, що локальний стан isFavorite
-    // завжди синхронізується з пропсом card.isFavorite
-    if (card._id === card._id) {
-      // Перевіряємо, що картка та сама
-      setIsFavorite(!!card.isFavorite);
-    }
-  }, [card.isFavorite, card._id]);
-
-  // Get current user ID from localStorage
-  useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        const userId =
-          user.id?.toString() ||
-          user._id?.toString() ||
-          btoa(user.email || "").slice(0, 24);
-        setCurrentUserId(userId);
-
-        if (userId) {
-          useUserStore
-            .getState()
-            .setUserName(
-              userId,
-              user.username || user.name || `Користувач ${userId.slice(-4)}`,
-            );
-        }
-      } catch (e) {
-        console.error("Error parsing user:", e);
-      }
-    }
-  }, []);
-
-  // Get current user's email for owner comparison
-  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
-  useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        setCurrentUserEmail(user.email || null);
-      } catch (e) {
-        console.error("Error parsing user email:", e);
-      }
-    }
-  }, []);
 
   // Check if current user is the card author
   const isCardAuthor = (() => {
@@ -177,26 +127,9 @@ export default function WineCardComponent({
     return false;
   })();
 
-  // Load all usernames from localStorage into Zustand store
-  useEffect(() => {
-    try {
-      const userNamesFromStorage = JSON.parse(
-        localStorage.getItem("userNames") || "{}",
-      );
-      const setUserName = useUserStore.getState().setUserName;
-      Object.entries(userNamesFromStorage).forEach(([userId, username]) => {
-        setUserName(userId, username as string);
-      });
-    } catch (e) {
-      console.error("Error loading userNames from localStorage:", e);
-    }
-  }, []);
-
   // Store all usernames from card ratings in Zustand store
   useEffect(() => {
     if (card.ratings && Array.isArray(card.ratings)) {
-      const setUserName = useUserStore.getState().setUserName;
-
       card.ratings.forEach((rating) => {
         if (rating.userId) {
           const userIdStr = getUserIdString(rating.userId);
@@ -209,7 +142,7 @@ export default function WineCardComponent({
         }
       });
     }
-  }, [card.ratings]);
+  }, [card.ratings, setUserName]);
 
   // Load user's rating from the card's ratings array
   useEffect(() => {

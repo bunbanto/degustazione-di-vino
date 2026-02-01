@@ -29,6 +29,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   const [filters, setFilters] = useState<FilterParams>(initialFilters);
   const [currentPage, setCurrentPage] = useState(initialPage);
 
+  // Get current user from userStore
+  const currentUser = useUserStore((state) => state.currentUser);
+  const currentUserId = currentUser?.id?.toString() || currentUser?._id || null;
+
   // Refs для оптимістичних оновлень
   const previousCardsRef = useRef<WineCard[] | null>(null);
   const isUpdatingRef = useRef(false);
@@ -128,22 +132,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
   // Initial fetch and when filters/page change
   useEffect(() => {
-    // Отримуємо поточного userId
-    const getCurrentUserId = () => {
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          return user.id?.toString() || user._id?.toString() || null;
-        } catch (e) {
-          return null;
-        }
-      }
-      return null;
-    };
-
-    const currentUserId = getCurrentUserId();
-
     // Якщо userId змінився (інший акаунт), очищуємо весь кеш і робимо fresh fetch
     if (previousUserIdRef.current !== currentUserId) {
       cacheUtils.clearAll();
@@ -152,7 +140,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     } else {
       fetchCards();
     }
-  }, [fetchCards]);
+  }, [fetchCards, currentUserId]);
 
   const handleFilterChange = (newFilters: FilterParams) => {
     setFilters(newFilters);
@@ -198,18 +186,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     // Зберігаємо попередній стан для відкату
     if (!previousCardsRef.current) {
       previousCardsRef.current = [...cards];
-    }
-
-    // Отримуємо поточного користувача для ідентифікації
-    let currentUserId = null;
-    try {
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        currentUserId = user.id?.toString() || user._id?.toString();
-      }
-    } catch (e) {
-      console.error("Error getting user:", e);
     }
 
     // Оптимістичне оновлення з правильним розрахунком середнього рейтингу

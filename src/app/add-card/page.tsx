@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { cardsAPI } from "@/services/api";
@@ -98,7 +98,7 @@ function AddCardPage() {
     return true;
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = useCallback((file: File) => {
     if (validateFile(file)) {
       setImageFile(file);
       // Create preview
@@ -108,7 +108,7 @@ function AddCardPage() {
       };
       reader.readAsDataURL(file);
     }
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

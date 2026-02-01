@@ -8,6 +8,7 @@ import { cardsAPI, cacheUtils } from "@/services/api";
 import { WineCard } from "@/types";
 import CommentsSection from "@/components/CommentsSection";
 import EditCardModal from "@/components/EditCardModal";
+import { useUserStore } from "@/store/userStore";
 
 export default function CardViewPage() {
   const router = useRouter();
@@ -17,8 +18,11 @@ export default function CardViewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [card, setCard] = useState<WineCard | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Get current user from userStore
+  const currentUser = useUserStore((state) => state.currentUser);
+  const currentUserId = currentUser?.id?.toString() || currentUser?._id || null;
 
   // Favorite state
   const [isFavorite, setIsFavorite] = useState(false);
@@ -71,23 +75,6 @@ export default function CardViewPage() {
       isMounted = false;
     };
   }, [id]);
-
-  // Get current user ID
-  useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        const userId =
-          user.id?.toString() ||
-          user._id?.toString() ||
-          btoa(user.email || "").slice(0, 24);
-        setCurrentUserId(userId);
-      } catch (e) {
-        console.error("Error parsing user:", e);
-      }
-    }
-  }, []);
 
   // Check if current user is the card author
   const isCardAuthor = (() => {
