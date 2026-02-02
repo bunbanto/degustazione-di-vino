@@ -52,7 +52,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Navigation with glass buttons */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
               <Link
                 href="/cards"
                 className={`px-4 py-2 rounded-2xl font-medium transition-all duration-300 liquid-glass ${
@@ -168,7 +168,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Button with liquid glass */}
             <button
-              className="md:hidden p-2.5 rounded-2xl liquid-glass text-gray-600 dark:text-gray-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
+              className="lg:hidden p-2.5 rounded-2xl liquid-glass text-gray-600 dark:text-gray-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <svg
@@ -198,7 +198,7 @@ export default function Navbar() {
 
           {/* Mobile Menu with liquid glass overlay */}
           {isMenuOpen && (
-            <div className="md:hidden py-4 border-t border-rose-200/30 dark:border-rose-800/30">
+            <div className="lg:hidden py-4 border-t border-rose-200/30 dark:border-rose-800/30">
               <div className="flex flex-col gap-3">
                 <Link
                   href="/cards"
