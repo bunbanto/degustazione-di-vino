@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 
 type Theme = "light" | "dark";
 
@@ -20,9 +21,20 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
+  // Always use light theme on homepage
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
-    // Check for saved theme preference or system preference
+    // On homepage, always use light theme
+    if (isHomePage) {
+      setTheme("light");
+      setMounted(true);
+      return;
+    }
+
+    // Check for saved theme preference or system preference (non-homepage pages)
     const savedTheme = localStorage.getItem("theme") as Theme | null;
 
     if (savedTheme) {
@@ -32,21 +44,28 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
 
     setMounted(true);
-  }, []);
+  }, [isHomePage]);
 
   useEffect(() => {
-    if (mounted) {
-      // Apply theme to HTML element
-      const root = document.documentElement;
-      if (theme === "dark") {
-        root.classList.add("dark");
-      } else {
-        root.classList.remove("dark");
-      }
-      // Save preference
-      localStorage.setItem("theme", theme);
+    if (!mounted) return;
+
+    // Always remove dark class on homepage
+    if (isHomePage) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      return;
     }
-  }, [theme, mounted]);
+
+    // Apply theme to HTML element on other pages
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    // Save preference
+    localStorage.setItem("theme", theme);
+  }, [theme, mounted, isHomePage]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));

@@ -381,10 +381,10 @@ export default function WineCardComponent({
           )}
 
           {/* Overlay with "Детальніше" text */}
-          <div className="absolute inset-0 bg-black/0 dark:bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none z-30">
+          <div className="absolute inset-0 bg-black/0 dark:bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center z-30">
             <Link
               href={`/cards/${card._id}`}
-              className="text-white opacity-0 group-hover:opacity-100 transition-all duration-500 font-semibold liquid-glass px-5 py-2.5 rounded-full hover:scale-105 active:scale-95"
+              className="text-white opacity-0 group-hover:opacity-100 transition-all duration-500 font-semibold liquid-glass px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 cursor-pointer"
             >
               Детальніше →
             </Link>

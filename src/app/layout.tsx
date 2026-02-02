@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="uk" suppressHydrationWarning>
-      <body className="min-h-screen bg-gradient-to-b from-amber-50 to-rose-50 dark:from-dark-900 dark:to-dark-800 flex flex-col transition-colors duration-300">
+      <body className="min-h-screen bg-gradient-to-b from-amber-50 to-rose-50 flex flex-col transition-colors duration-300">
         <ThemeProvider>
           {children}
           <Footer />
