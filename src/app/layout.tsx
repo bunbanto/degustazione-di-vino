@@ -8,6 +8,22 @@ export const metadata: Metadata = {
   description: "Discover and rate the finest wines",
 };
 
+// Script to apply theme before React hydration
+const themeScript = `
+  (function() {
+    try {
+      var savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else if (savedTheme === "light") {
+        document.documentElement.classList.remove("dark");
+      } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
+      }
+    } catch (e) {}
+  })();
+`;
+
 export default function RootLayout({
   children,
 }: {
@@ -15,6 +31,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="uk" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-screen bg-gradient-to-b from-amber-50 to-rose-50 flex flex-col transition-colors duration-300">
         <ThemeProvider>
           {children}

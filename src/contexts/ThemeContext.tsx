@@ -18,38 +18,49 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
-  const pathname = usePathname();
+// Helper to get initial theme from localStorage synchronously
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") {
+    return "light";
+  }
 
-  // Always use light theme on homepage
+  const savedTheme = localStorage.getItem("theme") as Theme | null;
+  if (savedTheme) {
+    return savedTheme;
+  }
+
+  // Check system preference
+  if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    return "dark";
+  }
+
+  return "light";
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const isHomePage = pathname === "/";
 
-  useEffect(() => {
-    // On homepage, always use light theme
+  // Read from localStorage synchronously to avoid flash
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Homepage always uses light theme
     if (isHomePage) {
-      setTheme("light");
-      setMounted(true);
-      return;
+      return "light";
     }
+    return getInitialTheme();
+  });
 
-    // Check for saved theme preference or system preference (non-homepage pages)
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
+  const [mounted, setMounted] = useState(false);
 
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-    }
-
+  useEffect(() => {
     setMounted(true);
-  }, [isHomePage]);
+  }, []);
 
+  // Apply theme to HTML element immediately on mount
   useEffect(() => {
     if (!mounted) return;
 
-    // Always remove dark class on homepage
+    // Always use light theme on homepage
     if (isHomePage) {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
@@ -71,9 +82,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  // Prevent flash of wrong theme
+  // Prevent flash of wrong theme - render with correct theme immediately
   if (!mounted) {
-    return <div className="min-h-screen bg-amber-50">{children}</div>;
+    // Apply theme synchronously before render to prevent flash
+    if (typeof window !== "undefined") {
+      if (isHomePage) {
+        document.documentElement.classList.remove("dark");
+      } else {
+        const currentTheme = getInitialTheme();
+        if (currentTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      }
+    }
+    return <>{children}</>;
   }
 
   return (
