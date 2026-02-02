@@ -363,9 +363,9 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       <Navbar />
 
       <main className="pt-24 pb-12 px-4">
-        {/* Header with liquid glass */}
-        <div className="max-w-7xl mx-auto mb-8">
-          <div className="liquid-glass rounded-2xl p-6 inline-block">
+        {/* Header with liquid glass - aligned with filter panel */}
+        <div className="max-w-7xl mx-auto mb-4">
+          <div className="lg:w-80 liquid-glass rounded-2xl p-6">
             <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
               Каталог вин
             </h1>

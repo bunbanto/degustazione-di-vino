@@ -19,14 +19,12 @@ export default function Home() {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1920')] bg-cover bg-center opacity-15" />
 
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          {/* Main Title with glass effect */}
-          <div className="liquid-glass-heavy inline-block px-8 py-4 rounded-3xl mb-6 animate-float">
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-rose-900 drop-shadow-lg">
-              Degustazione di Vino
-            </h1>
-          </div>
+          {/* Main Title - lighter glass effect */}
+          <h1 className="text-5xl md:text-7xl font-serif font-bold text-rose-900 drop-shadow-lg mb-6 animate-float">
+            Degustazione di Vino
+          </h1>
 
-          <p className="text-xl md:text-2xl text-rose-800 mb-10 italic font-serif liquid-glass inline-block px-6 py-2 rounded-full">
+          <p className="text-xl md:text-2xl text-rose-800 mb-10 italic font-serif liquid-glass inline-block px-6 py-2 rounded-full bg-white/30">
             Відкрийте для себе світ вин разом з нами
           </p>
 
@@ -77,7 +75,7 @@ export default function Home() {
       {/* Features Section with glass cards */}
       <section className="py-20 px-4 !bg-white/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-serif text-center text-rose-900 mb-12 liquid-glass inline-block px-8 py-3 rounded-2xl mx-auto">
+          <h2 className="text-4xl font-serif text-center text-rose-900 mb-12 liquid-glass bg-white/30 w-fit px-8 py-3 rounded-2xl mx-auto">
             Наші переваги
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -86,10 +84,10 @@ export default function Home() {
               <div className="liquid-glass rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 animate-float">
                 <span className="text-4xl">🍷</span>
               </div>
-              <h3 className="text-2xl font-semibold text-rose-800 dark:text-rose-300 mb-4">
+              <h3 className="text-2xl font-semibold text-rose-800 mb-4">
                 Великий вибір
               </h3>
-              <p className="text-rose-700 dark:text-rose-400">
+              <p className="text-rose-700">
                 Колекція найкращих вин з усього світу
               </p>
             </div>
@@ -105,10 +103,10 @@ export default function Home() {
               >
                 <span className="text-4xl">⭐</span>
               </div>
-              <h3 className="text-2xl font-semibold text-rose-800 dark:text-rose-300 mb-4">
+              <h3 className="text-2xl font-semibold text-rose-800 mb-4">
                 Рейтинги
               </h3>
-              <p className="text-rose-700 dark:text-rose-400">
+              <p className="text-rose-700">
                 Діліться своїми враженнями та оцінюйте вина
               </p>
             </div>
@@ -124,12 +122,10 @@ export default function Home() {
               >
                 <span className="text-4xl">👥</span>
               </div>
-              <h3 className="text-2xl font-semibold text-rose-800 dark:text-rose-300 mb-4">
+              <h3 className="text-2xl font-semibold text-rose-800 mb-4">
                 Спільнота
               </h3>
-              <p className="text-rose-700 dark:text-rose-400">
-                Спілкуйтеся з любителями вин
-              </p>
+              <p className="text-rose-700">Спілкуйтеся з любителями вин</p>
             </div>
           </div>
         </div>
@@ -139,10 +135,10 @@ export default function Home() {
       <section className="py-16 px-4 !bg-gradient-to-r from-rose-900/10 to-amber-900/10">
         <div className="max-w-4xl mx-auto text-center">
           <div className="liquid-glass-heavy fluid-rounded-3xl p-10">
-            <h2 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-4">
+            <h2 className="text-3xl font-serif font-bold text-rose-900 mb-4">
               Готові почати?
             </h2>
-            <p className="text-rose-700 dark:text-rose-400 mb-8 text-lg">
+            <p className="text-rose-700 mb-8 text-lg">
               Приєднуйтесь до нашої спільноти та відкрийте для себе світ вин
             </p>
             <Link

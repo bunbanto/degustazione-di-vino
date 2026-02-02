@@ -305,14 +305,16 @@ function FavoritesPage() {
       <Navbar />
 
       <main className="pt-24 pb-12 px-4">
-        {/* Header */}
-        <div className="max-w-7xl mx-auto mb-8">
-          <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-            Мої улюблені вина
-          </h1>
-          <p className="text-rose-700 dark:text-rose-400">
-            Ваша персональна колекція улюблених вин ({cards.length})
-          </p>
+        {/* Header - aligned with filter panel */}
+        <div className="max-w-7xl mx-auto mb-4">
+          <div className="lg:w-80 liquid-glass rounded-2xl p-6">
+            <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
+              Мої улюблені вина
+            </h1>
+            <p className="text-rose-700 dark:text-rose-400">
+              Ваша персональна колекція улюблених вин ({cards.length})
+            </p>
+          </div>
         </div>
 
         <div className="max-w-7xl mx-auto">
