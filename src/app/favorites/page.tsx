@@ -304,9 +304,9 @@ function FavoritesPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="pt-24 pb-12 px-4">
+      <main className="pt-20 pb-12 px-4">
         {/* Header - aligned with filter panel */}
-        <div className="max-w-7xl mx-auto mb-4">
+        <div className="max-w-7xl mx-auto mb-6">
           <div className="lg:w-80 liquid-glass rounded-2xl p-6">
             <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
               Мої улюблені вина
@@ -356,7 +356,7 @@ function FavoritesPage() {
             </div>
           ) : (
             <>
-              <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex flex-col lg:flex-row gap-6">
                 {/* Filter Panel - Left Sidebar */}
                 <aside className="lg:w-80 flex-shrink-0">
                   <FilterPanel filters={filters} onFilterChange={setFilters} />
