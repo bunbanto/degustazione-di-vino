@@ -18,7 +18,16 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Helper to get initial theme from localStorage synchronously
+// Separate key for user preference that persists even on homepage
+const THEME_PREFERENCE_KEY = "theme-preference";
+
+function getUserThemePreference(): Theme | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return localStorage.getItem(THEME_PREFERENCE_KEY) as Theme | null;
+}
+
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") {
     return "light";
@@ -41,14 +50,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isHomePage = pathname === "/";
 
+  // Get user preference from localStorage
+  const userPreference = getUserThemePreference();
+  const initialTheme = userPreference || getInitialTheme();
+
   // Read from localStorage synchronously to avoid flash
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Homepage always uses light theme
-    if (isHomePage) {
-      return "light";
-    }
-    return getInitialTheme();
-  });
+  const [theme, setTheme] = useState<Theme>(initialTheme);
 
   const [mounted, setMounted] = useState(false);
 
@@ -56,14 +63,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  // Apply theme to HTML element immediately on mount
+  // Apply theme to HTML element and save preference
   useEffect(() => {
     if (!mounted) return;
 
-    // Always use light theme on homepage
+    // Always use light theme on homepage, but save user preference separately
     if (isHomePage) {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      // Save user preference for when they leave homepage
+      localStorage.setItem(THEME_PREFERENCE_KEY, theme);
+      // Also save to main theme key for consistency
+      localStorage.setItem("theme", theme);
       return;
     }
 
@@ -76,6 +86,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     // Save preference
     localStorage.setItem("theme", theme);
+    localStorage.setItem(THEME_PREFERENCE_KEY, theme);
   }, [theme, mounted, isHomePage]);
 
   const toggleTheme = () => {
