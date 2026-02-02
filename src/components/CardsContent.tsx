@@ -132,7 +132,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
   // Initial fetch and when filters/page change
   useEffect(() => {
-    // Якщо userId змінився (інший акаунт), очищуємо весь кеш і робимо fresh fetch
+    // Якщонився (ін userId зміший акаунт), очищуємо весь кеш і робимо fresh fetch
     if (previousUserIdRef.current !== currentUserId) {
       cacheUtils.clearAll();
       fetchCards(true);
@@ -363,14 +363,16 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       <Navbar />
 
       <main className="pt-24 pb-12 px-4">
-        {/* Header */}
+        {/* Header with liquid glass */}
         <div className="max-w-7xl mx-auto mb-8">
-          <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-            Каталог вин
-          </h1>
-          <p className="text-rose-700 dark:text-rose-400">
-            Знайдіть своє ідеальне вино серед {totalCount} пропозицій
-          </p>
+          <div className="liquid-glass rounded-2xl p-6 inline-block">
+            <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
+              Каталог вин
+            </h1>
+            <p className="text-rose-700 dark:text-rose-400">
+              Знайдіть своє ідеальне вино серед {totalCount} пропозицій
+            </p>
+          </div>
         </div>
 
         <div className="max-w-7xl mx-auto">
@@ -387,10 +389,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
             <div className="flex-1">
               {error && (
                 <div
-                  className={`p-4 rounded-lg mb-6 ${
+                  className={`p-4 rounded-2xl mb-6 liquid-glass ${
                     error.includes("Офлайн")
-                      ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
-                      : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
+                      ? "bg-amber-100/80 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
+                      : "bg-red-100/80 dark:bg-red-900/50 text-red-700 dark:text-red-400"
                   }`}
                 >
                   <p className="font-medium">{error}</p>
@@ -399,12 +401,16 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
               {loading ? (
                 <div className="flex items-center justify-center h-64">
-                  <div className="text-rose-600 text-lg">Завантаження...</div>
+                  <div className="liquid-glass rounded-full p-6">
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-rose-600"></div>
+                  </div>
                 </div>
               ) : !cards || cards.length === 0 ? (
-                <div className="flex items-center justify-center h-64 glass-card rounded-2xl">
+                <div className="flex items-center justify-center h-64 liquid-glass rounded-2xl">
                   <div className="text-center">
-                    <div className="text-6xl mb-4">🍷</div>
+                    <div className="liquid-glass rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-5xl">🍷</span>
+                    </div>
                     <p className="text-rose-700 dark:text-rose-400 text-lg">
                       Вина не знайдено
                     </p>
@@ -428,11 +434,13 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                   </div>
 
                   {totalPageCount > 1 && (
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPageCount}
-                      onPageChange={handlePageChange}
-                    />
+                    <div className="mt-8">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPageCount}
+                        onPageChange={handlePageChange}
+                      />
+                    </div>
                   )}
                 </>
               )}

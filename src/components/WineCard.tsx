@@ -302,12 +302,15 @@ export default function WineCardComponent({
 
   return (
     <>
-      <div className="glass-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
-        {/* Image container */}
+      <div className="liquid-glass-heavy fluid-rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group">
+        {/* Image container with glass overlay */}
         <div
-          className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-dark-800 flex items-center justify-center"
+          className="relative aspect-[4/3] overflow-hidden rounded-t-[32px] bg-gray-100 dark:bg-dark-800 flex items-center justify-center"
           style={{ cursor: "default" }}
         >
+          {/* Glass overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
+
           <img
             src={
               card.img ||
@@ -315,22 +318,26 @@ export default function WineCardComponent({
               "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
             }
             alt={card.name}
-            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
           />
-          {card.color && (
-            <div
-              className={`absolute top-3 left-3 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur px-3 py-1 rounded-full text-sm font-medium shadow-md capitalize ${getColorBadgeStyle(card.color).border || ""}`}
-            >
-              {getColorLabel(card.color)}
-            </div>
-          )}
-          {card.frizzante && (
-            <div className="absolute top-3 left-3 bg-amber-500/90 backdrop-blur px-3 py-1 rounded-full text-sm font-medium text-white shadow-md capitalize mt-8">
-              Frizzante
-            </div>
-          )}
 
-          {/* Favorite Heart Button */}
+          {/* Glass badges */}
+          <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
+            {card.color && (
+              <div
+                className={`${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium shadow-lg border border-white/20 ${getColorBadgeStyle(card.color).border || ""}`}
+              >
+                {getColorLabel(card.color)}
+              </div>
+            )}
+            {card.frizzante && (
+              <div className="bg-amber-500/90 backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium text-white shadow-lg border border-white/20">
+                Frizzante
+              </div>
+            )}
+          </div>
+
+          {/* Glass Favorite Heart Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -339,16 +346,16 @@ export default function WineCardComponent({
               handleToggleFavorite();
             }}
             disabled={isFavoriteLoading}
-            className={`absolute top-3 right-3 bg-white/90 dark:bg-dark-800/90 backdrop-blur p-2 rounded-full transition-all duration-300 shadow-md hover:bg-rose-50 dark:hover:bg-dark-700 ${
+            className={`absolute top-4 right-4 liquid-glass p-2.5 rounded-full transition-all duration-300 z-20 hover:scale-110 active:scale-95 ${
               isFavoriteLoading ? "opacity-50 cursor-wait" : ""
             }`}
             title={isFavorite ? "Видалити з улюблених" : "Додати до улюблених"}
           >
             <svg
-              className={`w-5 h-5 transition-transform duration-300 ${
+              className={`w-5 h-5 transition-all duration-300 ${
                 isFavorite
                   ? "text-rose-500 scale-110"
-                  : "text-gray-400 dark:text-gray-500 hover:text-rose-400"
+                  : "text-gray-500 dark:text-gray-400 hover:text-rose-500"
               }`}
               fill={isFavorite ? "currentColor" : "none"}
               stroke="currentColor"
@@ -366,25 +373,25 @@ export default function WineCardComponent({
             </svg>
           </button>
 
-          {/* Price badge */}
+          {/* Glass Price badge */}
           {card.price && typeof card.price === "number" && (
-            <span className="absolute top-14 right-3 bg-white/90 dark:bg-dark-800/90 backdrop-blur px-2 py-1 rounded-md text-sm font-semibold text-rose-700 dark:text-rose-400 shadow-sm">
+            <span className="absolute top-14 right-4 liquid-glass px-3 py-1.5 rounded-xl text-sm font-bold text-rose-700 dark:text-rose-400 z-20">
               €{card.price.toFixed(2)}
             </span>
           )}
 
           {/* Overlay with "Детальніше" text */}
-          <div className="absolute inset-0 bg-black/0 dark:bg-black/20 group-hover:bg-black/10 dark:group-hover:bg-black/30 transition-colors flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-black/0 dark:bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none z-30">
             <Link
               href={`/cards/${card._id}`}
-              className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-semibold bg-black/50 dark:bg-black/70 px-4 py-2 rounded-full pointer-events-auto hover:bg-black/70 dark:hover:bg-black/80"
+              className="text-white opacity-0 group-hover:opacity-100 transition-all duration-500 font-semibold liquid-glass px-5 py-2.5 rounded-full hover:scale-105 active:scale-95"
             >
               Детальніше →
             </Link>
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content with liquid glass effect */}
         <div className="p-5">
           <h3
             className="text-xl font-bold text-rose-900 dark:text-rose-300 mb-1 line-clamp-1 cursor-pointer hover:text-rose-700 dark:hover:text-rose-400 transition-colors"
@@ -394,14 +401,14 @@ export default function WineCardComponent({
           </h3>
 
           {card.winery && (
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
               {card.winery}
             </p>
           )}
 
-          <div className="flex items-center gap-2 mb-3 flex-wrap justify-between">
+          <div className="flex items-center gap-2 mb-4 flex-wrap justify-between">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-md text-xs font-medium">
+              <span className="px-3 py-1 bg-rose-100/80 dark:bg-rose-900/50 backdrop-blur text-rose-800 dark:text-rose-300 rounded-full text-xs font-medium">
                 {getTypeLabel(card.type)}
               </span>
               {(card.year || card.anno) && (
@@ -417,25 +424,30 @@ export default function WineCardComponent({
             </div>
           </div>
 
-          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-5 line-clamp-2">
             {card.description}
           </p>
 
-          {/* Rating - 10 stars with 0.5 step */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
+          {/* Rating - 10 stars with liquid glass container */}
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
                 <div
-                  className={`text-2xl font-bold ${getRatingColor(displayRating)}`}
+                  className={`text-3xl font-bold ${getRatingColor(displayRating)}`}
                 >
                   {displayRating.toFixed(1)}
                 </div>
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  середній
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    середній
+                  </span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    ({card.ratingCount || card.ratings?.length || 0})
+                  </span>
+                </div>
               </div>
               {currentUserId && userRating !== null && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2 liquid-glass px-3 py-1.5 rounded-xl">
                   <span className="text-xs text-green-600 dark:text-green-400">
                     Ваш:
                   </span>
@@ -448,8 +460,8 @@ export default function WineCardComponent({
               )}
             </div>
 
-            {/* Interactive Rating Stars */}
-            <div className="flex items-center gap-0.5">
+            {/* Interactive Rating Stars with glass container */}
+            <div className="flex items-center gap-0.5 liquid-glass rounded-xl p-2">
               {stars.map((star) => {
                 const starValue = star;
                 const prevStarValue = star - 1;
@@ -500,15 +512,10 @@ export default function WineCardComponent({
             </div>
           </div>
 
-          {/* Rating Count */}
-          <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-            {card.ratingCount || card.ratings?.length || 0} оцінок
-          </div>
-
-          {/* Additional Info */}
-          <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+          {/* Additional Info with glass style */}
+          <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
             {card.country && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5 liquid-glass px-2.5 py-1 rounded-full">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -526,7 +533,7 @@ export default function WineCardComponent({
               </span>
             )}
             {card.region && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5 liquid-glass px-2.5 py-1 rounded-full">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -551,11 +558,11 @@ export default function WineCardComponent({
             )}
           </div>
 
-          {/* Edit Button for Author */}
+          {/* Edit Button for Author with liquid glass */}
           {isCardAuthor && (
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="mt-4 w-full py-3 bg-rose-100 dark:bg-dark-700 text-rose-700 dark:text-rose-400 rounded-lg font-semibold hover:bg-rose-200 dark:hover:bg-dark-600 transition-colors flex items-center justify-center gap-2"
+              className="mt-5 w-full py-3 liquid-glass rounded-2xl font-semibold text-rose-700 dark:text-rose-400 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
             >
               <svg
                 className="w-5 h-5"
@@ -581,9 +588,7 @@ export default function WineCardComponent({
         card={card}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onSaved={() => {
-          // Trigger refresh - the parent component will handle this via onRate or similar
-        }}
+        onSaved={() => {}}
         onDeleted={() => {
           if (onDelete) {
             onDelete(card._id);

@@ -71,34 +71,63 @@ export default function FilterPanel({
   };
 
   return (
-    <div className="glass-card rounded-2xl p-6 shadow-lg sticky top-24">
+    <div className="liquid-glass-heavy fluid-rounded-2xl p-6 sticky top-24">
+      {/* Header with glass effect */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-rose-900 dark:text-rose-300">
+        <h2 className="text-xl font-bold text-rose-900 dark:text-rose-300 flex items-center gap-2">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+            />
+          </svg>
           Фільтри
         </h2>
         <button
           onClick={clearFilters}
-          className="text-sm text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline"
+          className="text-sm text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline transition-colors"
         >
           Очистити
         </button>
       </div>
 
-      {/* Search */}
+      {/* Search with liquid input */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Пошук
         </label>
-        <input
-          type="text"
-          placeholder="Назва вина..."
-          value={localFilters.search || ""}
-          onChange={(e) => handleChange("search", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 backdrop-blur"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Назва вина..."
+            value={localFilters.search || ""}
+            onChange={(e) => handleChange("search", e.target.value)}
+            className="liquid-input pl-10"
+          />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
       </div>
 
-      {/* Wine Type */}
+      {/* Wine Type with liquid select */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Тип вина
@@ -106,7 +135,7 @@ export default function FilterPanel({
         <select
           value={localFilters.type || ""}
           onChange={(e) => handleChange("type", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 backdrop-blur"
+          className="liquid-select"
         >
           <option value="">Усі типи</option>
           {wineTypes.map((type) => (
@@ -117,7 +146,7 @@ export default function FilterPanel({
         </select>
       </div>
 
-      {/* Wine Color */}
+      {/* Wine Color with liquid select */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Колір
@@ -125,7 +154,7 @@ export default function FilterPanel({
         <select
           value={localFilters.color || ""}
           onChange={(e) => handleChange("color", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 backdrop-blur"
+          className="liquid-select"
         >
           <option value="">Усі кольори</option>
           {wineColors.map((color) => (
@@ -136,7 +165,7 @@ export default function FilterPanel({
         </select>
       </div>
 
-      {/* Frizzante Checkbox */}
+      {/* Frizzante Checkbox with liquid toggle */}
       <div className="mb-6">
         <label className="flex items-center gap-3 cursor-pointer group">
           <div className="relative">
@@ -148,7 +177,8 @@ export default function FilterPanel({
               }
               className="sr-only peer"
             />
-            <div className="w-10 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+            <div className="w-10 h-6 liquid-glass rounded-full peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 cursor-pointer transition-all"></div>
+            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-gray-200 rounded-full shadow-md transition-all peer-checked:translate-x-4 peer-checked:bg-rose-500"></div>
           </div>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
             Frizzante
@@ -156,12 +186,12 @@ export default function FilterPanel({
         </label>
       </div>
 
-      {/* Minimum Rating */}
+      {/* Minimum Rating with liquid slider */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           Мінімальний рейтинг
         </label>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <input
             type="range"
             min="0"
@@ -171,19 +201,35 @@ export default function FilterPanel({
             onChange={(e) =>
               handleChange("minRating", parseFloat(e.target.value))
             }
-            className="flex-1 accent-rose-600 dark:accent-rose-500"
+            className="flex-1 accent-rose-600 dark:accent-rose-500 h-2 rounded-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, #df4b51 0%, #df4b51 ${(localFilters.minRating || 0) * 10}%, rgba(148, 163, 184, 0.3) ${(localFilters.minRating || 0) * 10}%, rgba(148, 163, 184, 0.3) 100%)`,
+            }}
           />
-          <span className="text-rose-700 dark:text-rose-400 font-semibold min-w-[3ch]">
+          <span className="liquid-glass px-3 py-1.5 rounded-xl text-rose-700 dark:text-rose-400 font-bold min-w-[3ch] text-center">
             {localFilters.minRating || 0}
           </span>
         </div>
       </div>
 
-      {/* Apply Button */}
+      {/* Apply Button with liquid wine gradient */}
       <button
         onClick={applyFilters}
-        className="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all shadow-md"
+        className="w-full py-3.5 liquid-btn-wine rounded-2xl font-semibold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
       >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
         Застосувати
       </button>
     </div>

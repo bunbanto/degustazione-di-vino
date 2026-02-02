@@ -72,28 +72,37 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        {/* Logo/Title */}
+      {/* Animated background orbs for liquid glass effect */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-rose-300/20 rounded-full blur-3xl animate-float" />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-300/20 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: "-3s" }}
+        />
+      </div>
+
+      <div className="max-w-md w-full relative z-10">
+        {/* Logo/Title with glass effect */}
         <div className="text-center mb-8">
           <Link
             href="/"
-            className="text-4xl font-serif font-bold text-rose-800 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
+            className="text-4xl font-serif font-bold text-rose-800 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors inline-block liquid-glass px-6 py-3 rounded-2xl"
           >
             🍷 Degustazione
           </Link>
-          <p className="text-rose-600 dark:text-rose-400 mt-2">
+          <p className="text-rose-600 dark:text-rose-400 mt-3 liquid-glass inline-block px-4 py-1.5 rounded-full text-sm">
             {isRegister ? "Створіть акаунт" : "Увійдіть до акаунту"}
           </p>
         </div>
 
-        {/* Form Card */}
-        <div className="glass-card rounded-2xl p-8 shadow-xl">
+        {/* Form Card with heavy liquid glass */}
+        <div className="liquid-glass-heavy fluid-rounded-3xl p-8 shadow-2xl">
           {error && (
             <div
-              className={`mb-6 p-4 rounded-lg text-sm ${
+              className={`mb-6 p-4 rounded-2xl text-sm backdrop-blur-md ${
                 error.includes("успішна")
-                  ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400"
-                  : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
+                  ? "bg-green-100/80 dark:bg-green-900/50 text-green-700 dark:text-green-400"
+                  : "bg-red-100/80 dark:bg-red-900/50 text-red-700 dark:text-red-400"
               }`}
             >
               {error}
@@ -113,7 +122,7 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                  className="liquid-input"
                   placeholder="Ваше ім'я"
                 />
               </div>
@@ -130,7 +139,7 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                className="liquid-input"
                 placeholder="your@email.com"
               />
             </div>
@@ -147,7 +156,7 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                className="liquid-input"
                 placeholder="••••••••"
               />
             </div>
@@ -155,24 +164,44 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3.5 liquid-btn-wine rounded-2xl font-semibold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading
-                ? "Завантаження..."
-                : isRegister
-                  ? "Зареєструватися"
-                  : "Увійти"}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Завантаження...
+                </>
+              ) : isRegister ? (
+                "Зареєструватися"
+              ) : (
+                <>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                    />
+                  </svg>
+                  Увійти
+                </>
+              )}
             </button>
           </form>
 
-          {/* Toggle Mode */}
+          {/* Toggle Mode with glass effect */}
           <div className="mt-6 text-center">
             <button
               onClick={() => {
                 setIsRegister(!isRegister);
                 setError("");
               }}
-              className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm"
+              className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm liquid-glass px-4 py-2 rounded-full transition-all hover:scale-105"
             >
               {isRegister
                 ? "Вже маєте акаунт? Увійдіть"
@@ -181,11 +210,11 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Back to Home */}
+        {/* Back to Home with glass effect */}
         <div className="text-center mt-6">
           <Link
             href="/"
-            className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm"
+            className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm liquid-glass inline-block px-4 py-2 rounded-full transition-all hover:scale-105"
           >
             ← Повернутися на головну
           </Link>

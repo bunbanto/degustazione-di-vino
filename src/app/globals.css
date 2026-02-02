@@ -17,9 +17,10 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
+      135deg,
+      rgba(255, 251, 235, 0.95) 0%,
+      rgba(253, 244, 244, 0.95) 50%,
+      rgba(255, 240, 245, 0.95) 100%
     )
     rgb(var(--background-start-rgb));
   min-height: 100vh;
@@ -29,9 +30,10 @@ body {
 /* Dark mode specific body styles */
 .dark body {
   background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
+      135deg,
+      rgba(15, 23, 42, 0.95) 0%,
+      rgba(30, 41, 59, 0.95) 50%,
+      rgba(30, 41, 59, 0.95) 100%
     )
     rgb(var(--background-start-rgb));
 }
@@ -48,7 +50,7 @@ body {
 
 /* Custom ring color for focus - wine/rose color */
 * {
-  --tw-ring-color: rgb(225 29 72 / 0.5) !important; /* rose-600 with opacity */
+  --tw-ring-color: rgb(225 29 72 / 0.5) !important;
 }
 
 @layer utilities {
@@ -57,29 +59,430 @@ body {
   }
 }
 
-/* Glass card - light theme */
+/* ==================== LIQUID GLASS CORE STYLES ==================== */
+
+/* Base liquid glass effect */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Liquid glass for fixed navbar - maintains blur when scrolling */
+.liquid-glass-safe {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 4px 16px rgba(31, 38, 135, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode liquid glass for navbar */
+.dark .liquid-glass-safe {
+  background: rgba(30, 41, 59, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Heavy liquid glass for cards */
+.liquid-glass-heavy {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 12px 40px rgba(31, 38, 135, 0.15),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Dark mode liquid glass */
+.dark .liquid-glass,
+.liquid-glass.dark {
+  background: rgba(30, 41, 59, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dark .liquid-glass-heavy,
+.liquid-glass-heavy.dark {
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Glass card with gradient border effect */
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Dark mode glass card */
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ==================== FLUID SHAPES & ANIMATIONS ==================== */
+
+/* Fluid border radius for organic feel */
+.fluid-rounded-xl {
+  border-radius: 24px;
+}
+
+.fluid-rounded-2xl {
+  border-radius: 32px;
+}
+
+.fluid-rounded-3xl {
+  border-radius: 40px;
+}
+
+.fluid-rounded-full {
+  border-radius: 9999px;
+}
+
+/* Liquid button base */
+.liquid-btn {
+  @apply px-6 py-3 rounded-2xl font-semibold transition-all duration-300;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 4px 16px rgba(31, 38, 135, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.liquid-btn:hover {
+  @apply transform -translate-y-1;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 8px 24px rgba(31, 38, 135, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+.liquid-btn:active {
+  @apply transform translate-y-0;
+}
+
+/* Wine gradient button */
+.liquid-btn-wine {
+  background: linear-gradient(135deg, rgba(219, 75, 81, 0.9) 0%, rgba(198, 54, 59, 0.9) 100%);
+  @apply text-white border-none;
+  box-shadow: 
+    0 4px 20px rgba(219, 75, 81, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.liquid-btn-wine:hover {
+  background: linear-gradient(135deg, rgba(219, 75, 81, 1) 0%, rgba(198, 54, 59, 1) 100%);
+  box-shadow: 
+    0 8px 30px rgba(219, 75, 81, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Liquid shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Inner glow effect */
+@keyframes innerGlow {
+  0%, 100% {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+}
+
+.animate-inner-glow {
+  animation: innerGlow 3s ease-in-out infinite;
+}
+
+/* ==================== INPUT STYLES ==================== */
+
+.liquid-input {
+  @apply w-full px-4 py-3 rounded-xl transition-all duration-300;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.liquid-input:focus {
+  @apply outline-none ring-2;
+  --tw-ring-color: rgba(225, 29, 72, 0.3);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 0 0 4px rgba(225, 29, 72, 0.1);
+}
+
+.dark .liquid-input {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgb(248, 250, 252);
+}
+
+.dark .liquid-input:focus {
+  background: rgba(30, 41, 59, 0.7);
+  --tw-ring-color: rgba(225, 29, 72, 0.5);
+}
+
+/* ==================== SELECT & CHECKBOX STYLES ==================== */
+
+.liquid-select {
+  @apply w-full px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 20px;
+  padding-right: 44px;
+}
+
+.liquid-select:focus {
+  @apply outline-none ring-2;
+  --tw-ring-color: rgba(225, 29, 72, 0.3);
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.dark .liquid-select {
+  background-color: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgb(248, 250, 252);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+.dark .liquid-select:focus {
+  background-color: rgba(30, 41, 59, 0.7);
+}
+
+/* Liquid checkbox toggle */
+.liquid-toggle {
+  @apply relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-300;
+  background: rgba(148, 163, 184, 0.5);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Glass card - dark theme */
-.dark .glass-card {
-  background: rgba(30, 41, 59, 0.7) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+.liquid-toggle:checked {
+  @apply bg-rose-500;
 }
+
+.liquid-toggle::after {
+  content: '';
+  @apply absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-all duration-300;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.liquid-toggle:checked::after {
+  @apply translate-x-5;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9));
+}
+
+/* ==================== GRADIENT BACKGROUNDS ==================== */
+
+/* Wine gradient with glass feel */
+.wine-gradient-glass {
+  background: linear-gradient(135deg, 
+    rgba(116, 34, 40, 0.9) 0%, 
+    rgba(203, 54, 59, 0.85) 50%, 
+    rgba(219, 75, 81, 0.9) 100%
+  );
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gold gradient accent */
+.gold-gradient-glass {
+  background: linear-gradient(135deg, 
+    rgba(180, 83, 9, 0.9) 0%, 
+    rgba(245, 158, 11, 0.85) 50%, 
+    rgba(251, 191, 36, 0.9) 100%
+  );
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Subtle gradient overlay */
+.gradient-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 240, 245, 0.3) 100%
+  );
+  backdrop-filter: blur(8px);
+}
+
+/* ==================== HOVER EFFECTS ==================== */
+
+/* Glass hover effect */
+.glass-hover {
+  @apply transition-all duration-300;
+}
+
+.glass-hover:hover {
+  @apply -translate-y-1;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 20px 40px rgba(31, 38, 135, 0.2),
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(32px) saturate(200%);
+}
+
+.dark .glass-hover:hover {
+  background: rgba(30, 41, 59, 0.85);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Ripple effect base */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  @apply absolute rounded-full opacity-0;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ==================== iPhone Safe Areas ==================== */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-all {
+    padding: 
+      env(safe-area-inset-top) 
+      env(safe-area-inset-right) 
+      env(safe-area-inset-bottom) 
+      env(safe-area-inset-left);
+  }
+}
+
+/* ==================== Heart Beat Animation ==================== */
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.3);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+/* ==================== Dark Mode Transitions ==================== */
+
+.dark,
+.dark * {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* ==================== Force light theme overrides ==================== */
 
 /* Force light theme on body for main page */
 body:has(main),
 :global(.dark) body:has(main) {
-  background: linear-gradient(to bottom, transparent, rgb(255, 251, 235)) rgb(255, 251, 235) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 251, 235, 0.98) 0%,
+    rgba(253, 244, 244, 0.98) 50%,
+    rgba(255, 240, 245, 0.98) 100%
+  ) rgb(255, 251, 235) !important;
 }
 
 /* Force light theme on Navbar for main page */
 body:has(main) nav,
 :global(.dark) body:has(main) nav {
-  background: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
 }
 
 body:has(main) nav a,
@@ -91,7 +494,7 @@ body:has(main) nav span,
 
 body:has(main) nav button,
 :global(.dark) body:has(main) nav button {
-  background: rgb(255, 240, 245) !important;
+  background: rgba(255, 240, 245, 0.8) !important;
   color: #9f1239 !important;
 }
 
@@ -104,12 +507,12 @@ body:has(main) nav .text-gray-500,
 
 body:has(main) nav .bg-gray-100,
 :global(.dark) body:has(main) nav .bg-gray-100 {
-  background-color: rgb(255, 240, 245) !important;
+  background-color: rgba(255, 240, 245, 0.8) !important;
 }
 
 body:has(main) nav .border-gray-100,
 :global(.dark) body:has(main) nav .border-gray-100 {
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 body:has(main) nav .text-gray-300,
@@ -139,46 +542,14 @@ body:has(main) section p {
   color: #be123c !important;
 }
 
-.wine-gradient {
-  background: linear-gradient(135deg, #742228 0%, #cb363b 50%, #df4b51 100%);
-}
+/* ==================== Input Dark Mode Overrides ==================== */
 
-.gold-gradient {
-  background: linear-gradient(135deg, #b45309 0%, #f59e0b 50%, #fbbf24 100%);
-}
-
-/* Heart beat animation for favorite button */
-@keyframes heartBeat {
-  0% {
-    transform: scale(1);
-  }
-  14% {
-    transform: scale(1.3);
-  }
-  28% {
-    transform: scale(1);
-  }
-  42% {
-    transform: scale(1.3);
-  }
-  70% {
-    transform: scale(1);
-  }
-}
-
-/* Dark mode transitions */
-.dark,
-.dark * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-/* Input styles for dark mode */
 .dark input,
 .dark select,
 .dark textarea {
   background-color: rgba(30, 41, 59, 0.5) !important;
   color: rgb(248, 250, 252) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 .dark input::placeholder,

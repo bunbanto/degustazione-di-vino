@@ -51,27 +51,40 @@ export default function Pagination({
 
   return (
     <div className="flex items-center justify-center gap-2 mt-8">
-      {/* Previous Button */}
+      {/* Previous Button with liquid glass */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-4 py-2 rounded-lg bg-white/80 text-rose-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-rose-100 transition-colors shadow-md"
+        className="px-5 py-2.5 rounded-2xl liquid-glass text-rose-700 dark:text-rose-400 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-1"
       >
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
         Попередня
       </button>
 
-      {/* Page Numbers */}
-      <div className="flex items-center gap-1">
+      {/* Page Numbers with liquid glass */}
+      <div className="flex items-center gap-1.5">
         {getPageNumbers().map((page, index) => (
           <button
             key={index}
             onClick={() => typeof page === "number" && onPageChange(page)}
             disabled={typeof page !== "number"}
-            className={`min-w-[40px] h-10 rounded-lg font-medium transition-all shadow-md ${
+            className={`min-w-[40px] h-10 rounded-xl font-medium transition-all liquid-glass ${
               page === currentPage
-                ? "bg-gradient-to-r from-rose-600 to-rose-500 text-white"
+                ? "bg-rose-500/20 text-rose-700 dark:text-rose-400"
                 : typeof page === "number"
-                  ? "bg-white/80 text-rose-700 hover:bg-rose-100"
+                  ? "text-rose-700 dark:text-rose-400 hover:bg-rose-100/50 dark:hover:bg-rose-900/30"
                   : "bg-transparent text-gray-400 cursor-default"
             }`}
           >
@@ -80,13 +93,26 @@ export default function Pagination({
         ))}
       </div>
 
-      {/* Next Button */}
+      {/* Next Button with liquid glass */}
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 rounded-lg bg-white/80 text-rose-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-rose-100 transition-colors shadow-md"
+        className="px-5 py-2.5 rounded-2xl liquid-glass text-rose-700 dark:text-rose-400 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-1"
       >
         Наступна
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
       </button>
     </div>
   );

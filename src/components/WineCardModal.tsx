@@ -26,17 +26,19 @@ function RatingListItem({
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
-    <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+    <div className="flex items-center justify-between py-2 border-b border-rose-100 dark:border-rose-900/30 last:border-0">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center">
-          <span className="text-rose-600 font-medium text-sm">
+        <div className="w-8 h-8 liquid-glass rounded-full flex items-center justify-center">
+          <span className="text-rose-600 dark:text-rose-400 font-medium text-sm">
             {username.charAt(0).toUpperCase()}
           </span>
         </div>
         <div>
-          <span className="text-sm font-medium text-gray-700">{username}</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {username}
+          </span>
           {isCurrentUser && (
-            <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+            <span className="ml-2 text-xs liquid-glass bg-green-100/50 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
               Ви
             </span>
           )}
@@ -50,7 +52,9 @@ function RatingListItem({
             <svg
               key={star}
               className={`w-4 h-4 ${
-                isFull || isHalf ? "text-yellow-400" : "text-gray-200"
+                isFull || isHalf
+                  ? "text-yellow-400"
+                  : "text-gray-200 dark:text-gray-600"
               }`}
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -59,7 +63,7 @@ function RatingListItem({
             </svg>
           );
         })}
-        <span className="ml-2 text-sm font-bold text-gray-700">
+        <span className="ml-2 text-sm font-bold text-gray-700 dark:text-gray-300">
           {rating.toFixed(1)}
         </span>
       </div>
@@ -128,8 +132,8 @@ export default function WineCardModal({
   })();
 
   const getRatingColor = (rating: number) => {
-    if (rating >= 8) return "text-green-600";
-    if (rating >= 6) return "text-yellow-600";
+    if (rating >= 8) return "text-green-500";
+    if (rating >= 6) return "text-yellow-500";
     if (rating >= 4) return "text-orange-500";
     return "text-red-500";
   };
@@ -161,14 +165,25 @@ export default function WineCardModal({
     > = {
       rosso: { bg: "bg-red-600", text: "text-white" },
       bianco: {
-        bg: "bg-yellow-50",
-        text: "text-gray-800",
-        border: "border border-gray-200",
+        bg: "bg-yellow-50 dark:bg-yellow-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+        border: "border border-gray-200 dark:border-gray-700",
       },
-      rosato: { bg: "bg-pink-100", text: "text-gray-800" },
-      sparkling: { bg: "bg-sky-200", text: "text-gray-800" },
+      rosato: {
+        bg: "bg-pink-100 dark:bg-pink-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+      },
+      sparkling: {
+        bg: "bg-sky-100 dark:bg-sky-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+      },
     };
-    return styles[color] || { bg: "bg-gray-200", text: "text-gray-800" };
+    return (
+      styles[color] || {
+        bg: "bg-gray-200 dark:bg-gray-700",
+        text: "text-gray-800 dark:text-gray-200",
+      }
+    );
   };
 
   const displayRating = card.rating || 0;
@@ -177,15 +192,16 @@ export default function WineCardModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
       onClick={onClose}
     >
+      {/* Close button with liquid glass */}
       <button
-        className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors z-10"
+        className="absolute top-4 right-4 liquid-glass rounded-full p-2 text-white/80 hover:text-white hover:bg-white/20 transition-all z-10"
         onClick={onClose}
       >
         <svg
-          className="w-10 h-10"
+          className="w-8 h-8"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -199,14 +215,15 @@ export default function WineCardModal({
         </svg>
       </button>
 
-      {/* Modal Content */}
+      {/* Modal Content with liquid glass */}
       <div
-        className="bg-white rounded-2xl w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
+        className="liquid-glass-heavy w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left Side - Image */}
-        <div className="md:w-1/2 bg-gray-100 flex items-center justify-center min-h-[300px] md:min-h-[400px]">
-          <div className="aspect-[4/3] w-full h-full flex items-center justify-center bg-gray-100 dark:bg-dark-800">
+        <div className="md:w-1/2 bg-gray-100/50 dark:bg-dark-800/50 flex items-center justify-center min-h-[300px] md:min-h-[400px] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+          <div className="aspect-[4/3] w-full h-full flex items-center justify-center p-4">
             <img
               src={
                 card.img ||
@@ -221,31 +238,32 @@ export default function WineCardModal({
 
         {/* Right Side - Info */}
         <div className="md:w-1/2 p-6 md:p-8 overflow-y-auto max-h-[60vh] md:max-h-[90vh]">
-          {/* Header */}
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-rose-900">{card.name}</h2>
+          {/* Header with liquid glass */}
+          <div className="mb-4 liquid-glass rounded-2xl p-4">
+            <h2 className="text-2xl font-bold text-rose-900 dark:text-rose-300">
+              {card.name}
+            </h2>
             {card.winery && (
-              <p className="text-rose-600 font-medium">{card.winery}</p>
+              <p className="text-rose-600 dark:text-rose-400 font-medium">
+                {card.winery}
+              </p>
             )}
           </div>
 
-          {/* Rating Summary */}
-          <div className="bg-amber-50 rounded-lg p-4 mb-4">
+          {/* Rating Summary with liquid glass */}
+          <div className="liquid-glass rounded-2xl p-4 mb-4">
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div
                   className={`text-3xl font-bold ${getRatingColor(displayRating)}`}
                 >
                   {displayRating.toFixed(1)}
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   <div>із 10</div>
-                  {/* <div>
-                    ({card.ratingCount || card.ratings?.length || 0} оцінок)
-                  </div> */}
                 </div>
               </div>
-              <div className="flex gap-1">
+              <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => {
                   const isFull = displayRating >= star;
                   const isHalf = !isFull && displayRating >= star - 0.5;
@@ -253,7 +271,9 @@ export default function WineCardModal({
                     <svg
                       key={star}
                       className={`w-5 h-5 ${
-                        isFull || isHalf ? "text-yellow-400" : "text-gray-200"
+                        isFull || isHalf
+                          ? "text-yellow-400"
+                          : "text-gray-200 dark:text-gray-600"
                       }`}
                       viewBox="0 0 20 20"
                       fill="currentColor"
@@ -266,19 +286,19 @@ export default function WineCardModal({
             </div>
           </div>
 
-          {/* Wine Details */}
+          {/* Wine Details with liquid glass badges */}
           <div className="space-y-3 mb-4">
             <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1 bg-rose-100 text-rose-800 rounded-full text-sm font-medium">
+              <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-rose-800 dark:text-rose-300">
                 {getTypeLabel(card.type)}
               </span>
               <span
-                className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
+                className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize liquid-glass ${getColorBadgeStyle(card.color).border || ""}`}
               >
                 {getColorLabel(card.color)}
               </span>
               {card.frizzante && (
-                <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+                <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">
                   Frizzante
                 </span>
               )}
@@ -286,21 +306,31 @@ export default function WineCardModal({
 
             <div className="grid grid-cols-3 gap-2 text-sm">
               {(card.year || card.anno) && (
-                <div className="bg-gray-50 p-2 rounded text-center">
-                  <div className="text-gray-500 text-xs">Рік</div>
-                  <div className="font-medium">{card.year || card.anno}</div>
+                <div className="liquid-glass rounded-xl p-2 text-center">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs">
+                    Рік
+                  </div>
+                  <div className="font-medium text-rose-800 dark:text-rose-300">
+                    {card.year || card.anno}
+                  </div>
                 </div>
               )}
               {card.alcohol && (
-                <div className="bg-gray-50 p-2 rounded text-center">
-                  <div className="text-gray-500 text-xs">Алкоголь</div>
-                  <div className="font-medium">{card.alcohol}%</div>
+                <div className="liquid-glass rounded-xl p-2 text-center">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs">
+                    Алкоголь
+                  </div>
+                  <div className="font-medium text-rose-800 dark:text-rose-300">
+                    {card.alcohol}%
+                  </div>
                 </div>
               )}
               {card.price && (
-                <div className="bg-gray-50 p-2 rounded text-center">
-                  <div className="text-gray-500 text-xs">Ціна</div>
-                  <div className="font-medium">
+                <div className="liquid-glass rounded-xl p-2 text-center">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs">
+                    Ціна
+                  </div>
+                  <div className="font-medium text-rose-800 dark:text-rose-300">
                     {typeof card.price === "number"
                       ? `€${card.price.toFixed(2)}`
                       : card.price}
@@ -310,9 +340,9 @@ export default function WineCardModal({
             </div>
 
             {(card.country || card.region) && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 {card.country && (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5 liquid-glass px-2.5 py-1 rounded-full">
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -330,7 +360,7 @@ export default function WineCardModal({
                   </span>
                 )}
                 {card.region && (
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5 liquid-glass px-2.5 py-1 rounded-full">
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -357,21 +387,25 @@ export default function WineCardModal({
             )}
           </div>
 
-          {/* Description */}
+          {/* Description with liquid glass */}
           {card.description && (
-            <div className="mb-4">
-              <h4 className="font-medium text-gray-700 mb-2">Опис</h4>
-              <p className="text-gray-600 text-sm">{card.description}</p>
+            <div className="mb-4 liquid-glass rounded-2xl p-4">
+              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Опис
+              </h4>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                {card.description}
+              </p>
             </div>
           )}
 
-          {/* All Ratings List */}
+          {/* All Ratings List with liquid glass */}
           {card.ratings && card.ratings.length > 0 && (
-            <div className="border-t pt-4">
-              <h4 className="font-medium text-gray-700 mb-3">
+            <div className="border-t border-rose-200/30 dark:border-rose-800/30 pt-4 mb-4">
+              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3 liquid-glass inline-block px-3 py-1 rounded-full text-sm">
                 Оцінки користувачів ({card.ratings.length})
               </h4>
-              <div className="max-h-48 overflow-y-auto space-y-1">
+              <div className="max-h-48 overflow-y-auto space-y-1 liquid-glass rounded-2xl p-3">
                 {card.ratings.map((rating, idx) => {
                   const userIdStr = getUserIdString(rating.userId || "");
                   const displayUsername =
@@ -394,18 +428,20 @@ export default function WineCardModal({
           )}
 
           {/* Comments Section */}
-          <div className="border-t pt-4 mt-4">
-            <CommentsSection
-              cardId={card._id}
-              currentUserId={currentUserId || undefined}
-            />
+          <div className="border-t border-rose-200/30 dark:border-rose-800/30 pt-4 mt-4">
+            <div className="liquid-glass rounded-2xl p-4">
+              <CommentsSection
+                cardId={card._id}
+                currentUserId={currentUserId || undefined}
+              />
+            </div>
           </div>
 
-          {/* Edit Button */}
+          {/* Edit Button with liquid glass */}
           {isCardAuthor && (
             <Link
               href={`/cards/${card._id}`}
-              className="mt-4 w-full py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors flex items-center justify-center gap-2"
+              className="mt-4 w-full py-3.5 liquid-btn-wine rounded-2xl font-semibold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
             >
               <svg
                 className="w-5 h-5"
