@@ -163,7 +163,10 @@ body {
 
 /* Liquid button base */
 .liquid-btn {
-  @apply px-6 py-3 rounded-2xl font-semibold transition-all duration-300;
+  padding: 0.75rem 1.5rem;
+  border-radius: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -173,7 +176,7 @@ body {
 }
 
 .liquid-btn:hover {
-  @apply transform -translate-y-1;
+  transform: translateY(-0.25rem);
   background: rgba(255, 255, 255, 0.5);
   box-shadow: 
     0 8px 24px rgba(31, 38, 135, 0.2),
@@ -181,13 +184,14 @@ body {
 }
 
 .liquid-btn:active {
-  @apply transform translate-y-0;
+  transform: translateY(0);
 }
 
 /* Wine gradient button */
 .liquid-btn-wine {
   background: linear-gradient(135deg, rgba(219, 75, 81, 0.9) 0%, rgba(198, 54, 59, 0.9) 100%);
-  @apply text-white border-none;
+  color: white;
+  border: none;
   box-shadow: 
     0 4px 20px rgba(219, 75, 81, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -252,7 +256,10 @@ body {
 /* ==================== INPUT STYLES ==================== */
 
 .liquid-input {
-  @apply w-full px-4 py-3 rounded-xl transition-all duration-300;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.5);
@@ -262,12 +269,11 @@ body {
 }
 
 .liquid-input:focus {
-  @apply outline-none ring-2;
-  --tw-ring-color: rgba(225, 29, 72, 0.3);
-  background: rgba(255, 255, 255, 0.7);
+  outline: none;
   box-shadow: 
     inset 0 2px 4px rgba(0, 0, 0, 0.05),
     0 0 0 4px rgba(225, 29, 72, 0.1);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .dark .liquid-input {
@@ -278,13 +284,16 @@ body {
 
 .dark .liquid-input:focus {
   background: rgba(30, 41, 59, 0.7);
-  --tw-ring-color: rgba(225, 29, 72, 0.5);
 }
 
 /* ==================== SELECT & CHECKBOX STYLES ==================== */
 
 .liquid-select {
-  @apply w-full px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.5);
@@ -297,8 +306,7 @@ body {
 }
 
 .liquid-select:focus {
-  @apply outline-none ring-2;
-  --tw-ring-color: rgba(225, 29, 72, 0.3);
+  outline: none;
   background-color: rgba(255, 255, 255, 0.7);
 }
 
@@ -315,25 +323,36 @@ body {
 
 /* Liquid checkbox toggle */
 .liquid-toggle {
-  @apply relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-300;
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
   background: rgba(148, 163, 184, 0.5);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .liquid-toggle:checked {
-  @apply bg-rose-500;
+  background-color: rgb(244, 63, 94);
 }
 
 .liquid-toggle::after {
   content: '';
-  @apply absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-all duration-300;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .liquid-toggle:checked::after {
-  @apply translate-x-5;
+  transform: translateX(20px);
   background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9));
 }
 
@@ -376,11 +395,11 @@ body {
 
 /* Glass hover effect */
 .glass-hover {
-  @apply transition-all duration-300;
+  transition: all 0.3s ease;
 }
 
 .glass-hover:hover {
-  @apply -translate-y-1;
+  transform: translateY(-0.25rem);
   background: rgba(255, 255, 255, 0.85);
   box-shadow: 
     0 20px 40px rgba(31, 38, 135, 0.2),
@@ -405,7 +424,9 @@ body {
 
 .ripple::after {
   content: '';
-  @apply absolute rounded-full opacity-0;
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0;
   background: rgba(255, 255, 255, 0.4);
   transform: scale(0);
   animation: ripple 0.6s ease-out;
