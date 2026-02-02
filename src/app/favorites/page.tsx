@@ -309,12 +309,12 @@ function FavoritesPage() {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Header & Filter Panel Combined */}
             <aside className="lg:w-80 flex-shrink-0">
-              <div className="liquid-glass rounded-2xl p-6 mb-4">
+              <div className="liquid-glass rounded-2xl p-6 mb-4 text-center">
                 <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-                  Мої улюблені вина
+                  Мої улюблені
                 </h1>
                 <p className="text-rose-700 dark:text-rose-400 text-sm">
-                  {cards.length} вин у колекції
+                  {cards.length}шт у колекції
                 </p>
               </div>
               <FilterPanel filters={filters} onFilterChange={setFilters} />

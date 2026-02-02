@@ -61,7 +61,7 @@ export default function Navbar() {
                     : "hover:bg-rose-100/50 dark:hover:bg-rose-900/30 text-gray-600 dark:text-gray-300"
                 }`}
               >
-                Каталог вин
+                Каталог
               </Link>
 
               {isAuthenticated ? (
