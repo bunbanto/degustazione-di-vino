@@ -375,7 +375,7 @@ export default function WineCardComponent({
 
           {/* Glass Price badge */}
           {card.price && typeof card.price === "number" && (
-            <span className="absolute top-14 right-4 liquid-glass px-3 py-1.5 rounded-xl text-sm font-bold text-rose-700 dark:text-rose-400 z-20">
+            <span className="absolute top-16 right-4 liquid-glass px-3 py-1.5 rounded-xl text-sm font-bold text-rose-700 dark:text-rose-400 z-20">
               €{card.price.toFixed(2)}
             </span>
           )}
