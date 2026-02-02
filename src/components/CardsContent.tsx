@@ -363,22 +363,19 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       <Navbar />
 
       <main className="pt-20 pb-12 px-4">
-        {/* Header with liquid glass - aligned with filter panel */}
-        <div className="max-w-7xl mx-auto mb-6">
-          <div className="lg:w-80 liquid-glass rounded-2xl p-6">
-            <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-              Каталог вин
-            </h1>
-            <p className="text-rose-700 dark:text-rose-400">
-              Знайдіть своє ідеальне вино серед {totalCount} пропозицій
-            </p>
-          </div>
-        </div>
-
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Filter Panel - Left Sidebar */}
+            {/* Header & Filter Panel Combined */}
             <aside className="lg:w-80 flex-shrink-0">
+              {/* Header with liquid glass */}
+              <div className="liquid-glass rounded-2xl p-6 mb-4">
+                <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
+                  Каталог вин
+                </h1>
+                <p className="text-rose-700 dark:text-rose-400 text-sm">
+                  {totalCount} пропозицій
+                </p>
+              </div>
               <FilterPanel
                 filters={filters}
                 onFilterChange={handleFilterChange}

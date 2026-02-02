@@ -305,119 +305,113 @@ function FavoritesPage() {
       <Navbar />
 
       <main className="pt-20 pb-12 px-4">
-        {/* Header - aligned with filter panel */}
-        <div className="max-w-7xl mx-auto mb-6">
-          <div className="lg:w-80 liquid-glass rounded-2xl p-6">
-            <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-              Мої улюблені вина
-            </h1>
-            <p className="text-rose-700 dark:text-rose-400">
-              Ваша персональна колекція улюблених вин ({cards.length})
-            </p>
-          </div>
-        </div>
-
         <div className="max-w-7xl mx-auto">
-          {error && (
-            <div
-              className={`p-4 rounded-lg mb-6 ${
-                error.includes("Офлайн")
-                  ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
-                  : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
-              }`}
-            >
-              <p className="font-medium">{error}</p>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-rose-600 dark:text-rose-400 text-lg">
-                Завантаження...
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Header & Filter Panel Combined */}
+            <aside className="lg:w-80 flex-shrink-0">
+              <div className="liquid-glass rounded-2xl p-6 mb-4">
+                <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
+                  Мої улюблені вина
+                </h1>
+                <p className="text-rose-700 dark:text-rose-400 text-sm">
+                  {cards.length} вин у колекції
+                </p>
               </div>
-            </div>
-          ) : !cards || cards.length === 0 ? (
-            <div className="flex items-center justify-center h-64 glass-card rounded-2xl">
-              <div className="text-center">
-                <div className="text-6xl mb-4">💔</div>
-                <p className="text-rose-700 dark:text-rose-400 text-lg">
-                  У вас поки немає улюблених вин
-                </p>
-                <p className="text-rose-500 dark:text-rose-500 text-sm mt-2">
-                  Додавайте вина до улюблених, натискаючи на сердечко
-                </p>
-                <a
-                  href="/cards"
-                  className="inline-block mt-4 px-6 py-2 bg-rose-600 dark:bg-rose-700 text-white rounded-full font-medium hover:bg-rose-700 dark:hover:bg-rose-600 transition-colors"
+              <FilterPanel filters={filters} onFilterChange={setFilters} />
+            </aside>
+
+            {/* Content */}
+            <div className="flex-1">
+              {error && (
+                <div
+                  className={`p-4 rounded-lg mb-6 ${
+                    error.includes("Офлайн")
+                      ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
+                      : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
+                  }`}
                 >
-                  Переглянути каталог
-                </a>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-col lg:flex-row gap-6">
-                {/* Filter Panel - Left Sidebar */}
-                <aside className="lg:w-80 flex-shrink-0">
-                  <FilterPanel filters={filters} onFilterChange={setFilters} />
-                </aside>
+                  <p className="font-medium">{error}</p>
+                </div>
+              )}
 
-                {/* Cards Grid */}
-                <div className="flex-1">
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {cards
-                      .filter((card) => {
-                        // Filter by search
-                        if (filters.search) {
-                          const searchLower = filters.search.toLowerCase();
-                          const nameMatch = card.name
-                            ?.toLowerCase()
-                            .includes(searchLower);
-                          const wineryMatch = card.winery
-                            ?.toLowerCase()
-                            .includes(searchLower);
-                          if (!nameMatch && !wineryMatch) return false;
-                        }
-
-                        // Filter by type
-                        if (filters.type && card.type !== filters.type) {
-                          return false;
-                        }
-
-                        // Filter by color
-                        if (filters.color && card.color !== filters.color) {
-                          return false;
-                        }
-
-                        // Filter by frizzante
-                        if (filters.frizzante && !card.frizzante) {
-                          return false;
-                        }
-
-                        // Filter by min rating
-                        if (
-                          filters.minRating &&
-                          (card.rating || 0) < filters.minRating
-                        ) {
-                          return false;
-                        }
-
-                        return true;
-                      })
-                      .map((card) => (
-                        <WineCardComponent
-                          key={card._id}
-                          card={card}
-                          onRate={handleRate}
-                          onToggleFavorite={handleToggleFavorite}
-                          onDelete={handleDelete}
-                        />
-                      ))}
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-rose-600 dark:text-rose-400 text-lg">
+                    Завантаження...
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              ) : !cards || cards.length === 0 ? (
+                <div className="flex items-center justify-center h-64 glass-card rounded-2xl">
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">💔</div>
+                    <p className="text-rose-700 dark:text-rose-400 text-lg">
+                      У вас поки немає улюблених вин
+                    </p>
+                    <p className="text-rose-500 dark:text-rose-500 text-sm mt-2">
+                      Додавайте вина до улюблених, натискаючи на сердечко
+                    </p>
+                    <a
+                      href="/cards"
+                      className="inline-block mt-4 px-6 py-2 bg-rose-600 dark:bg-rose-700 text-white rounded-full font-medium hover:bg-rose-700 dark:hover:bg-rose-600 transition-colors"
+                    >
+                      Переглянути каталог
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {cards
+                    .filter((card) => {
+                      // Filter by search
+                      if (filters.search) {
+                        const searchLower = filters.search.toLowerCase();
+                        const nameMatch = card.name
+                          ?.toLowerCase()
+                          .includes(searchLower);
+                        const wineryMatch = card.winery
+                          ?.toLowerCase()
+                          .includes(searchLower);
+                        if (!nameMatch && !wineryMatch) return false;
+                      }
+
+                      // Filter by type
+                      if (filters.type && card.type !== filters.type) {
+                        return false;
+                      }
+
+                      // Filter by color
+                      if (filters.color && card.color !== filters.color) {
+                        return false;
+                      }
+
+                      // Filter by frizzante
+                      if (filters.frizzante && !card.frizzante) {
+                        return false;
+                      }
+
+                      // Filter by min rating
+                      if (
+                        filters.minRating &&
+                        (card.rating || 0) < filters.minRating
+                      ) {
+                        return false;
+                      }
+
+                      return true;
+                    })
+                    .map((card) => (
+                      <WineCardComponent
+                        key={card._id}
+                        card={card}
+                        onRate={handleRate}
+                        onToggleFavorite={handleToggleFavorite}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
