@@ -314,7 +314,7 @@ function ClientFavoritesPage() {
                   Мої улюблені
                 </h1>
                 <p className="text-rose-700 dark:text-rose-400 text-sm">
-                  {cards.length}шт у колекції
+                  {cards.length} пропозицій у колекції
                 </p>
               </div>
               <FilterPanel filters={filters} onFilterChange={setFilters} />
