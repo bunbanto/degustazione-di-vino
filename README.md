@@ -129,7 +129,7 @@ pnpm install
 Створіть файл `.env.local`:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
 ```
 
 ### 4. Запуск розробницького серверу
@@ -201,9 +201,9 @@ interface Comment {
 
 <div align="center">
 
-| Головна сторінка                                                            | Каталог вин                                                                    |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| ![Home](https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400) | ![Catalog](https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400) |
+| Головна сторінка                                                            | Каталог вин |
+| --------------------------------------------------------------------------- | ----------- |
+| ![Home](https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400) |             |
 
 </div>
 
@@ -227,7 +227,7 @@ interface Comment {
 
 ## 👨‍💻 Автор
 
-**Your Name** - [GitHub](https://github.com/your-username)
+**Your Name** - [GitHub](https://github.com/bunbanto)
 
 ---
 
