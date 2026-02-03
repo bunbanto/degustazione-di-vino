@@ -1,11 +1,71 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Degustazione di Vino",
-  description: "Discover and rate the finest wines",
+  metadataBase: new URL("https://degustazione-di-vino.com"),
+  title: {
+    default: "Degustazione di Vino | Відкрийте світ вин",
+    template: "%s | Degustazione di Vino",
+  },
+  description:
+    "Degustazione di Vino — ваш провідник у світі вин. Відкривайте, оцінюйте та діліться враженнями про найкращі вина з усього світу. Приєднуйтесь до спільноти любителів вин.",
+  keywords: [
+    "вино",
+    "wine",
+    "дегустація вин",
+    "каталог вин",
+    "рейтинги вин",
+    "оцінки вин",
+    "винний гід",
+    "вина світу",
+    "червоне вино",
+    "біле вино",
+    "рожеве вино",
+    "ігристе вино",
+  ],
+  authors: [{ name: "Degustazione di Vino" }],
+  creator: "Degustazione di Vino",
+  publisher: "Degustazione di Vino",
+  robots: "index, follow",
+  openGraph: {
+    type: "website",
+    locale: "uk_UA",
+    url: "/",
+    siteName: "Degustazione di Vino",
+    title: "Degustazione di Vino | Відкрийте світ вин",
+    description:
+      "Ваш провідник у світі вин. Відкривайте, оцінюйте та діліться враженнями про найкращі вина.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Degustazione di Vino",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Degustazione di Vino | Відкрийте світ вин",
+    description:
+      "Ваш провідник у світі вин. Відкривайте, оцінюйте та діліться враженнями.",
+    images: ["/og-image.jpg"],
+    creator: "@degustazione",
+  },
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+  category: "food & drink",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 // Script to apply theme before React hydration

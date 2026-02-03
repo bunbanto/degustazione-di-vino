@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="wineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#be123c"/>
+      <stop offset="100%" style="stop-color:#9f1239"/>
+    </linearGradient>
+  </defs>
+  <!-- Wine glass bowl -->
+  <path d="M8 12 C8 8 10 6 16 6 C22 6 24 8 24 12 L24 16 L22 16 L22 12 C22 10 20.5 9 16 9 C11.5 9 10 10 10 12 L10 16 L8 16 Z" fill="url(#wineGrad)"/>
+  <!-- Wine glass stem -->
+  <rect x="15.5" y="16" width="1" height="8" rx="0.5" fill="#d4d4d4"/>
+  <!-- Wine glass base -->
+  <ellipse cx="16" cy="25" rx="6" ry="1.5" fill="#d4d4d4"/>
+  <!-- Shine on glass -->
+  <path d="M11 10 Q13 8 15 9" stroke="rgba(255,255,255,0.3)" stroke-width="1" fill="none"/>
+</svg>
