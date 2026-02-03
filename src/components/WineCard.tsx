@@ -346,7 +346,7 @@ export default function WineCardComponent({
               handleToggleFavorite();
             }}
             disabled={isFavoriteLoading}
-            className={`absolute top-4 right-4 liquid-glass p-2.5 rounded-full transition-all duration-300 z-20 hover:scale-110 active:scale-95 ${
+            className={`absolute top-4 right-4 liquid-glass p-2.5 rounded-full transition-all duration-300 z-40 hover:scale-110 active:scale-95 ${
               isFavoriteLoading ? "opacity-50 cursor-wait" : ""
             }`}
             title={isFavorite ? "Видалити з улюблених" : "Додати до улюблених"}
