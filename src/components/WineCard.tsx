@@ -260,7 +260,6 @@ export default function WineCardComponent({
       bianco: "Bianco",
       rosso: "Rosso",
       rosato: "Rosato",
-      sparkling: "Ігристе",
     };
     return colors[color] || color;
   };
@@ -278,10 +277,6 @@ export default function WineCardComponent({
       },
       rosato: {
         bg: "bg-pink-100 dark:bg-pink-900/30",
-        text: "text-gray-800 dark:text-gray-200",
-      },
-      sparkling: {
-        bg: "bg-sky-200 dark:bg-sky-900/30",
         text: "text-gray-800 dark:text-gray-200",
       },
     };

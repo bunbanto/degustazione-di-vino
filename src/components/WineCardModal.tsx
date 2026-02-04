@@ -153,7 +153,6 @@ export default function WineCardModal({
       bianco: "Біле",
       rosso: "Червоне",
       rosato: "Рожеве",
-      sparkling: "Ігристе",
     };
     return colors[color] || color;
   };
@@ -171,10 +170,6 @@ export default function WineCardModal({
       },
       rosato: {
         bg: "bg-pink-100 dark:bg-pink-900/30",
-        text: "text-gray-800 dark:text-gray-200",
-      },
-      sparkling: {
-        bg: "bg-sky-100 dark:bg-sky-900/30",
         text: "text-gray-800 dark:text-gray-200",
       },
     };

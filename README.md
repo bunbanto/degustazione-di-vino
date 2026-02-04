@@ -166,7 +166,7 @@ vine-server/                       # 🔧 Backend (Express.js)
 {
   name: String,           // Назва вина
   type: String,           // secco | abboccato | amabile | dolce
-  color: String,          // bianco | rosso | rosato | sparkling
+  color: String,          // bianco | rosso | rosato
   alcohol: Number,        // Відсоток алкоголю
   winery: String,         // Виробник
   region: String,         // Регіон
