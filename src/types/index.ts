@@ -80,6 +80,14 @@ export interface PaginationParams {
   limit: number;
 }
 
+export type SortField = "name" | "price" | "rating";
+export type SortDirection = "asc" | "desc";
+
+export interface SortParams {
+  field: SortField;
+  direction: SortDirection;
+}
+
 export interface FilterParams {
   type?: string;
   color?: string;
@@ -90,4 +98,5 @@ export interface FilterParams {
   winery?: string;
   country?: string;
   region?: string;
+  sort?: SortParams;
 }

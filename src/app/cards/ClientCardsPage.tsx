@@ -24,6 +24,13 @@ function CardsPageContent({
       ? parseFloat(searchParams.get("minRating")!)
       : undefined,
     search: searchParams.get("search") || undefined,
+    sort: searchParams.get("sortField")
+      ? {
+          field: searchParams.get("sortField") as "name" | "price" | "rating",
+          direction:
+            (searchParams.get("sortDirection") as "asc" | "desc") || "asc",
+        }
+      : undefined,
   };
 
   const page =

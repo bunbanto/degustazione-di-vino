@@ -425,8 +425,8 @@ export const cardsAPI = {
   },
 
   // Favorites APIs з кешуванням та оптимістичним оновленням
-  getFavorites: async (): Promise<FavoritesResponse> => {
-    const cacheKey = CACHE_KEYS.favorites();
+  getFavorites: async (filters?: FilterParams): Promise<FavoritesResponse> => {
+    const cacheKey = generateCacheKey("favorites", { filters });
 
     // Пробуємо з кешу
     if (typeof window !== "undefined") {
@@ -436,7 +436,15 @@ export const cardsAPI = {
       }
     }
 
-    const response = await api.get("/favorites");
+    // Будуємо параметри запиту
+    const params = new URLSearchParams();
+    if (filters?.sort) {
+      params.set("sortField", filters.sort.field);
+      params.set("sortDirection", filters.sort.direction);
+    }
+
+    const url = `/favorites${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await api.get(url);
 
     if (typeof window !== "undefined") {
       hybridCache.set(
@@ -547,6 +555,10 @@ async function fetchCardsFromServer(
     if (filters.winery) params.set("winery", filters.winery);
     if (filters.country) params.set("country", filters.country);
     if (filters.region) params.set("region", filters.region);
+    if (filters.sort) {
+      params.set("sortField", filters.sort.field);
+      params.set("sortDirection", filters.sort.direction);
+    }
   }
 
   if (pagination) {

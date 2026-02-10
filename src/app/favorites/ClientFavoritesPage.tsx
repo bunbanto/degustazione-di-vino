@@ -6,8 +6,14 @@ import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
 import { cardsAPI, cacheUtils } from "@/services/api";
-import { WineCard, FilterParams } from "@/types";
+import { WineCard, FilterParams, SortField } from "@/types";
 import { withAuth } from "@/components/withAuth";
+
+const SORT_FIELDS: { value: SortField; label: string }[] = [
+  { value: "name", label: "За назвою" },
+  { value: "price", label: "За ціною" },
+  { value: "rating", label: "За рейтингом" },
+];
 
 function ClientFavoritesPage() {
   const router = useRouter();
@@ -21,6 +27,9 @@ function ClientFavoritesPage() {
   const previousCardsRef = useRef<WineCard[] | null>(null);
   // Ref для відстеження зміни користувача
   const previousUserIdRef = useRef<string | null>(null);
+  // Ref для доступу до поточних фільтрів без залежності в useCallback
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
 
   // Fetch favorites з очищенням кешу при зміні користувача
   const fetchFavorites = useCallback(
@@ -36,7 +45,7 @@ function ClientFavoritesPage() {
           cacheUtils.clearFavorites();
         }
 
-        const response = await cardsAPI.getFavorites();
+        const response = await cardsAPI.getFavorites(filtersRef.current);
         // Mark all cards as favorites
         const favoritesWithFlag = response.results.map((card) => ({
           ...card,
@@ -115,6 +124,11 @@ function ClientFavoritesPage() {
       fetchFavorites();
     }
   }, [fetchFavorites]);
+
+  // Fetch favorites when sort changes
+  useEffect(() => {
+    fetchFavorites(true, true);
+  }, [filters.sort?.field, filters.sort?.direction]);
 
   const handleToggleFavorite = async (cardId: string): Promise<void> => {
     const token = localStorage.getItem("token");
@@ -360,6 +374,62 @@ function ClientFavoritesPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {/* Sort Controls */}
+                  <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 col-span-full">
+                    <div className="flex items-center gap-2">
+                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
+                        Сортування:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={filters.sort?.field || "name"}
+                          onChange={(e) => {
+                            setFilters({
+                              ...filters,
+                              sort: {
+                                field: e.target.value as SortField,
+                                direction: filters.sort?.direction || "asc",
+                              },
+                            });
+                          }}
+                          className="liquid-select py-2 px-3 text-sm min-w-[140px]"
+                        >
+                          {SORT_FIELDS.map((field) => (
+                            <option key={field.value} value={field.value}>
+                              {field.label}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => {
+                            setFilters({
+                              ...filters,
+                              sort: {
+                                field: filters.sort?.field || "name",
+                                direction:
+                                  filters.sort?.direction === "asc"
+                                    ? "desc"
+                                    : "asc",
+                              },
+                            });
+                          }}
+                          className="liquid-glass p-2 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors"
+                          title={
+                            filters.sort?.direction === "asc"
+                              ? "За зростанням"
+                              : "За спаданням"
+                          }
+                        >
+                          <span className="text-lg">
+                            {filters.sort?.direction === "asc" ? "↑" : "↓"}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-rose-600 dark:text-rose-500 text-sm">
+                      {cards.length} вин
+                    </div>
+                  </div>
                   {cards
                     .filter((card) => {
                       // Filter by search

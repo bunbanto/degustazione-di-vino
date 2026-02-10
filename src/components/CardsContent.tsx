@@ -7,10 +7,16 @@ import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
 import Pagination from "@/components/Pagination";
 import { cardsAPI, cacheUtils } from "@/services/api";
-import { WineCard, FilterParams } from "@/types";
+import { WineCard, FilterParams, SortField, SortDirection } from "@/types";
 import { useUserStore } from "@/store/userStore";
 
 const ITEMS_PER_PAGE = 6;
+
+const SORT_FIELDS: { value: SortField; label: string }[] = [
+  { value: "name", label: "За назвою" },
+  { value: "price", label: "За ціною" },
+  { value: "rating", label: "За рейтингом" },
+];
 
 interface CardsContentProps {
   initialFilters: FilterParams;
@@ -157,6 +163,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     if (newFilters.minRating)
       params.set("minRating", newFilters.minRating.toString());
     if (newFilters.search) params.set("search", newFilters.search);
+    if (newFilters.sort) {
+      params.set("sortField", newFilters.sort.field);
+      params.set("sortDirection", newFilters.sort.direction);
+    }
     params.set("page", "1");
 
     router.push(`/cards?${params.toString()}`);
@@ -418,6 +428,63 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                 </div>
               ) : (
                 <>
+                  {/* Sort Controls */}
+                  <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
+                        Сортування:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={filters.sort?.field || "name"}
+                          onChange={(e) =>
+                            handleFilterChange({
+                              ...filters,
+                              sort: {
+                                field: e.target.value as SortField,
+                                direction: filters.sort?.direction || "asc",
+                              },
+                            })
+                          }
+                          className="liquid-select py-2 px-3 text-sm min-w-[140px]"
+                        >
+                          {SORT_FIELDS.map((field) => (
+                            <option key={field.value} value={field.value}>
+                              {field.label}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() =>
+                            handleFilterChange({
+                              ...filters,
+                              sort: {
+                                field: filters.sort?.field || "name",
+                                direction:
+                                  filters.sort?.direction === "asc"
+                                    ? "desc"
+                                    : "asc",
+                              },
+                            })
+                          }
+                          className="liquid-glass p-2 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors"
+                          title={
+                            filters.sort?.direction === "asc"
+                              ? "За зростанням"
+                              : "За спаданням"
+                          }
+                        >
+                          <span className="text-lg">
+                            {filters.sort?.direction === "asc" ? "↑" : "↓"}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-rose-600 dark:text-rose-500 text-sm">
+                      {totalCount} вин
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {cards.map((card) => (
                       <WineCardComponent
