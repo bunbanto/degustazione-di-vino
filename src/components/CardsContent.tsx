@@ -490,7 +490,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {cards.map((card) => (
                       <WineCardComponent
                         key={card._id}
