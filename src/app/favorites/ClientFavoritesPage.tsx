@@ -320,17 +320,19 @@ function ClientFavoritesPage() {
 
       <main className="pt-20 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Favorites Header */}
+          <div className="liquid-glass rounded-2xl p-6 mb-6 text-center">
+            <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
+              Мої улюблені
+            </h1>
+            <p className="text-rose-700 dark:text-rose-400 text-sm">
+              {cards.length} пропозицій у колекції
+            </p>
+          </div>
+
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Header & Filter Panel Combined */}
+            {/* Filter Panel */}
             <aside className="lg:w-80 flex-shrink-0">
-              <div className="liquid-glass rounded-2xl p-6 mb-4 text-center">
-                <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-                  Мої улюблені
-                </h1>
-                <p className="text-rose-700 dark:text-rose-400 text-sm">
-                  {cards.length} пропозицій у колекції
-                </p>
-              </div>
               <FilterPanel filters={filters} onFilterChange={setFilters} />
             </aside>
 
@@ -373,9 +375,9 @@ function ClientFavoritesPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <>
                   {/* Sort Controls */}
-                  <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4 col-span-full">
+                  <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
                         Сортування:
@@ -430,55 +432,58 @@ function ClientFavoritesPage() {
                       {cards.length} вин
                     </div>
                   </div>
-                  {cards
-                    .filter((card) => {
-                      // Filter by search
-                      if (filters.search) {
-                        const searchLower = filters.search.toLowerCase();
-                        const nameMatch = card.name
-                          ?.toLowerCase()
-                          .includes(searchLower);
-                        const wineryMatch = card.winery
-                          ?.toLowerCase()
-                          .includes(searchLower);
-                        if (!nameMatch && !wineryMatch) return false;
-                      }
 
-                      // Filter by type
-                      if (filters.type && card.type !== filters.type) {
-                        return false;
-                      }
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-6">
+                    {cards
+                      .filter((card) => {
+                        // Filter by search
+                        if (filters.search) {
+                          const searchLower = filters.search.toLowerCase();
+                          const nameMatch = card.name
+                            ?.toLowerCase()
+                            .includes(searchLower);
+                          const wineryMatch = card.winery
+                            ?.toLowerCase()
+                            .includes(searchLower);
+                          if (!nameMatch && !wineryMatch) return false;
+                        }
 
-                      // Filter by color
-                      if (filters.color && card.color !== filters.color) {
-                        return false;
-                      }
+                        // Filter by type
+                        if (filters.type && card.type !== filters.type) {
+                          return false;
+                        }
 
-                      // Filter by frizzante
-                      if (filters.frizzante && !card.frizzante) {
-                        return false;
-                      }
+                        // Filter by color
+                        if (filters.color && card.color !== filters.color) {
+                          return false;
+                        }
 
-                      // Filter by min rating
-                      if (
-                        filters.minRating &&
-                        (card.rating || 0) < filters.minRating
-                      ) {
-                        return false;
-                      }
+                        // Filter by frizzante
+                        if (filters.frizzante && !card.frizzante) {
+                          return false;
+                        }
 
-                      return true;
-                    })
-                    .map((card) => (
-                      <WineCardComponent
-                        key={card._id}
-                        card={card}
-                        onRate={handleRate}
-                        onToggleFavorite={handleToggleFavorite}
-                        onDelete={handleDelete}
-                      />
-                    ))}
-                </div>
+                        // Filter by min rating
+                        if (
+                          filters.minRating &&
+                          (card.rating || 0) < filters.minRating
+                        ) {
+                          return false;
+                        }
+
+                        return true;
+                      })
+                      .map((card) => (
+                        <WineCardComponent
+                          key={card._id}
+                          card={card}
+                          onRate={handleRate}
+                          onToggleFavorite={handleToggleFavorite}
+                          onDelete={handleDelete}
+                        />
+                      ))}
+                  </div>
+                </>
               )}
             </div>
           </div>

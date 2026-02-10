@@ -374,18 +374,19 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
       <main className="pt-20 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Catalog Header */}
+          <div className="liquid-glass rounded-2xl p-6 mb-6 text-center">
+            <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
+              Каталог
+            </h1>
+            <p className="text-rose-700 dark:text-rose-400 text-sm">
+              {totalCount} пропозицій
+            </p>
+          </div>
+
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Header & Filter Panel Combined */}
+            {/* Filter Panel */}
             <aside className="lg:w-80 flex-shrink-0">
-              {/* Header with liquid glass */}
-              <div className="liquid-glass rounded-2xl p-6 mb-4 text-center">
-                <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-                  Каталог
-                </h1>
-                <p className="text-rose-700 dark:text-rose-400 text-sm">
-                  {totalCount} пропозицій
-                </p>
-              </div>
               <FilterPanel
                 filters={filters}
                 onFilterChange={handleFilterChange}
@@ -485,7 +486,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-6">
                     {cards.map((card) => (
                       <WineCardComponent
                         key={card._id}
