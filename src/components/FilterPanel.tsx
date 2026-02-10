@@ -173,6 +173,46 @@ export default function FilterPanel({
         </label>
       </div>
 
+      {/* Price Range */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Ціна
+        </label>
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <input
+              type="number"
+              min="0"
+              placeholder="Від"
+              value={localFilters.minPrice || ""}
+              onChange={(e) =>
+                handleChange(
+                  "minPrice",
+                  e.target.value ? Number(e.target.value) : undefined,
+                )
+              }
+              className="liquid-input w-full"
+            />
+          </div>
+          <span className="text-gray-400">—</span>
+          <div className="flex-1">
+            <input
+              type="number"
+              min="0"
+              placeholder="До"
+              value={localFilters.maxPrice || ""}
+              onChange={(e) =>
+                handleChange(
+                  "maxPrice",
+                  e.target.value ? Number(e.target.value) : undefined,
+                )
+              }
+              className="liquid-input w-full"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Minimum Rating with liquid slider */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">

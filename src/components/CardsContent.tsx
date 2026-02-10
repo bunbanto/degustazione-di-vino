@@ -162,6 +162,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     if (newFilters.frizzante) params.set("frizzante", "true");
     if (newFilters.minRating)
       params.set("minRating", newFilters.minRating.toString());
+    if (newFilters.minPrice)
+      params.set("minPrice", newFilters.minPrice.toString());
+    if (newFilters.maxPrice)
+      params.set("maxPrice", newFilters.maxPrice.toString());
     if (newFilters.search) params.set("search", newFilters.search);
     if (newFilters.sort) {
       params.set("sortField", newFilters.sort.field);

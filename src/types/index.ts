@@ -94,6 +94,8 @@ export interface FilterParams {
   frizzante?: boolean;
   minRating?: number;
   maxRating?: number;
+  minPrice?: number;
+  maxPrice?: number;
   search?: string;
   winery?: string;
   country?: string;

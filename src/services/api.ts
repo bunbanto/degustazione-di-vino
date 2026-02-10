@@ -552,6 +552,8 @@ async function fetchCardsFromServer(
     if (filters.frizzante) params.set("frizzante", "true");
     if (filters.minRating)
       params.set("minRating", filters.minRating.toString());
+    if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
+    if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
     if (filters.winery) params.set("winery", filters.winery);
     if (filters.country) params.set("country", filters.country);
     if (filters.region) params.set("region", filters.region);
