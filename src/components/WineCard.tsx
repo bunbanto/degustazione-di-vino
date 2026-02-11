@@ -419,9 +419,13 @@ export default function WineCardComponent({
             </div>
           </div>
 
-          <p className="text-gray-600 dark:text-gray-300 text-sm mb-5 line-clamp-2">
-            {card.description}
-          </p>
+          {card.description ? (
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-5 line-clamp-2">
+              {card.description}
+            </p>
+          ) : (
+            <div className="h-[2.1rem] mb-5" />
+          )}
 
           {/* Rating - 10 stars with liquid glass container */}
           <div className="mb-5">
