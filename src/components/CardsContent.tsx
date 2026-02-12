@@ -148,6 +148,31 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     }
   }, [fetchCards, currentUserId]);
 
+  const buildSearchParams = (sourceFilters: FilterParams, page: number) => {
+    const params = new URLSearchParams();
+
+    if (sourceFilters.type) params.set("type", sourceFilters.type);
+    if (sourceFilters.color) params.set("color", sourceFilters.color);
+    if (sourceFilters.frizzante === true) params.set("frizzante", "true");
+    if (sourceFilters.minRating !== undefined) {
+      params.set("minRating", sourceFilters.minRating.toString());
+    }
+    if (sourceFilters.minPrice !== undefined) {
+      params.set("minPrice", sourceFilters.minPrice.toString());
+    }
+    if (sourceFilters.maxPrice !== undefined) {
+      params.set("maxPrice", sourceFilters.maxPrice.toString());
+    }
+    if (sourceFilters.search) params.set("search", sourceFilters.search);
+    if (sourceFilters.sort) {
+      params.set("sortField", sourceFilters.sort.field);
+      params.set("sortDirection", sourceFilters.sort.direction);
+    }
+
+    params.set("page", page.toString());
+    return params;
+  };
+
   const handleFilterChange = (newFilters: FilterParams) => {
     setFilters(newFilters);
     setCurrentPage(1);
@@ -156,22 +181,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     cacheUtils.clearCards();
 
     // Update URL
-    const params = new URLSearchParams();
-    if (newFilters.type) params.set("type", newFilters.type);
-    if (newFilters.color) params.set("color", newFilters.color);
-    if (newFilters.frizzante) params.set("frizzante", "true");
-    if (newFilters.minRating)
-      params.set("minRating", newFilters.minRating.toString());
-    if (newFilters.minPrice)
-      params.set("minPrice", newFilters.minPrice.toString());
-    if (newFilters.maxPrice)
-      params.set("maxPrice", newFilters.maxPrice.toString());
-    if (newFilters.search) params.set("search", newFilters.search);
-    if (newFilters.sort) {
-      params.set("sortField", newFilters.sort.field);
-      params.set("sortDirection", newFilters.sort.direction);
-    }
-    params.set("page", "1");
+    const params = buildSearchParams(newFilters, 1);
 
     router.push(`/cards?${params.toString()}`);
   };
@@ -180,11 +190,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     setCurrentPage(page);
 
     // Update URL
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value.toString());
-    });
-    params.set("page", page.toString());
+    const params = buildSearchParams(filters, page);
 
     router.push(`/cards?${params.toString()}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -236,9 +242,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
       // Перераховуємо середній рейтинг
       const totalRating = newRatings.reduce((acc, curr) => acc + curr.value, 0);
-      const newAverageRating = parseFloat(
-        (totalRating / newRatings.length).toFixed(1),
-      );
+      const newAverageRating =
+        newRatings.length > 0
+          ? parseFloat((totalRating / newRatings.length).toFixed(1))
+          : card.rating;
 
       return {
         ...card,
@@ -280,10 +287,6 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     if (!previousCardsRef.current) {
       previousCardsRef.current = [...cards];
     }
-
-    // Зберігаємо поточний стан isFavorite для картки
-    const currentCard = cards.find((c) => c._id === cardId);
-    const wasFavorite = currentCard?.isFavorite || false;
 
     try {
       await cardsAPI.toggleFavorite(
@@ -351,11 +354,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         setCurrentPage(newPage);
 
         // Update URL
-        const params = new URLSearchParams();
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value) params.set(key, value.toString());
-        });
-        params.set("page", newPage.toString());
+        const params = buildSearchParams(filters, newPage);
         router.push(`/cards?${params.toString()}`);
       }
 
