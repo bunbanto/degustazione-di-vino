@@ -59,6 +59,12 @@ body {
   }
 }
 
+.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1.5rem * calc(1.2 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
+}
+
 /* ==================== LIQUID GLASS CORE STYLES ==================== */
 
 /* Base liquid glass effect */
@@ -583,4 +589,3 @@ body:has(main) section p {
   background-color: rgb(15, 23, 42) !important;
   color: rgb(248, 250, 252) !important;
 }
-

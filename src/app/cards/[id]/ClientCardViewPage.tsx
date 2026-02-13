@@ -255,10 +255,9 @@ export default function ClientCardViewPage() {
             </button>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Column - Image with Ratings */}
-            <div className="lg:w-5/12 space-y-6">
-              {/* Image */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+            {/* Top Left - Image */}
+            <div className="lg:order-1 lg:col-span-5">
               <div className="glass-card rounded-2xl overflow-hidden shadow-lg relative">
                 <div className="aspect-[4/3] w-full bg-gray-100 dark:bg-dark-800">
                   <img
@@ -306,109 +305,10 @@ export default function ClientCardViewPage() {
                   </svg>
                 </button>
               </div>
-
-              {/* Rating Summary & User Ratings - under the image */}
-              <div className="bg-amber-50 dark:bg-dark-800 rounded-2xl p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`text-4xl font-bold ${getRatingColor(displayRating)}`}
-                    >
-                      {displayRating.toFixed(1)}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      <div>із 10</div>
-                      <div>({card.ratings?.length || 0} оцінок)</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-0.5">
-                    {stars.map((star) => {
-                      const isFull = displayRating >= star;
-                      const isHalf = !isFull && displayRating >= star - 0.5;
-                      return (
-                        <svg
-                          key={star}
-                          className={`w-5 h-5 ${
-                            isFull || isHalf
-                              ? "text-yellow-400"
-                              : "text-gray-200 dark:text-gray-600"
-                          }`}
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Individual Ratings */}
-                {card.ratings && card.ratings.length > 0 && (
-                  <div className="border-t border-amber-200 dark:border-dark-700 pt-4">
-                    <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3">
-                      Оцінки користувачів
-                    </h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                      {card.ratings.map((rating, idx) => {
-                        const userIdStr = getUserIdString(rating.userId || "");
-                        const displayUsername =
-                          (typeof rating.userId === "object" &&
-                            rating.userId.name) ||
-                          rating.username ||
-                          "";
-
-                        return (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-between py-2 border-b border-amber-100 dark:border-dark-700 last:border-0"
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center">
-                                <span className="text-rose-600 dark:text-rose-400 font-medium text-xs">
-                                  {displayUsername.charAt(0).toUpperCase() ||
-                                    "?"}
-                                </span>
-                              </div>
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[100px]">
-                                {displayUsername || "Користувач"}
-                              </span>
-                              {userIdStr === currentUserId && (
-                                <span className="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
-                                  Ви
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-0.5">
-                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-                                <svg
-                                  key={star}
-                                  className={`w-3.5 h-3.5 ${
-                                    rating.value >= star
-                                      ? "text-yellow-400"
-                                      : "text-gray-200 dark:text-gray-600"
-                                  }`}
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                >
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                              ))}
-                              <span className="ml-1.5 text-sm font-bold text-gray-700 dark:text-gray-300">
-                                {rating.value.toFixed(1)}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
-            {/* Right Column - Info */}
-            <div className="lg:w-7/12 space-y-6">
+            {/* Top Right - Info */}
+            <div className="lg:order-2 lg:col-span-7 space-y-6">
               {/* Header */}
               <div>
                 <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
@@ -525,7 +425,111 @@ export default function ClientCardViewPage() {
                   </div>
                 )}
               </div>
+            </div>
 
+            {/* Bottom Left - Rating Summary & User Ratings */}
+            <div className="lg:order-3 lg:col-span-5">
+              <div className="bg-amber-50 dark:bg-dark-800 rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`text-4xl font-bold ${getRatingColor(displayRating)}`}
+                    >
+                      {displayRating.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      <div>із 10</div>
+                      <div>({card.ratings?.length || 0} оцінок)</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {stars.map((star) => {
+                      const isFull = displayRating >= star;
+                      const isHalf = !isFull && displayRating >= star - 0.5;
+                      return (
+                        <svg
+                          key={star}
+                          className={`w-5 h-5 ${
+                            isFull || isHalf
+                              ? "text-yellow-400"
+                              : "text-gray-200 dark:text-gray-600"
+                          }`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Individual Ratings */}
+                {card.ratings && card.ratings.length > 0 && (
+                  <div className="border-t border-amber-200 dark:border-dark-700 pt-4">
+                    <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Оцінки користувачів
+                    </h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                      {card.ratings.map((rating, idx) => {
+                        const userIdStr = getUserIdString(rating.userId || "");
+                        const displayUsername =
+                          (typeof rating.userId === "object" &&
+                            rating.userId.name) ||
+                          rating.username ||
+                          "";
+
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between py-2 border-b border-amber-100 dark:border-dark-700 last:border-0"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center">
+                                <span className="text-rose-600 dark:text-rose-400 font-medium text-xs">
+                                  {displayUsername.charAt(0).toUpperCase() ||
+                                    "?"}
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[100px]">
+                                {displayUsername || "Користувач"}
+                              </span>
+                              {userIdStr === currentUserId && (
+                                <span className="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
+                                  Ви
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                                <svg
+                                  key={star}
+                                  className={`w-3.5 h-3.5 ${
+                                    rating.value >= star
+                                      ? "text-yellow-400"
+                                      : "text-gray-200 dark:text-gray-600"
+                                  }`}
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              ))}
+                              <span className="ml-1.5 text-sm font-bold text-gray-700 dark:text-gray-300">
+                                {rating.value.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Right - Description + Actions */}
+            <div className="lg:order-4 lg:col-span-7 space-y-6">
               {/* Description */}
               {card.description && (
                 <div className="glass-card rounded-2xl p-6 shadow-lg">
