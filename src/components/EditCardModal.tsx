@@ -9,7 +9,7 @@ interface EditCardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaved: () => void;
-  onDeleted?: () => void;
+  onDeleted?: () => Promise<void> | void;
 }
 
 export default function EditCardModal({
@@ -174,10 +174,11 @@ export default function EditCardModal({
     setError("");
 
     try {
-      await cardsAPI.delete(card._id);
-      onSaved();
       if (onDeleted) {
-        onDeleted();
+        await onDeleted();
+      } else {
+        await cardsAPI.delete(card._id);
+        onSaved();
       }
       onClose();
     } catch (err: any) {

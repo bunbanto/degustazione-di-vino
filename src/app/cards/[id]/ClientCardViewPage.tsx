@@ -196,6 +196,13 @@ export default function ClientCardViewPage() {
     fetchCard();
   };
 
+  const handleCardDeleted = async () => {
+    await cardsAPI.delete(id);
+    cacheUtils.clearCards();
+    cacheUtils.clearFavorites();
+    router.push("/cards");
+  };
+
   function getUserIdString(
     userId: string | { _id: string; name?: string },
   ): string {
@@ -622,6 +629,7 @@ export default function ClientCardViewPage() {
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           onSaved={handleCardSaved}
+          onDeleted={handleCardDeleted}
         />
       )}
     </div>

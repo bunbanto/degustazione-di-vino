@@ -11,7 +11,7 @@ interface WineCardProps {
   card: WineCardType;
   onRate?: (id: string, rating: number) => void;
   onToggleFavorite?: (id: string) => Promise<void>;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string) => Promise<void> | void;
 }
 
 // SVG Star component with optional fill percentage
@@ -588,9 +588,9 @@ export default function WineCardComponent({
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSaved={() => {}}
-        onDeleted={() => {
+        onDeleted={async () => {
           if (onDelete) {
-            onDelete(card._id);
+            await onDelete(card._id);
           }
         }}
       />
