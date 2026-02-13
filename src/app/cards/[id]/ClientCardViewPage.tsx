@@ -35,21 +35,18 @@ export default function ClientCardViewPage() {
 
     const fetchCard = async () => {
       try {
-        // Clear cache before fetching to get fresh data
-        cacheUtils.clearCards();
-        cacheUtils.clearFavorites();
+        const token =
+          typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-        const cardData = await cardsAPI.getById(id);
+        const cardPromise = cardsAPI.getById(id);
+        const favoritePromise = token ? cardsAPI.checkFavorite(id) : null;
 
-        // Also check if this card is in favorites
-        let isCardFavorite = !!cardData.isFavorite;
-        try {
-          const favoriteCheck = await cardsAPI.checkFavorite(id);
-          isCardFavorite = favoriteCheck.isFavorite;
-        } catch (favErr) {
-          // If checkFavorite fails, card might not be in favorites
-          console.log("Could not check favorite status:", favErr);
-        }
+        const [cardData, favoriteCheck] = await Promise.all([
+          cardPromise,
+          favoritePromise,
+        ]);
+
+        const isCardFavorite = favoriteCheck?.isFavorite ?? !!cardData.isFavorite;
 
         if (isMounted) {
           setCard(cardData);
