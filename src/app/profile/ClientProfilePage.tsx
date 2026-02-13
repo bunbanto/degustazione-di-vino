@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { authAPI } from "@/services/api";
 import { cacheUtils } from "@/services/api";
@@ -192,7 +193,7 @@ export default function ClientProfilePage() {
               Швидкі посилання
             </h3>
             <div className="space-y-3">
-              <a
+              <Link
                 href="/favorites"
                 className="flex items-center gap-4 p-4 bg-rose-50 dark:bg-dark-700 rounded-xl hover:bg-rose-100 dark:hover:bg-dark-600 transition-colors group"
               >
@@ -219,9 +220,9 @@ export default function ClientProfilePage() {
                     Переглянути збережені вина
                   </div>
                 </div>
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="/add-card"
                 className="flex items-center gap-4 p-4 bg-rose-50 dark:bg-dark-700 rounded-xl hover:bg-rose-100 dark:hover:bg-dark-600 transition-colors group"
               >
@@ -248,9 +249,9 @@ export default function ClientProfilePage() {
                     Поділіться своїм улюбленим вином
                   </div>
                 </div>
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="/cards"
                 className="flex items-center gap-4 p-4 bg-rose-50 dark:bg-dark-700 rounded-xl hover:bg-rose-100 dark:hover:bg-dark-600 transition-colors group"
               >
@@ -277,7 +278,7 @@ export default function ClientProfilePage() {
                     Переглянути всі вина
                   </div>
                 </div>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

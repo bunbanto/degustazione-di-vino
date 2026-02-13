@@ -32,6 +32,36 @@ function ClientAddCardPage() {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
 
+  const validateFile = useCallback((file: File): boolean => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError("Дозволені формати: JPG, PNG, WebP");
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      setUploadError("Максимальний розмір файлу: 5MB");
+      return false;
+    }
+
+    setUploadError("");
+    return true;
+  }, []);
+
+  const handleFile = useCallback((file: File) => {
+    if (validateFile(file)) {
+      setImageFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, [validateFile]);
+
   // Drag & Drop handlers
   useEffect(() => {
     const dropZone = dropZoneRef.current;
@@ -78,37 +108,7 @@ function ClientAddCardPage() {
       dropZone.removeEventListener("dragleave", handleDragLeave);
       dropZone.removeEventListener("drop", handleDrop);
     };
-  }, []);
-
-  const validateFile = (file: File): boolean => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError("Дозволені формати: JPG, PNG, WebP");
-      return false;
-    }
-
-    if (file.size > maxSize) {
-      setUploadError("Максимальний розмір файлу: 5MB");
-      return false;
-    }
-
-    setUploadError("");
-    return true;
-  };
-
-  const handleFile = useCallback((file: File) => {
-    if (validateFile(file)) {
-      setImageFile(file);
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }, []);
+  }, [handleFile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

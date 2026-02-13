@@ -25,6 +25,8 @@ export function withAuth<P extends object>(WrappedComponent: ComponentType<P>) {
 
       if (!token || !userStr) {
         // Немає токена - перенаправляємо на login
+        setIsAuthenticated(false);
+        setIsLoading(false);
         router.push("/login");
         return;
       }

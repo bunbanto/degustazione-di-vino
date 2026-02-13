@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
@@ -58,11 +59,15 @@ function ClientFavoritesPage() {
 
         // При помилці мережі, пробуємо з кешу
         if (!navigator.onLine) {
-          const cached = localStorage.getItem("wine-cache:favorites:all");
+          const cacheKey = `wine-cache:favorites:${JSON.stringify({
+            filters: filtersRef.current,
+          })}`;
+          const cached = localStorage.getItem(cacheKey);
           if (cached) {
             try {
               const cachedData = JSON.parse(cached);
-              const favoritesWithFlag = (cachedData.results || []).map(
+              const payload = cachedData?.data || cachedData;
+              const favoritesWithFlag = (payload?.results || []).map(
                 (card: WineCard) => ({
                   ...card,
                   isFavorite: true,
@@ -128,7 +133,7 @@ function ClientFavoritesPage() {
   // Fetch favorites when sort changes
   useEffect(() => {
     fetchFavorites(true, true);
-  }, [filters.sort?.field, filters.sort?.direction]);
+  }, [filters.sort?.field, filters.sort?.direction, fetchFavorites]);
 
   const handleToggleFavorite = async (cardId: string): Promise<void> => {
     const token = localStorage.getItem("token");
@@ -366,12 +371,12 @@ function ClientFavoritesPage() {
                     <p className="text-rose-500 dark:text-rose-500 text-sm mt-2">
                       Додавайте вина до улюблених, натискаючи на сердечко
                     </p>
-                    <a
+                    <Link
                       href="/cards"
                       className="inline-block mt-4 px-6 py-2 bg-rose-600 dark:bg-rose-700 text-white rounded-full font-medium hover:bg-rose-700 dark:hover:bg-rose-600 transition-colors"
                     >
                       Переглянути каталог
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ) : (

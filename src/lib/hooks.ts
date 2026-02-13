@@ -281,11 +281,3 @@ export function useDebouncedFilters<T>(initialFilters: T, delay: number = 500) {
 
   return { filters, setFilters, debouncedFilters };
 }
-
-export default {
-  useHybridCache,
-  useOptimisticList,
-  useOffline,
-  useCacheStats,
-  useDebouncedFilters,
-};

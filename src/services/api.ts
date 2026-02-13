@@ -390,12 +390,14 @@ export const cardsAPI = {
     // Очищуємо кеш коментарів
     if (typeof window !== "undefined") {
       const commentsPrefix = `wine-cache:comments:`;
+      const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith(commentsPrefix) && key.includes(cardId)) {
-          localStorage.removeItem(key);
+          keysToRemove.push(key);
         }
       }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
       // Очищуємо деталі картки
       hybridCache.remove(generateCacheKey("card", cardId));
     }
@@ -412,12 +414,14 @@ export const cardsAPI = {
     // Очищуємо кеш
     if (typeof window !== "undefined") {
       const commentsPrefix = `wine-cache:comments:`;
+      const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith(commentsPrefix) && key.includes(cardId)) {
-          localStorage.removeItem(key);
+          keysToRemove.push(key);
         }
       }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
       hybridCache.remove(generateCacheKey("card", cardId));
     }
 

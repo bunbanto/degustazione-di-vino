@@ -95,19 +95,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Prevent flash of wrong theme - render with correct theme immediately
   if (!mounted) {
-    // Apply theme synchronously before render to prevent flash
-    if (typeof window !== "undefined") {
-      if (isHomePage) {
-        document.documentElement.classList.remove("dark");
-      } else {
-        const currentTheme = getInitialTheme();
-        if (currentTheme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-      }
-    }
     return <>{children}</>;
   }
 

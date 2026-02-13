@@ -78,9 +78,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
           if (cached) {
             try {
               const cachedData = JSON.parse(cached);
-              setCards(cachedData.cards || []);
-              setTotalPages(cachedData.totalPages || 1);
-              setTotalCount(cachedData.total || 0);
+              const payload = cachedData?.data || cachedData;
+              setCards(payload?.cards || []);
+              setTotalPages(payload?.totalPages || 1);
+              setTotalCount(payload?.total || 0);
               setError("Офлайн режим - показані кешовані дані");
               return;
             } catch (e) {

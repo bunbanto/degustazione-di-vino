@@ -4,8 +4,9 @@ dist
 build
 *.log
 npm-debug.log*
-.env*.local
+.env.local
 .env
+
 .DS_Store
 coverage
 .vercel
