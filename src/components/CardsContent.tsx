@@ -197,6 +197,17 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleRandomWine = () => {
+    if (!cards.length) return;
+
+    const randomIndex = Math.floor(Math.random() * cards.length);
+    const randomCard = cards[randomIndex];
+
+    if (randomCard?._id) {
+      router.push(`/cards/${randomCard._id}`);
+    }
+  };
+
   const handleRate = async (id: string, rating: number): Promise<void> => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -485,9 +496,15 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                         </button>
                       </div>
                     </div>
-                    <div className="text-rose-600 dark:text-rose-500 text-sm">
-                      {totalCount} вин
-                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRandomWine}
+                      disabled={!cards.length}
+                      className="liquid-glass px-4 py-2 rounded-xl text-sm font-medium text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Відкрити випадкове вино"
+                    >
+                      Випадкове вино
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
