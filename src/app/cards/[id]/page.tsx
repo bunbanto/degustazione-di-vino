@@ -7,7 +7,8 @@ interface PageProps {
 
 async function getCardData(id: string) {
   const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://wine-server-b5gr.onrender.com";
 
   try {
     const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
