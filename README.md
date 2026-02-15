@@ -112,6 +112,11 @@ npm run dev
 
 Базовий URL налаштовується через `NEXT_PUBLIC_API_URL`.
 
+### Backend ресурси
+
+- API docs (Swagger): `https://wine-server-b5gr.onrender.com/docs/`
+- Backend repository: `https://github.com/bunbanto/vine-server`
+
 ## 🎨 UI/UX підхід
 
 - Glassmorphism стиль інтерфейсу
