@@ -2,354 +2,133 @@
 
 <div align="center">
 
-![Next.js](https://img.shields.io/badge/Next.js-14.2.3-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.4.5-blue?style=for-the-badge&logo=typescript)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.3-38bdf8?style=for-the-badge&logo=tailwindcss)
-![Zustand](https://img.shields.io/badge/Zustand-5.0.10-purple?style=for-the-badge&logo=zustand)
-![Express](https://img.shields.io/badge/Express-5.2.1-gray?style=for-the-badge&logo=express)
-![MongoDB](https://img.shields.io/badge/MongoDB-7.0.0-green?style=for-the-badge&logo=mongodb)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue?style=for-the-badge&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8?style=for-the-badge&logo=tailwindcss)
+![React](https://img.shields.io/badge/React-18-149eca?style=for-the-badge&logo=react)
+![Zustand](https://img.shields.io/badge/Zustand-State_Management-7b3f00?style=for-the-badge)
 
-**Ваш провідник у світі вин.**  
-Відкривайте, оцінюйте та діліться враженнями про найкращі вина з усього світу.
+**Естетичний wine‑catalog застосунок з оцінками, коментарями та персональними добірками.**
 
-[Проєкт](#про-проєкт) • [Функції](#ключові-функції) • [Архітектура](#архітектура) • [Встановлення](#встановлення) • [Сервер](#сервер)
-
----
+[Швидкий старт](#-швидкий-старт) • [Функціонал](#-можливості) • [Маршрути](#-маршрути) • [Стек](#-технології)
 
 </div>
 
-## 🍇 Про проєкт
+## ✨ Про проєкт
 
-**Degustazione di Vino** — це повномасштабний веб-додаток для любителів вин, побудований на сучасному стеку технологій. Додаток складається з двох частин:
+`Degustazione di Vino` це фронтенд-застосунок на `Next.js App Router` для спільноти поціновувачів вина.
 
-| Частина         | Опис                                  |
-| --------------- | ------------------------------------- |
-| 🌐 **Frontend** | Next.js 14 додаток з Glassmorphism UI |
-| 🔧 **Backend**  | Express.js REST API з MongoDB         |
+Ключова ідея: дати користувачу зручний спосіб знайти вино, оцінити його, додати до обраного і зберігати власний смак у персональному профілі.
 
-### ✨ Особливості дизайну
+## 🌟 Можливості
 
-- 🎨 **Glassmorphism** — ефект матового скла
-- 🌓 **Темна/світла тема** — повна підтримка режимів
-- 📱 **Адаптивний дизайн** — працює на всіх пристроях
-- ✨ **Плавні анімації** — з butter-smooth переходами
+- `Каталог вин`: пошук, фільтри, сортування, пагінація.
+- `Детальна картка`: опис, атрибути, рейтинг, коментарі.
+- `Оцінювання`: рейтинг 0–10 з кроком 0.5.
+- `Коментарі`: додавання та видалення коментарів.
+- `Улюблені`: персональна сторінка обраних вин.
+- `Авторизація`: реєстрація/вхід, збереження сесії через `localStorage`.
+- `Профіль`: базова інформація та статистика користувача.
+- `Створення картки`: захищена форма з upload зображення.
+- `Оптимістичні оновлення`: швидка реакція інтерфейсу на дії користувача.
+- `Hybrid cache`: кешування в `localStorage` з TTL і stale-while-revalidate підходом.
 
----
+## 🧱 Технології
 
-## 🌟 Ключові функції
+- `Next.js 15` (App Router)
+- `React 18`
+- `TypeScript`
+- `Tailwind CSS`
+- `Zustand` (+ persist middleware)
+- `Axios`
 
-| Функція               | Опис                                                      |
-| --------------------- | --------------------------------------------------------- |
-| 🔐 **Автентифікація** | JWT авторизація з localStorage, сторінки входу/реєстрації |
-| 📚 **Каталог вин**    | Сітка карток з фільтрацією, пошуком та пагінацією         |
-| ⭐ **Система оцінок** | Рейтинг 1-10 балів з кроком 0.5                           |
-| 💬 **Коментарі**      | CRUD операції з пагінацією (10 на сторінку)               |
-| ❤️ **Улюблені**       | Додавання в обране з оптимістичними оновленнями           |
-| 🏠 **Профіль**        | Перегляд та редагування даних користувача                 |
-| ➕ **Додавання вин**  | Створення нових карток (захищені маршрути)                |
+## 🗂 Структура проєкту
 
----
-
-## 🏗 Архітектура
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      Degustazione di Vino                       │
-├─────────────────────────────┬───────────────────────────────────┤
-│      🌐 Frontend            │         🔧 Backend                │
-│   Next.js 14 + TypeScript   │      Express.js + MongoDB         │
-├─────────────────────────────┼───────────────────────────────────┤
-│  • App Router               │  • REST API                       │
-│  • Zustand Store            │  • JWT Authentication             │
-│  • Tailwind CSS             │  • Cloudinary Upload              │
-│  • Axios Client             │  • Rate Limiting                  │
-└─────────────────────────────┴───────────────────────────────────┘
+```text
+src/
+├── app/                  # Роутинг і сторінки (App Router)
+│   ├── cards/            # Каталог і перегляд картки
+│   ├── favorites/        # Улюблені
+│   ├── add-card/         # Додавання картки (protected)
+│   ├── login/            # Вхід/реєстрація
+│   └── profile/          # Профіль користувача
+├── components/           # UI-компоненти (картки, фільтри, модалки, navbar)
+├── services/api.ts       # HTTP-клієнт і методи для API
+├── lib/                  # Кеш, optimistic updates, hooks
+├── store/                # Zustand store
+└── types/                # TypeScript типи
 ```
 
----
+## 🧭 Маршрути
 
-## 🛠 Технологічний стек
+- `/` — лендінг
+- `/login` — вхід та реєстрація
+- `/cards` — каталог вин
+- `/cards/[id]` — деталі конкретної картки
+- `/favorites` — улюблені вина користувача
+- `/add-card` — створення нової картки
+- `/profile` — особистий кабінет
 
-### Frontend
+## ⚙️ Швидкий старт
 
-| Технологія   | Версія | Призначення                  |
-| ------------ | ------ | ---------------------------- |
-| Next.js      | 14.2.3 | React Framework (App Router) |
-| TypeScript   | 5.4.5  | Типізація                    |
-| Tailwind CSS | 3.4.3  | Стилізація                   |
-| Zustand      | 5.0.10 | State Management             |
-| Axios        | 1.7.2  | HTTP Client                  |
-| React        | 18.3.1 | UI Library                   |
-
-### Backend
-
-| Технологія | Версія | Призначення          |
-| ---------- | ------ | -------------------- |
-| Express    | 5.2.1  | Node.js Framework    |
-| MongoDB    | 7.0.0  | Database             |
-| Mongoose   | 9.1.1  | ODM                  |
-| JWT        | 9.0.3  | Authentication       |
-| Cloudinary | 1.41.3 | Image Upload         |
-| Joi        | 18.0.2 | Validation           |
-| Helmet     | 8.1.0  | Security Headers     |
-| Morgan     | 1.10.0 | HTTP Request Logging |
-
----
-
-## 📁 Структура проєкту
-
-```
-degustazione-di-vino/              # 🌐 Frontend (Next.js)
-├── public/                        # Статичні файли
-├── src/
-│   ├── app/                       # Next.js 14 App Router
-│   │   ├── page.tsx              # Головна сторінка
-│   │   ├── login/                # Автентифікація
-│   │   ├── cards/                # Каталог вин
-│   │   │   ├── page.tsx          # Каталог з фільтрами
-│   │   │   └── [id]/             # Деталі картки
-│   │   ├── favorites/            # Улюблені користувача
-│   │   ├── add-card/             # Додати вино (protected)
-│   │   └── profile/              # Профіль користувача
-│   ├── components/               # React компоненти
-│   │   ├── WineCard.tsx          # Картка вина
-│   │   ├── WineCardModal.tsx     # Модальне вікно
-│   │   ├── FilterPanel.tsx       # Панель фільтрів
-│   │   ├── Navbar.tsx            # Навігація
-│   │   └── CommentsSection.tsx    # Коментарі
-│   ├── services/
-│   │   └── api.ts                # Axios API клієнт
-│   ├── store/
-│   │   └── userStore.ts          # Zustand store
-│   ├── lib/
-│   │   ├── cache.ts              # Hybrid cache
-│   │   └── hooks.ts              # Custom hooks
-│   └── types/
-│       └── index.ts              # TypeScript interfaces
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── next.config.js
-
-vine-server/                       # 🔧 Backend (Express.js)
-├── src/
-│   ├── controllers/              # Контролери
-│   │   ├── auth.js               # Авторизація
-│   │   ├── cards.js              # Картки вин
-│   │   └── favorites.js          # Улюблені
-│   ├── models/                    # Mongoose моделі
-│   │   ├── user.js               # Модель користувача
-│   │   └── card.js               # Модель картки вина
-│   ├── routes/                    # API маршрути
-│   │   └── api/
-│   │       ├── auth.js
-│   │       ├── cards.js
-│   │       └── favorites.js
-│   ├── middlewares/              # Middleware
-│   │   ├── auth.js               # JWT верифікація
-│   │   └── upload.js             # Завантаження файлів
-│   ├── db/
-│   │   └── connection.js         # Підключення до MongoDB
-│   ├── server.js                 # Точка входу
-│   └── index.js                  # Ініціалізація
-├── package.json
-└── .env                          # Змінні середовища
-```
-
----
-
-## 🗄 Моделі бази даних
-
-### Wine Card (Card Schema)
-
-```javascript
-{
-  name: String,           // Назва вина
-  type: String,           // secco | abboccato | amabile | dolce
-  color: String,          // bianco | rosso | rosato
-  alcohol: Number,        // Відсоток алкоголю
-  winery: String,         // Виробник
-  region: String,         // Регіон
-  country: String,        // Країна
-  anno: Number,          // Рік витримки
-  img: String,           // URL зображення (Cloudinary)
-  price: Number,         // Ціна
-  frizzante: Boolean,   // Ігристе
-  description: String,   // Опис
-  rating: Number,        // Середній рейтинг (0-10)
-  ratings: [{            // Оцінки користувачів
-    userId: ObjectId,
-    username: String,
-    value: Number
-  }],
-  comments: [{           // Коментарі
-    userId: ObjectId,
-    username: String,
-    text: String,
-    createdAt: Date
-  }],
-  owner: ObjectId,       // Автор картки
-  favorites: [ObjectId]  // Користувачі, що додали в улюблені
-}
-```
-
-### User (User Schema)
-
-```javascript
-{
-  username: String,       // Унікальне ім'я
-  email: String,          // Email
-  password: String,      // Хеш пароля (bcrypt)
-  role: String,          // Роль користувача
-  createdAt: Date        // Дата реєстрації
-}
-```
-
----
-
-## 🎯 API Ендпоінти
-
-### Authentication
-
-| Метод | Ендпоінт             | Опис       |
-| ----- | -------------------- | ---------- |
-| POST  | `/api/auth/register` | Реєстрація |
-| POST  | `/api/auth/login`    | Вхід       |
-| POST  | `/api/auth/logout`   | Вихід      |
-
-### Cards
-
-| Метод  | Ендпоінт                  | Опис                                  |
-| ------ | ------------------------- | ------------------------------------- |
-| GET    | `/api/cards`              | Список карток (фільтрація, пагінація) |
-| GET    | `/api/cards/:id`          | Одна картка                           |
-| POST   | `/api/cards`              | Створити картку                       |
-| PUT    | `/api/cards/:id`          | Редагувати картку                     |
-| DELETE | `/api/cards/:id`          | Видалити картку                       |
-| POST   | `/api/cards/:id/rate`     | Оцінити вино                          |
-| GET    | `/api/cards/:id/comments` | Коментарі картки                      |
-| POST   | `/api/cards/:id/comments` | Додати коментар                       |
-
-### Favorites
-
-| Метод | Ендпоінт                 | Опис                        |
-| ----- | ------------------------ | --------------------------- |
-| GET   | `/api/favorites`         | Улюблені картки користувача |
-| POST  | `/api/favorites/:cardId` | Додати/видалити з улюблених |
-
----
-
-## 🚀 Встановлення
-
-### 📋 Вимоги
-
-- Node.js 18+
-- MongoDB (локально або Atlas)
-- npm / yarn / pnpm
-
-### 1. Клонування
+### 1. Встановлення
 
 ```bash
-# Frontend
-git clone https://github.com/your-username/degustazione-di-vino.git
-cd degustazione-di-vino
-
-# Backend
-git clone https://github.com/your-username/vine-server.git
-cd vine-server
-```
-
-### 2. Встановлення залежностей
-
-```bash
-# Frontend
-cd degustazione-di-vino
-npm install
-
-# Backend
-cd vine-server
 npm install
 ```
 
-### 3. Налаштування змінних середовища
+### 2. Налаштування змінних оточення
 
-**Frontend** — створіть `.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3000/
-```
-
-**Backend** — створіть `.env`:
+Створіть `.env.local`:
 
 ```env
-PORT=4000
-MONGODB_URI=mongodb://localhost:27017/vine-db
-JWT_SECRET=your-super-secret-jwt-key
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
+NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
 
-### 4. Запуск
+Якщо змінну не вказати, застосунок використовує fallback API URL, зашитий у коді.
+
+### 3. Запуск dev-сервера
 
 ```bash
-# Terminal 1 - Backend
-cd vine-server
-npm run dev
-
-# Terminal 2 - Frontend
-cd degustazione-di-vino
 npm run dev
 ```
 
-| Сервіс      | URL                                            |
-| ----------- | ---------------------------------------------- |
-| Frontend    | [http://localhost:3000](http://localhost:3000) |
-| Backend API | [http://localhost:4000](http://localhost:4000) |
+Після старту відкрийте `http://localhost:3000`.
 
----
+## 📜 Доступні скрипти
 
-## 🏃 Production Build
+- `npm run dev` — запуск у dev-режимі
+- `npm run build` — production build
+- `npm run start` — запуск production build
+- `npm run lint` — перевірка ESLint
+
+## 🔌 API інтеграція
+
+Фронтенд очікує зовнішній backend з такими основними групами ендпоінтів:
+
+- `auth`: реєстрація, вхід, профіль
+- `cards`: список, деталі, створення, редагування, видалення, рейтинг, коментарі
+- `favorites`: отримання, додавання/видалення, перевірка стану
+
+Базовий URL налаштовується через `NEXT_PUBLIC_API_URL`.
+
+## 🎨 UI/UX підхід
+
+- Glassmorphism стиль інтерфейсу
+- Світла/темна теми
+- Адаптивний layout
+- Плавні анімації та акцент на візуальну презентацію контенту
+
+## 🚀 Production notes
+
+- Перед деплоєм перевірте коректний `NEXT_PUBLIC_API_URL`.
+- Для стабільності продакшн-збірки виконайте:
 
 ```bash
-# Frontend
+npm run lint
 npm run build
-npm start
-
-# Backend
-npm run start
 ```
 
 ---
 
-## 📸 Скріншоти
-
-<div align="center">
-
-| Головна сторінка                                                            |
-| --------------------------------------------------------------------------- |
-| ![Home](https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400) |
-
-</div>
-
----
-
-## 📄 Ліцензія
-
-Цей проєкт розповсюджується під MIT License.
-
----
-
-## 👨‍💻 Автор
-
-**Yurii Fishbakh** - [GitHub](https://github.com/bunbanto)
-
----
-
-<div align="center">
-
-⭐ **Сподобався проєкт? Поставте зірочку!** ⭐
-
-_Зроблено з ❤️ та 🍷_
-
-</div>
+**Degustazione di Vino** створений як сучасний showcase-проєкт з акцентом на дизайн, UX і практичну клієнтську архітектуру.
