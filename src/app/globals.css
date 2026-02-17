@@ -495,8 +495,7 @@ body {
 /* ==================== Force light theme overrides ==================== */
 
 /* Force light theme on body for main page */
-body:has(main),
-:global(.dark) body:has(main) {
+body:has(main.home-page) {
   background: linear-gradient(
     135deg,
     rgba(255, 251, 235, 0.98) 0%,
@@ -506,66 +505,54 @@ body:has(main),
 }
 
 /* Force light theme on Navbar for main page */
-body:has(main) nav,
-:global(.dark) body:has(main) nav {
+body:has(main.home-page) nav {
   background: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(20px) !important;
 }
 
-body:has(main) nav a,
-body:has(main) nav span,
-:global(.dark) body:has(main) nav a,
-:global(.dark) body:has(main) nav span {
+body:has(main.home-page) nav a,
+body:has(main.home-page) nav span {
   color: #9f1239 !important;
 }
 
-body:has(main) nav button,
-:global(.dark) body:has(main) nav button {
+body:has(main.home-page) nav button {
   background: rgba(255, 240, 245, 0.8) !important;
   color: #9f1239 !important;
 }
 
-body:has(main) nav .text-gray-600,
-body:has(main) nav .text-gray-500,
-:global(.dark) body:has(main) nav .text-gray-600,
-:global(.dark) body:has(main) nav .text-gray-500 {
+body:has(main.home-page) nav .text-gray-600,
+body:has(main.home-page) nav .text-gray-500 {
   color: #9f1239 !important;
 }
 
-body:has(main) nav .bg-gray-100,
-:global(.dark) body:has(main) nav .bg-gray-100 {
+body:has(main.home-page) nav .bg-gray-100 {
   background-color: rgba(255, 240, 245, 0.8) !important;
 }
 
-body:has(main) nav .border-gray-100,
-:global(.dark) body:has(main) nav .border-gray-100 {
+body:has(main.home-page) nav .border-gray-100 {
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-body:has(main) nav .text-gray-300,
-:global(.dark) body:has(main) nav .text-gray-300 {
+body:has(main.home-page) nav .text-gray-300 {
   color: #9f1239 !important;
 }
 
 /* Force light theme on Features section for main page */
-body:has(main) section h2,
-body:has(main) section h3,
-body:has(main) section p,
-:global(.dark) body:has(main) section h2,
-:global(.dark) body:has(main) section h3,
-:global(.dark) body:has(main) section p {
+body:has(main.home-page) section h2,
+body:has(main.home-page) section h3,
+body:has(main.home-page) section p {
   color: #9f1239 !important;
 }
 
-body:has(main) section h2 {
+body:has(main.home-page) section h2 {
   color: #742228 !important;
 }
 
-body:has(main) section h3 {
+body:has(main.home-page) section h3 {
   color: #9f1239 !important;
 }
 
-body:has(main) section p {
+body:has(main.home-page) section p {
   color: #be123c !important;
 }
 
