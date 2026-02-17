@@ -446,15 +446,19 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                 <>
                   {/* Sort Controls */}
                   <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
-                        Сортування:
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={filters.sort?.field || "name"}
-                          onChange={(e) =>
-                            handleFilterChange({
+	                    <div className="flex items-center gap-2">
+	                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
+	                        Сортування:
+	                      </span>
+	                      <div className="flex items-center gap-2">
+	                        <label htmlFor="cards-sort-field" className="sr-only">
+	                          Поле сортування
+	                        </label>
+	                        <select
+	                          id="cards-sort-field"
+	                          value={filters.sort?.field || "name"}
+	                          onChange={(e) =>
+	                            handleFilterChange({
                               ...filters,
                               sort: {
                                 field: e.target.value as SortField,

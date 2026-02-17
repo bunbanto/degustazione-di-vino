@@ -116,10 +116,14 @@ export default function FilterPanel({
 
       {/* Wine Type with liquid select */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="wine-type-filter"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           Тип вина
         </label>
         <select
+          id="wine-type-filter"
           value={localFilters.type || ""}
           onChange={(e) => handleChange("type", e.target.value)}
           className="liquid-select"
@@ -135,10 +139,14 @@ export default function FilterPanel({
 
       {/* Wine Color with liquid select */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label
+          htmlFor="wine-color-filter"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        >
           Колір
         </label>
         <select
+          id="wine-color-filter"
           value={localFilters.color || ""}
           onChange={(e) => handleChange("color", e.target.value)}
           className="liquid-select"

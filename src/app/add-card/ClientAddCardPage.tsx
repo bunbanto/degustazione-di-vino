@@ -200,10 +200,14 @@ function ClientAddCardPage() {
               {/* Type and Color Row */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="add-card-type"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Тип вина *
                   </label>
                   <select
+                    id="add-card-type"
                     value={formData.type}
                     onChange={(e) => handleChange("type", e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
@@ -217,10 +221,14 @@ function ClientAddCardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="add-card-color"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Колір *
                   </label>
                   <select
+                    id="add-card-color"
                     value={formData.color}
                     onChange={(e) => handleChange("color", e.target.value)}
                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
