@@ -299,7 +299,7 @@ export default function WineCardComponent({
           />
 
           {/* Glass badges */}
-          <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
+          <div className="absolute top-4 left-4 flex flex-col items-start gap-2 z-20">
             {card.color && (
               <div
                 className={`${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium shadow-lg border border-white/20 ${getColorBadgeStyle(card.color).border || ""}`}
