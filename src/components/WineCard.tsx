@@ -84,6 +84,7 @@ export default function WineCardComponent({
 
   // Edit modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   // Refs для відстеження стану
   const previousRatingRef = useRef<number | null>(null);
@@ -276,6 +277,10 @@ export default function WineCardComponent({
   const currentRating = isRatingLoading
     ? userRating || 0
     : hoverRating || userRating || 0;
+  const imageUrl =
+    card.img ||
+    card.image ||
+    "https://res.cloudinary.com/demo/image/upload/wines/default.jpg";
 
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -285,19 +290,16 @@ export default function WineCardComponent({
         {/* Image container with glass overlay */}
         <div
           className="relative aspect-[4/3] overflow-hidden rounded-t-[32px] bg-gray-100 dark:bg-dark-800 flex items-center justify-center"
-          style={{ cursor: "default" }}
+          style={{ cursor: "zoom-in" }}
+          onClick={() => setIsImageModalOpen(true)}
         >
           {/* Glass overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
 
           <img
-            src={
-              card.img ||
-              card.image ||
-              "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
-            }
+            src={imageUrl}
             alt={card.name}
-            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 cursor-zoom-in"
           />
 
           {/* Glass badges */}
@@ -363,6 +365,7 @@ export default function WineCardComponent({
           <div className="absolute inset-0 bg-black/0 dark:bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center z-30">
             <Link
               href={`/cards/${card._id}`}
+              onClick={(e) => e.stopPropagation()}
               className="text-white opacity-0 group-hover:opacity-100 transition-all duration-500 font-semibold liquid-glass px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 cursor-pointer"
             >
               Детальніше →
@@ -373,8 +376,7 @@ export default function WineCardComponent({
         {/* Content with liquid glass effect */}
         <div className="p-5">
           <h3
-            className="text-xl font-bold text-rose-900 dark:text-rose-300 mb-1 line-clamp-1 cursor-pointer hover:text-rose-700 dark:hover:text-rose-400 transition-colors"
-            onClick={() => router.push(`/cards/${card._id}`)}
+            className="text-xl font-bold text-rose-900 dark:text-rose-300 mb-1 line-clamp-1"
           >
             {card.name}
           </h3>
@@ -582,6 +584,40 @@ export default function WineCardComponent({
           }
         }}
       />
+
+      {isImageModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+          onClick={() => setIsImageModalOpen(false)}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 liquid-glass rounded-full p-2 text-white/80 hover:text-white hover:bg-white/20 transition-all z-10"
+            onClick={() => setIsImageModalOpen(false)}
+            aria-label="Закрити модалку з фото"
+          >
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <img
+            src={imageUrl}
+            alt={card.name}
+            className="max-h-[90vh] max-w-[95vw] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </>
   );
 }
