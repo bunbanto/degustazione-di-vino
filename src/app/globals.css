@@ -27,7 +27,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Dark mode specific body styles */
+/* Стилі body для темної теми */
 .dark body {
   background: linear-gradient(
       135deg,
@@ -38,7 +38,7 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-/* Remove default browser outline and use custom focus styles */
+/* Прибираємо стандартний outline браузера й задаємо власний focus-стиль */
 *:focus {
   outline: none;
 }
@@ -48,7 +48,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Custom ring color for focus - wine/rose color */
+/* Кастомний колір фокуса у винно-рожевій палітрі */
 * {
   --tw-ring-color: rgb(225 29 72 / 0.5) !important;
 }
@@ -65,9 +65,9 @@ body {
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
 }
 
-/* ==================== LIQUID GLASS CORE STYLES ==================== */
+/* ==================== БАЗОВІ СТИЛІ LIQUID GLASS ==================== */
 
-/* Base liquid glass effect */
+/* Базовий ефект liquid glass */
 .liquid-glass {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(24px) saturate(180%);
@@ -79,7 +79,7 @@ body {
     inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Liquid glass for fixed navbar - maintains blur when scrolling */
+/* Liquid glass для фіксованої навігації з розмиттям під час скролу */
 .liquid-glass-safe {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px) saturate(180%);
@@ -91,7 +91,7 @@ body {
     inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Dark mode liquid glass for navbar */
+/* Liquid glass для навігації в темній темі */
 .dark .liquid-glass-safe {
   background: rgba(30, 41, 59, 0.7);
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
@@ -101,7 +101,7 @@ body {
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Heavy liquid glass for cards */
+/* Посилений liquid glass для карток */
 .liquid-glass-heavy {
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(32px) saturate(200%);
@@ -113,7 +113,7 @@ body {
     inset 0 -2px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Dark mode liquid glass */
+/* Liquid glass у темній темі */
 .dark .liquid-glass,
 .liquid-glass.dark {
   background: rgba(30, 41, 59, 0.35);
@@ -134,7 +134,7 @@ body {
     inset 0 -2px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Glass card with gradient border effect */
+/* Скляна картка з градієнтним контуром */
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px) saturate(150%);
@@ -142,15 +142,15 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-/* Dark mode glass card */
+/* Скляна картка в темній темі */
 .dark .glass-card {
   background: rgba(30, 41, 59, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* ==================== FLUID SHAPES & ANIMATIONS ==================== */
+/* ==================== ПЛАВНІ ФОРМИ ТА АНІМАЦІЇ ==================== */
 
-/* Fluid border radius for organic feel */
+/* Плавні радіуси для органічного вигляду */
 .fluid-rounded-xl {
   border-radius: 24px;
 }
@@ -167,7 +167,7 @@ body {
   border-radius: 9999px;
 }
 
-/* Liquid button base */
+/* Базові стилі кнопки liquid */
 .liquid-btn {
   padding: 0.75rem 1.5rem;
   border-radius: 16px;
@@ -193,7 +193,7 @@ body {
   transform: translateY(0);
 }
 
-/* Wine gradient button */
+/* Кнопка з винним градієнтом */
 .liquid-btn-wine {
   background: linear-gradient(135deg, rgba(219, 75, 81, 0.9) 0%, rgba(198, 54, 59, 0.9) 100%);
   color: white;
@@ -210,7 +210,7 @@ body {
     inset 0 2px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* Floating animation */
+/* Анімація плавання */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
@@ -224,7 +224,7 @@ body {
   animation: float 6s ease-in-out infinite;
 }
 
-/* Liquid shimmer effect */
+/* Ефект мерехтіння liquid */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -245,7 +245,7 @@ body {
   animation: shimmer 2s infinite;
 }
 
-/* Inner glow effect */
+/* Ефект внутрішнього сяйва */
 @keyframes innerGlow {
   0%, 100% {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
@@ -259,7 +259,7 @@ body {
   animation: innerGlow 3s ease-in-out infinite;
 }
 
-/* ==================== INPUT STYLES ==================== */
+/* ==================== СТИЛІ ПОЛІВ ВВЕДЕННЯ ==================== */
 
 .liquid-input {
   width: 100%;
@@ -292,7 +292,7 @@ body {
   background: rgba(30, 41, 59, 0.7);
 }
 
-/* ==================== SELECT & CHECKBOX STYLES ==================== */
+/* ==================== СТИЛІ SELECT ТА CHECKBOX ==================== */
 
 .liquid-select {
   width: 100%;
@@ -327,7 +327,7 @@ body {
   background-color: rgba(30, 41, 59, 0.7);
 }
 
-/* Liquid checkbox toggle */
+/* Перемикач checkbox у стилі liquid */
 .liquid-toggle {
   position: relative;
   width: 44px;
@@ -362,9 +362,9 @@ body {
   background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9));
 }
 
-/* ==================== GRADIENT BACKGROUNDS ==================== */
+/* ==================== ГРАДІЄНТНІ ФОНИ ==================== */
 
-/* Wine gradient with glass feel */
+/* Винний градієнт із ефектом скла */
 .wine-gradient-glass {
   background: linear-gradient(135deg, 
     rgba(116, 34, 40, 0.9) 0%, 
@@ -375,7 +375,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Gold gradient accent */
+/* Золотий градієнтний акцент */
 .gold-gradient-glass {
   background: linear-gradient(135deg, 
     rgba(180, 83, 9, 0.9) 0%, 
@@ -386,7 +386,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Subtle gradient overlay */
+/* Делікатний градієнтний оверлей */
 .gradient-overlay {
   background: linear-gradient(
     135deg,
@@ -397,9 +397,9 @@ body {
   backdrop-filter: blur(8px);
 }
 
-/* ==================== HOVER EFFECTS ==================== */
+/* ==================== ЕФЕКТИ ПРИ НАВЕДЕННІ ==================== */
 
-/* Glass hover effect */
+/* Ефект скла при наведенні */
 .glass-hover {
   transition: all 0.3s ease;
 }
@@ -422,7 +422,7 @@ body {
     inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Ripple effect base */
+/* Базовий ефект хвилі */
 .ripple {
   position: relative;
   overflow: hidden;
@@ -445,7 +445,7 @@ body {
   }
 }
 
-/* ==================== iPhone Safe Areas ==================== */
+/* ==================== Безпечні відступи iPhone ==================== */
 
 @supports (padding: env(safe-area-inset-bottom)) {
   .safe-area-bottom {
@@ -465,7 +465,7 @@ body {
   }
 }
 
-/* ==================== Heart Beat Animation ==================== */
+/* ==================== Анімація серцебиття ==================== */
 
 @keyframes heartBeat {
   0% {
@@ -485,16 +485,16 @@ body {
   }
 }
 
-/* ==================== Dark Mode Transitions ==================== */
+/* ==================== Переходи для темної теми ==================== */
 
 .dark,
 .dark * {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
-/* ==================== Force light theme overrides ==================== */
+/* ==================== Примусове перевизначення світлої теми ==================== */
 
-/* Force light theme on body for main page */
+/* Примусова світла тема для body на головній */
 body:has(main.home-page) {
   background: linear-gradient(
     135deg,
@@ -504,7 +504,7 @@ body:has(main.home-page) {
   ) rgb(255, 251, 235) !important;
 }
 
-/* Force light theme on Navbar for main page */
+/* Примусова світла тема для Navbar на головній */
 body:has(main.home-page) nav {
   background: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(20px) !important;
@@ -537,7 +537,7 @@ body:has(main.home-page) nav .text-gray-300 {
   color: #9f1239 !important;
 }
 
-/* Force light theme on Features section for main page */
+/* Примусова світла тема для секції Features на головній */
 body:has(main.home-page) section h2,
 body:has(main.home-page) section h3,
 body:has(main.home-page) section p {
@@ -556,7 +556,7 @@ body:has(main.home-page) section p {
   color: #be123c !important;
 }
 
-/* ==================== Input Dark Mode Overrides ==================== */
+/* ==================== Перевизначення полів вводу для темної теми ==================== */
 
 .dark input,
 .dark select,

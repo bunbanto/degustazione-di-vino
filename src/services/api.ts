@@ -88,14 +88,16 @@ export function getApiErrorMessage(
 
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
+
+    if (status === 401) return "Сесія завершилась. Увійдіть у систему повторно.";
+    if (status === 403) return "У вас немає доступу до цієї дії.";
+
     const serverMessage = getMessageFromPayload(error.response?.data);
 
     if (serverMessage) {
       return serverMessage;
     }
 
-    if (status === 401) return "Сесія завершилась. Увійдіть у систему повторно.";
-    if (status === 403) return "У вас немає доступу до цієї дії.";
     if (status === 404) return "Запитувані дані не знайдено.";
     if (status === 422) return "Перевірте правильність заповнених даних.";
     if (status === 429) return "Забагато запитів. Спробуйте трохи пізніше.";
@@ -132,14 +134,14 @@ const CACHE_KEYS = {
   user: () => hybridCache["generateKey"]("user", "profile"),
 };
 
-// Helper для генерації ключа кешу
+// Допоміжна функція для генерації ключа кешу
 function generateCacheKey(type: string, identifier: string | object): string {
   const id =
     typeof identifier === "object" ? JSON.stringify(identifier) : identifier;
   return `wine-cache:${type}:${id}`;
 }
 
-// Auth APIs
+// API авторизації
 export const authAPI = {
   register: async (
     name: string,
@@ -177,9 +179,9 @@ export const authAPI = {
   },
 };
 
-// Cards APIs з кешуванням
+// API карток із кешуванням
 export const cardsAPI = {
-  // Отримати всі картки з кешуванням та stale-while-revalidate
+  // Отримати всі картки з кешуванням і фоновою перевіркою актуальності
   getAll: async (
     filters?: FilterParams,
     pagination?: PaginationParams,
@@ -457,7 +459,7 @@ export const cardsAPI = {
     }
   },
 
-  // Comments APIs
+  // API коментарів
   getComments: async (
     cardId: string,
     page: number = 1,
@@ -532,7 +534,7 @@ export const cardsAPI = {
     return response.data;
   },
 
-  // Favorites APIs з кешуванням та оптимістичним оновленням
+  // API обраного з кешуванням та оптимістичним оновленням
   getFavorites: async (filters?: FilterParams): Promise<FavoritesResponse> => {
     const cacheKey = generateCacheKey("favorites", { filters });
 

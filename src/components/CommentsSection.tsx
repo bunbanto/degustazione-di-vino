@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { Comment, CommentsResponse } from "@/types";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 
@@ -25,6 +26,7 @@ export default function CommentsSection({
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Ref для відстеження оптимістичних оновлень
   const previousCommentsRef = useRef<Comment[] | null>(null);
@@ -63,9 +65,28 @@ export default function CommentsSection({
     fetchComments(1);
   }, [fetchComments]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const syncAuthState = () => {
+      setIsAuthenticated(Boolean(localStorage.getItem("token")));
+    };
+
+    syncAuthState();
+    window.addEventListener("storage", syncAuthState);
+    return () => window.removeEventListener("storage", syncAuthState);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || isAddingRef.current) return;
+
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+      setError("Щоб залишити коментар, увійдіть у систему.");
+      return;
+    }
 
     // Зберігаємо попередній стан
     if (!previousCommentsRef.current) {
@@ -182,32 +203,45 @@ export default function CommentsSection({
       )}
 
       {/* Add comment form */}
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="flex gap-4">
-          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold">
-            {getUserInitial("Ви")}
-          </div>
-          <div className="flex-1">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Напишіть свій коментар..."
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 resize-none"
-              disabled={submitting}
-            />
-            <div className="flex justify-end mt-2">
-              <button
-                type="submit"
-                disabled={submitting || !newComment.trim()}
-                className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? "Відправка..." : "Додати коментар"}
-              </button>
+      {isAuthenticated ? (
+        <form onSubmit={handleSubmit} className="mb-8">
+          <div className="flex gap-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold">
+              {getUserInitial("Ви")}
+            </div>
+            <div className="flex-1">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Напишіть свій коментар..."
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 resize-none"
+                disabled={submitting}
+              />
+              <div className="flex justify-end mt-2">
+                <button
+                  type="submit"
+                  disabled={submitting || !newComment.trim()}
+                  className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? "Відправка..." : "Додати коментар"}
+                </button>
+              </div>
             </div>
           </div>
+        </form>
+      ) : (
+        <div className="mb-8 rounded-xl border border-rose-200/70 bg-rose-50/70 p-4 text-sm text-rose-900 dark:border-rose-800/70 dark:bg-rose-900/20 dark:text-rose-200">
+          Щоб залишити коментар, потрібно{" "}
+          <Link
+            href="/login"
+            className="font-semibold underline underline-offset-2 hover:text-rose-700 dark:hover:text-rose-100"
+          >
+            увійти в акаунт
+          </Link>
+          .
         </div>
-      </form>
+      )}
 
       {/* Comments list */}
       {loading ? (
