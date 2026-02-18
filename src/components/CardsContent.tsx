@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
 import Pagination from "@/components/Pagination";
-import { cardsAPI, cacheUtils } from "@/services/api";
+import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField, SortDirection } from "@/types";
 import { useUserStore } from "@/store/userStore";
 
@@ -97,9 +97,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         } else if (err.response?.status === 403) {
           setError("Доступ заборонено");
         } else {
-          setError(
-            err.response?.data?.message || "Помилка завантаження карток",
-          );
+          setError(getApiErrorMessage(err, "Помилка завантаження карток"));
         }
       } finally {
         if (showLoading) {

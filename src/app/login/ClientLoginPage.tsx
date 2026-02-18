@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { authAPI } from "@/services/api";
+import { authAPI, getApiErrorMessage } from "@/services/api";
 import { useUserStore } from "@/store/userStore";
 
 export default function ClientLoginPage() {
@@ -61,10 +61,8 @@ export default function ClientLoginPage() {
 
         router.push("/cards");
       }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Сталася помилка. Спробуйте ще раз.",
-      );
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Сталася помилка. Спробуйте ще раз."));
     } finally {
       setLoading(false);
     }

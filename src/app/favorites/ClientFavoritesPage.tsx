@@ -6,7 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
-import { cardsAPI, cacheUtils } from "@/services/api";
+import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField } from "@/types";
 import { withAuth } from "@/components/withAuth";
 
@@ -89,9 +89,7 @@ function ClientFavoritesPage() {
         } else if (err.response?.status === 403) {
           setError("Доступ заборонено");
         } else {
-          setError(
-            err.response?.data?.message || "Помилка завантаження улюблених",
-          );
+          setError(getApiErrorMessage(err, "Помилка завантаження улюблених"));
         }
       } finally {
         if (showLoading) {

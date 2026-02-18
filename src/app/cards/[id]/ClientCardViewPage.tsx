@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { cardsAPI, cacheUtils } from "@/services/api";
+import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
 import CommentsSection from "@/components/CommentsSection";
 import EditCardModal from "@/components/EditCardModal";
@@ -64,9 +64,11 @@ export default function ClientCardViewPage() {
         }
       } catch (err: any) {
         if (isMounted) {
-          setError(
-            err.response?.data?.message || "Помилка завантаження картки",
-          );
+          if (err?.response?.status === 404) {
+            setError("Картку не знайдено або її було видалено.");
+          } else {
+            setError(getApiErrorMessage(err, "Помилка завантаження картки"));
+          }
         }
       } finally {
         if (isMounted) {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { cardsAPI } from "@/services/api";
+import { cardsAPI, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
 import { withAuth } from "@/components/withAuth";
 import {
@@ -124,8 +124,8 @@ function ClientAddCardPage() {
     try {
       await cardsAPI.create(formData, imageFile || undefined);
       router.push("/cards");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Помилка створення картки");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Помилка створення картки"));
     } finally {
       setLoading(false);
     }

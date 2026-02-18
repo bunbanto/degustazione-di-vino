@@ -33,6 +33,83 @@ const publicApi = axios.create({
   },
 });
 
+const DEFAULT_ERROR_MESSAGE = "Сталася помилка. Спробуйте ще раз.";
+
+function getMessageFromPayload(payload: unknown): string | null {
+  if (!payload) return null;
+
+  if (typeof payload === "string") {
+    return payload.trim() || null;
+  }
+
+  if (typeof payload !== "object") {
+    return null;
+  }
+
+  const data = payload as {
+    message?: unknown;
+    error?: unknown;
+    errors?: unknown;
+  };
+
+  if (typeof data.message === "string" && data.message.trim()) {
+    return data.message.trim();
+  }
+
+  if (typeof data.error === "string" && data.error.trim()) {
+    return data.error.trim();
+  }
+
+  if (Array.isArray(data.errors) && data.errors.length > 0) {
+    const firstError = data.errors[0] as { message?: unknown } | string;
+    if (typeof firstError === "string" && firstError.trim()) {
+      return firstError.trim();
+    }
+    if (
+      firstError &&
+      typeof firstError === "object" &&
+      typeof firstError.message === "string" &&
+      firstError.message.trim()
+    ) {
+      return firstError.message.trim();
+    }
+  }
+
+  return null;
+}
+
+export function getApiErrorMessage(
+  error: unknown,
+  fallbackMessage: string = DEFAULT_ERROR_MESSAGE,
+): string {
+  if (typeof window !== "undefined" && !navigator.onLine) {
+    return "Немає зʼєднання з інтернетом. Перевірте мережу та спробуйте ще раз.";
+  }
+
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    const serverMessage = getMessageFromPayload(error.response?.data);
+
+    if (serverMessage) {
+      return serverMessage;
+    }
+
+    if (status === 401) return "Сесія завершилась. Увійдіть у систему повторно.";
+    if (status === 403) return "У вас немає доступу до цієї дії.";
+    if (status === 404) return "Запитувані дані не знайдено.";
+    if (status === 422) return "Перевірте правильність заповнених даних.";
+    if (status === 429) return "Забагато запитів. Спробуйте трохи пізніше.";
+    if (status && status >= 500)
+      return "Проблема на сервері. Спробуйте ще раз трохи пізніше.";
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+}
+
 // Додавання токена до запитів
 api.interceptors.request.use((config) => {
   const token =

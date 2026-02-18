@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { cardsAPI } from "@/services/api";
+import { cardsAPI, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
 import {
   WINE_TYPES,
@@ -166,8 +166,8 @@ export default function EditCardModal({
       );
       onSaved();
       onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Помилка збереження картки");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Помилка збереження картки"));
     } finally {
       setSaving(false);
     }
@@ -187,8 +187,8 @@ export default function EditCardModal({
         onSaved();
       }
       onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Помилка видалення картки");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Помилка видалення картки"));
     } finally {
       setSaving(false);
     }

@@ -29,6 +29,8 @@
 - Профіль користувача зі статистикою.
 - Створення нової картки вина.
 - Hybrid cache в `localStorage` (TTL + stale-while-revalidate підхід).
+- Централізована обробка API-помилок з дружніми повідомленнями для користувача (`getApiErrorMessage`).
+- Глобальні сторінки помилок App Router: `error.tsx` (runtime error) та `not-found.tsx` (404).
 - Світла/темна теми (на головній сторінці дизайн зафіксований у світлій стилістиці).
 
 ## Маршрути
@@ -48,8 +50,10 @@ src/
 ├── app/                  # App Router сторінки
 │   ├── add-card/
 │   ├── cards/
+│   ├── error.tsx
 │   ├── favorites/
 │   ├── login/
+│   ├── not-found.tsx
 │   └── profile/
 ├── components/           # UI-компоненти
 ├── contexts/             # ThemeContext

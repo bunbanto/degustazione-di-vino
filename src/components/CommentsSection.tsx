@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Comment, CommentsResponse } from "@/types";
-import { cardsAPI, cacheUtils } from "@/services/api";
+import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 
 interface CommentsSectionProps {
   cardId: string;
@@ -48,10 +48,8 @@ export default function CommentsSection({
         setTotalComments(response.total);
         setPage(response.page);
         previousCommentsRef.current = null;
-      } catch (err: any) {
-        setError(
-          err.response?.data?.message || "Помилка завантаження коментарів",
-        );
+      } catch (err) {
+        setError(getApiErrorMessage(err, "Помилка завантаження коментарів"));
       } finally {
         if (showLoading) {
           setLoading(false);
@@ -99,13 +97,13 @@ export default function CommentsSection({
       await fetchComments(1, false);
 
       onCommentAdded?.();
-    } catch (err: any) {
+    } catch (err) {
       // Відкат при помилці
       if (previousCommentsRef.current) {
         setComments(previousCommentsRef.current);
         previousCommentsRef.current = null;
       }
-      setError(err.response?.data?.message || "Помилка додавання коментаря");
+      setError(getApiErrorMessage(err, "Помилка додавання коментаря"));
     } finally {
       isAddingRef.current = false;
       setSubmitting(false);
@@ -132,14 +130,14 @@ export default function CommentsSection({
       cacheUtils.clearCards();
 
       onCommentDeleted?.();
-    } catch (err: any) {
+    } catch (err) {
       // Відкат при помилці
       if (previousCommentsRef.current) {
         setComments(previousCommentsRef.current);
         setTotalComments(previousCommentsRef.current.length);
         previousCommentsRef.current = null;
       }
-      alert(err.response?.data?.message || "Помилка видалення коментаря");
+      setError(getApiErrorMessage(err, "Помилка видалення коментаря"));
     }
   };
 
