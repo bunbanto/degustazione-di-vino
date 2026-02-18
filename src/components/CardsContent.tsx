@@ -383,6 +383,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     }
   };
 
+  const handleCardSaved = async (): Promise<void> => {
+    await fetchCards(false);
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -519,6 +523,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                         onRate={handleRate}
                         onToggleFavorite={handleToggleFavorite}
                         onDelete={handleDelete}
+                        onCardSaved={handleCardSaved}
                       />
                     ))}
                   </div>

@@ -319,6 +319,10 @@ function ClientFavoritesPage() {
     }
   };
 
+  const handleCardSaved = async (): Promise<void> => {
+    await fetchFavorites(false, true);
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -489,6 +493,7 @@ function ClientFavoritesPage() {
                           onRate={handleRate}
                           onToggleFavorite={handleToggleFavorite}
                           onDelete={handleDelete}
+                          onCardSaved={handleCardSaved}
                         />
                       ))}
                   </div>

@@ -13,6 +13,7 @@ interface WineCardProps {
   onRate?: (id: string, rating: number) => void;
   onToggleFavorite?: (id: string) => Promise<void>;
   onDelete?: (id: string) => Promise<void> | void;
+  onCardSaved?: () => Promise<void> | void;
 }
 
 // SVG Star component with optional fill percentage
@@ -65,6 +66,7 @@ export default function WineCardComponent({
   onRate,
   onToggleFavorite,
   onDelete,
+  onCardSaved,
 }: WineCardProps) {
   const router = useRouter();
   const [userRating, setUserRating] = useState<number | null>(null);
@@ -569,7 +571,11 @@ export default function WineCardComponent({
         card={card}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onSaved={() => {}}
+        onSaved={() => {
+          if (onCardSaved) {
+            void onCardSaved();
+          }
+        }}
         onDeleted={async () => {
           if (onDelete) {
             await onDelete(card._id);
