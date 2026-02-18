@@ -40,7 +40,15 @@ export default function ClientCardViewPage() {
           typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
         const cardPromise = cardsAPI.getById(id);
-        const favoritePromise = token ? cardsAPI.checkFavorite(id) : null;
+        const favoritePromise = token
+          ? cardsAPI.checkFavorite(id).catch((favoriteError: any) => {
+              if (favoriteError?.response?.status === 401) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+              }
+              return null;
+            })
+          : Promise.resolve(null);
 
         const [cardData, favoriteCheck] = await Promise.all([
           cardPromise,

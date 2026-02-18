@@ -26,6 +26,13 @@ const api = axios.create({
   },
 });
 
+const publicApi = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 // Додавання токена до запитів
 api.interceptors.request.use((config) => {
   const token =
@@ -170,6 +177,16 @@ export const cardsAPI = {
       if (cached.isStale && cached.data) {
         api
           .get(`/cards/${id}`)
+          .catch((error) => {
+            if (
+              (error.response?.status === 401 ||
+                error.response?.status === 403) &&
+              typeof window !== "undefined"
+            ) {
+              return publicApi.get(`/cards/${id}`);
+            }
+            throw error;
+          })
           .then((response) => {
             hybridCache.set(
               cacheKey,
@@ -182,8 +199,17 @@ export const cardsAPI = {
       }
     }
 
-    // Робимо реальний запит
-    const response = await api.get(`/cards/${id}`);
+    // Робимо реальний запит (з fallback без токена, якщо токен прострочений)
+    let response;
+    try {
+      response = await api.get(`/cards/${id}`);
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        response = await publicApi.get(`/cards/${id}`);
+      } else {
+        throw error;
+      }
+    }
 
     // Зберігаємо в кеш
     if (typeof window !== "undefined") {
