@@ -2,6 +2,12 @@
 
 import { FilterParams } from "@/types";
 import { useState, useEffect } from "react";
+import {
+  WINE_TYPES,
+  WINE_COLORS,
+  getWineTypeLabel,
+  getWineColorLabel,
+} from "@/constants/wine";
 
 interface FilterPanelProps {
   filters: FilterParams;
@@ -45,29 +51,6 @@ export default function FilterPanel({
     const clearedFilters: FilterParams = {};
     setLocalFilters(clearedFilters);
     onFilterChange(clearedFilters);
-  };
-
-  const wineTypes = ["secco", "abboccato", "amabile", "dolce"];
-  const wineColors = ["bianco", "rosso", "rosato"];
-
-  // Translation helpers
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      secco: "Secco",
-      abboccato: "Abboccato",
-      amabile: "Amabile",
-      dolce: "Dolce",
-    };
-    return labels[type] || type;
-  };
-
-  const getColorLabel = (color: string) => {
-    const labels: Record<string, string> = {
-      bianco: "Bianco",
-      rosso: "Rosso",
-      rosato: "Rosato",
-    };
-    return labels[color] || color;
   };
 
   return (
@@ -129,9 +112,9 @@ export default function FilterPanel({
           className="liquid-select"
         >
           <option value="">Усі типи</option>
-          {wineTypes.map((type) => (
+          {WINE_TYPES.map((type) => (
             <option key={type} value={type}>
-              {getTypeLabel(type)}
+              {getWineTypeLabel(type)}
             </option>
           ))}
         </select>
@@ -152,9 +135,9 @@ export default function FilterPanel({
           className="liquid-select"
         >
           <option value="">Усі кольори</option>
-          {wineColors.map((color) => (
+          {WINE_COLORS.map((color) => (
             <option key={color} value={color}>
-              {getColorLabel(color)}
+              {getWineColorLabel(color)}
             </option>
           ))}
         </select>

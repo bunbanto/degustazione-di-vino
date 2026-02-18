@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 import EditCardModal from "@/components/EditCardModal";
+import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 
 interface WineCardProps {
   card: WineCardType;
@@ -245,25 +246,6 @@ export default function WineCardComponent({
     return "text-red-500 dark:text-red-400";
   };
 
-  const getTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      secco: "Secco",
-      abboccato: "Abboccato",
-      amabile: "Amabile",
-      dolce: "Dolce",
-    };
-    return types[type] || type;
-  };
-
-  const getColorLabel = (color: string) => {
-    const colors: Record<string, string> = {
-      bianco: "Bianco",
-      rosso: "Rosso",
-      rosato: "Rosato",
-    };
-    return colors[color] || color;
-  };
-
   const getColorBadgeStyle = (color: string) => {
     const styles: Record<
       string,
@@ -322,7 +304,7 @@ export default function WineCardComponent({
               <div
                 className={`${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium shadow-lg border border-white/20 ${getColorBadgeStyle(card.color).border || ""}`}
               >
-                {getColorLabel(card.color)}
+                {getWineColorLabel(card.color)}
               </div>
             )}
             {card.frizzante && (
@@ -404,7 +386,7 @@ export default function WineCardComponent({
           <div className="flex items-center gap-2 mb-4 flex-wrap justify-between">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 bg-rose-100/80 dark:bg-rose-900/50 backdrop-blur text-rose-800 dark:text-rose-300 rounded-full text-xs font-medium">
-                {getTypeLabel(card.type)}
+                {getWineTypeLabel(card.type)}
               </span>
               {(card.year || card.anno) && (
                 <span className="text-gray-500 dark:text-gray-400 text-sm">

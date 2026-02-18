@@ -387,7 +387,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="pt-20 pb-12 px-4">
+      <main className="pt-8 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Catalog Header */}
           <div className="liquid-glass rounded-2xl p-6 mb-6 text-center">

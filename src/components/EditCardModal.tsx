@@ -3,6 +3,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cardsAPI } from "@/services/api";
 import { WineCard } from "@/types";
+import {
+  WINE_TYPES,
+  WINE_COLORS,
+  getWineTypeLabel,
+  getWineColorLabel,
+} from "@/constants/wine";
 
 interface EditCardModalProps {
   card: WineCard;
@@ -210,19 +216,6 @@ export default function EditCardModal({
 
   if (!isOpen) return null;
 
-  const wineTypes = [
-    { value: "secco", label: "Secco" },
-    { value: "abboccato", label: "Abboccato" },
-    { value: "amabile", label: "Amabile" },
-    { value: "dolce", label: "Dolce" },
-  ];
-
-  const wineColors = [
-    { value: "bianco", label: "Bianco" },
-    { value: "rosso", label: "Rosso" },
-    { value: "rosato", label: "Rosato" },
-  ];
-
   return (
     <div
       className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4"
@@ -296,9 +289,9 @@ export default function EditCardModal({
                   onChange={(e) => handleChange("type", e.target.value)}
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
                 >
-                  {wineTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
+                  {WINE_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {getWineTypeLabel(type)}
                     </option>
                   ))}
                 </select>
@@ -317,9 +310,9 @@ export default function EditCardModal({
                   onChange={(e) => handleChange("color", e.target.value)}
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
                 >
-                  {wineColors.map((color) => (
-                    <option key={color.value} value={color.value}>
-                      {color.label}
+                  {WINE_COLORS.map((color) => (
+                    <option key={color} value={color}>
+                      {getWineColorLabel(color)}
                     </option>
                   ))}
                 </select>

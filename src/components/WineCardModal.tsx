@@ -4,6 +4,7 @@ import { WineCard } from "@/types";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import CommentsSection from "./CommentsSection";
+import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 
 interface WineCardModalProps {
   card: WineCard;
@@ -138,25 +139,6 @@ export default function WineCardModal({
     return "text-red-500";
   };
 
-  const getTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      secco: "Сухе",
-      abboccato: "Напівсухе",
-      amabile: "Напівсолодке",
-      dolce: "Солодке",
-    };
-    return types[type] || type;
-  };
-
-  const getColorLabel = (color: string) => {
-    const colors: Record<string, string> = {
-      bianco: "Біле",
-      rosso: "Червоне",
-      rosato: "Рожеве",
-    };
-    return colors[color] || color;
-  };
-
   const getColorBadgeStyle = (color: string) => {
     const styles: Record<
       string,
@@ -285,12 +267,12 @@ export default function WineCardModal({
           <div className="space-y-3 mb-4">
             <div className="flex flex-wrap gap-2">
               <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-rose-800 dark:text-rose-300">
-                {getTypeLabel(card.type)}
+                {getWineTypeLabel(card.type)}
               </span>
               <span
                 className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize liquid-glass ${getColorBadgeStyle(card.color).border || ""}`}
               >
-                {getColorLabel(card.color)}
+                {getWineColorLabel(card.color)}
               </span>
               {card.frizzante && (
                 <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">

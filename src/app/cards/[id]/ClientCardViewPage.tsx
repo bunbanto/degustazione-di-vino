@@ -9,6 +9,7 @@ import { WineCard } from "@/types";
 import CommentsSection from "@/components/CommentsSection";
 import EditCardModal from "@/components/EditCardModal";
 import { useUserStore } from "@/store/userStore";
+import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 
 export default function ClientCardViewPage() {
   const router = useRouter();
@@ -136,25 +137,6 @@ export default function ClientCardViewPage() {
     if (rating >= 6) return "text-yellow-600 dark:text-yellow-500";
     if (rating >= 4) return "text-orange-500 dark:text-orange-400";
     return "text-red-500 dark:text-red-400";
-  };
-
-  const getTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      secco: "Сухе",
-      abboccato: "Напівсухе",
-      amabile: "Напівсолодке",
-      dolce: "Солодке",
-    };
-    return types[type] || type;
-  };
-
-  const getColorLabel = (color: string) => {
-    const colors: Record<string, string> = {
-      bianco: "Біле",
-      rosso: "Червоне",
-      rosato: "Рожеве",
-    };
-    return colors[color] || color;
   };
 
   const getColorBadgeStyle = (color: string) => {
@@ -333,12 +315,12 @@ export default function ClientCardViewPage() {
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span className="px-3 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 rounded-full text-sm font-medium">
-                    {getTypeLabel(card.type)}
+                    {getWineTypeLabel(card.type)}
                   </span>
                   <span
                     className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
                   >
-                    {getColorLabel(card.color)}
+                    {getWineColorLabel(card.color)}
                   </span>
                   {card.frizzante && (
                     <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium">
