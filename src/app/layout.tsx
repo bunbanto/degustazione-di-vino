@@ -2,12 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Footer from "@/components/Footer";
+import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://degustazione-di-vino.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Degustazione di Vino | Відкрийте світ вин",
-    template: "%s | Degustazione di Vino",
+    default: `${SITE_NAME} | Відкрийте світ вин`,
+    template: `%s | ${SITE_NAME}`,
   },
   description:
     "Degustazione di Vino — ваш провідник у світі вин. Відкривайте, оцінюйте та діліться враженнями про найкращі вина з усього світу. Приєднуйтесь до спільноти любителів вин.",
@@ -26,32 +27,38 @@ export const metadata: Metadata = {
     "ігристе вино",
   ],
   authors: [{ name: "Degustazione di Vino" }],
-  creator: "Degustazione di Vino",
-  publisher: "Degustazione di Vino",
-  robots: "index, follow",
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
     type: "website",
     locale: "uk_UA",
     url: "/",
-    siteName: "Degustazione di Vino",
-    title: "Degustazione di Vino | Відкрийте світ вин",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | Відкрийте світ вин`,
     description:
       "Ваш провідник у світі вин. Відкривайте, оцінюйте та діліться враженнями про найкращі вина.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Degustazione di Vino",
+        alt: SITE_NAME,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Degustazione di Vino | Відкрийте світ вин",
+    title: `${SITE_NAME} | Відкрийте світ вин`,
     description:
       "Ваш провідник у світі вин. Відкривайте, оцінюйте та діліться враженнями.",
-    images: ["/og-image.jpg"],
+    images: ["/twitter-image"],
     creator: "@degustazione",
   },
   icons: {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Головна | Degustazione di Vino",
+  title: "Головна",
   description:
     "Degustazione di Vino — ваш провідник у світі вин. Відкривайте, оцінюйте та діліться враженнями про найкращі вина з усього світу. Приєднуйтесь до спільноти любителів вин.",
 };
