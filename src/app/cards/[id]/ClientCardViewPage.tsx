@@ -193,9 +193,18 @@ export default function ClientCardViewPage() {
   };
 
   function getUserIdString(
-    userId: string | { _id: string; name?: string },
+    userId:
+      | string
+      | { _id?: string; id?: string | number; name?: string }
+      | null
+      | undefined,
   ): string {
-    return typeof userId === "string" ? userId : userId._id;
+    if (!userId) return "";
+    if (typeof userId === "string") return userId;
+    return (
+      userId._id?.toString() ||
+      (userId.id !== undefined ? userId.id.toString() : "")
+    );
   }
 
   if (loading) {

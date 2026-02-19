@@ -56,9 +56,18 @@ function StarIcon({
 
 // Helper to get userId string from various formats
 function getUserIdString(
-  userId: string | { _id: string; name?: string },
+  userId:
+    | string
+    | { _id?: string; id?: string | number; name?: string }
+    | null
+    | undefined,
 ): string {
-  return typeof userId === "string" ? userId : userId._id;
+  if (!userId) return "";
+  if (typeof userId === "string") return userId;
+  return (
+    userId._id?.toString() ||
+    (userId.id !== undefined ? userId.id.toString() : "")
+  );
 }
 
 export default function WineCardComponent({
@@ -275,8 +284,8 @@ export default function WineCardComponent({
 
   const displayRating = card.rating || 0;
   const currentRating = isRatingLoading
-    ? userRating || 0
-    : hoverRating || userRating || 0;
+    ? userRating ?? displayRating
+    : hoverRating || (userRating ?? displayRating);
   const imageUrl =
     card.img ||
     card.image ||
