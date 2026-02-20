@@ -30,6 +30,7 @@
 - Створення нової картки вина.
 - Hybrid cache в `localStorage` (TTL + stale-while-revalidate підхід).
 - Централізована обробка API-помилок з дружніми повідомленнями для користувача (`getApiErrorMessage`).
+- Стабільна генерація `sitemap.xml` з таймаутом запиту до API та fallback при недоступності бекенду.
 - Глобальні сторінки помилок App Router: `error.tsx` (runtime error) та `not-found.tsx` (404).
 - Світла/темна теми (на головній сторінці дизайн зафіксований у світлій стилістиці).
 
@@ -93,6 +94,11 @@ npm run dev
 - `npm run build` - production build
 - `npm run start` - запуск production build
 - `npm run lint` - ESLint перевірка
+
+## Лінт-конфіг
+
+- Проєкт використовує `ESLint 9` з flat config у файлі `eslint.config.mjs`.
+- Файл `.eslintrc.json` залишено для сумісності, але основним є `eslint.config.mjs`.
 
 ## API
 
