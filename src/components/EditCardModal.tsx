@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { cardsAPI, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
 import {
@@ -493,9 +494,12 @@ export default function EditCardModal({
                 </div>
               ) : (
                 <div className="relative">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Preview"
+                    width={192}
+                    height={192}
+                    unoptimized
                     className="w-48 object-cover rounded-lg"
                   />
                   <button

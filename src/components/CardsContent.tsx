@@ -41,15 +41,12 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
   // Refs для оптимістичних оновлень
   const previousCardsRef = useRef<WineCard[] | null>(null);
-  const isUpdatingRef = useRef(false);
   // Ref для відстеження зміни користувача
   const previousUserIdRef = useRef<string | null>(null);
 
   // Fetch cards з кешуванням та fallback
   const fetchCards = useCallback(
     async (showLoading = true) => {
-      if (isUpdatingRef.current && !showLoading) return;
-
       if (showLoading) {
         setLoading(true);
       }
@@ -322,10 +319,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       cacheUtils.clearFavorites();
       // Очищуємо кеш карток для примусового оновлення
       cacheUtils.clearCards();
-      // Скидаємо прапорець оновлення для дозволу повторного запиту
-      isUpdatingRef.current = false;
       // Після успішного оновлення, робимо примусове оновлення карток з сервера
-      // Використовуємо isUpdatingRef для уникнення race conditions
       setTimeout(() => {
         fetchCards(false);
       }, 100);

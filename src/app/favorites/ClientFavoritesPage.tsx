@@ -154,6 +154,11 @@ function ClientFavoritesPage() {
         cardId,
         cards,
         (newCards, confirmedIsFavorite) => {
+          if (confirmedIsFavorite === false) {
+            setCards((prevCards) => prevCards.filter((card) => card._id !== cardId));
+            return;
+          }
+
           // На сторінці улюблених, якщо картку видалено з улюблених,
           // вона більше не повинна відображатися
           if (newCards) {

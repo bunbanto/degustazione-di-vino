@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { cardsAPI, getApiErrorMessage } from "@/services/api";
@@ -394,9 +395,12 @@ function ClientAddCardPage() {
                   </div>
                 ) : (
                   <div className="relative">
-                    <img
+                    <Image
                       src={imagePreview}
                       alt="Preview"
+                      width={800}
+                      height={384}
+                      unoptimized
                       className="w-full h-48 object-cover rounded-lg"
                     />
                     <button

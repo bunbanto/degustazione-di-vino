@@ -2,6 +2,7 @@
 
 import { WineCard } from "@/types";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import CommentsSection from "./CommentsSection";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
@@ -210,13 +211,16 @@ export default function WineCardModal({
         <div className="md:w-1/2 bg-gray-100/50 dark:bg-dark-800/50 flex items-center justify-center min-h-[300px] md:min-h-[400px] relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
           <div className="aspect-[4/3] w-full h-full flex items-center justify-center p-4">
-            <img
+            <Image
               src={
                 card.img ||
                 card.image ||
                 "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
               }
               alt={card.name}
+              width={1200}
+              height={900}
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="w-full h-full object-contain"
             />
           </div>

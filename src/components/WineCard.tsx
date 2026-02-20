@@ -3,6 +3,7 @@
 import { WineCard as WineCardType } from "@/types";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 import EditCardModal from "@/components/EditCardModal";
@@ -97,7 +98,7 @@ export default function WineCardComponent({
 
   // Refs для відстеження стану
   const previousRatingRef = useRef<number | null>(null);
-  const previousFavoriteRef = useRef<boolean>(false);
+  const previousFavoriteRef = useRef<boolean | null>(null);
   const isRatingRef = useRef(false);
 
   // Get current user ID from userStore
@@ -191,7 +192,7 @@ export default function WineCardComponent({
     }
 
     // Зберігаємо попередній стан для відкату
-    if (!previousFavoriteRef.current) {
+    if (previousFavoriteRef.current === null) {
       previousFavoriteRef.current = isFavorite;
     }
 
@@ -208,8 +209,8 @@ export default function WineCardComponent({
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
       // Відкат при помилці
-      setIsFavorite(previousFavoriteRef.current);
-      previousFavoriteRef.current = false;
+      setIsFavorite(previousFavoriteRef.current ?? isFavorite);
+      previousFavoriteRef.current = null;
     } finally {
       setIsFavoriteLoading(false);
     }
@@ -305,10 +306,12 @@ export default function WineCardComponent({
           {/* Glass overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
 
-          <img
+          <Image
             src={imageUrl}
             alt={card.name}
-            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 cursor-zoom-in"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            className="object-contain group-hover:scale-110 transition-transform duration-700 cursor-zoom-in"
           />
 
           {/* Glass badges */}
@@ -619,12 +622,18 @@ export default function WineCardComponent({
               />
             </svg>
           </button>
-          <img
-            src={imageUrl}
-            alt={card.name}
-            className="max-h-[90vh] max-w-[95vw] object-contain"
+          <div
+            className="relative h-[90vh] w-[95vw] max-w-6xl"
             onClick={(e) => e.stopPropagation()}
-          />
+          >
+            <Image
+              src={imageUrl}
+              alt={card.name}
+              fill
+              sizes="95vw"
+              className="object-contain"
+            />
+          </div>
         </div>
       )}
     </>

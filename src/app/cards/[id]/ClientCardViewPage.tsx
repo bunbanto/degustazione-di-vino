@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
@@ -28,7 +29,7 @@ export default function ClientCardViewPage() {
   // Favorite state
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
-  const previousFavoriteRef = useRef<boolean>(false);
+  const previousFavoriteRef = useRef<boolean | null>(null);
 
   // Fetch card data - only on mount and id change
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function ClientCardViewPage() {
       return;
     }
 
-    if (!previousFavoriteRef.current) {
+    if (previousFavoriteRef.current === null) {
       previousFavoriteRef.current = isFavorite;
     }
 
@@ -135,8 +136,8 @@ export default function ClientCardViewPage() {
     } catch (err: any) {
       console.error("Error toggling favorite:", err);
       // Revert on error
-      setIsFavorite(previousFavoriteRef.current);
-      previousFavoriteRef.current = false;
+      setIsFavorite(previousFavoriteRef.current ?? isFavorite);
+      previousFavoriteRef.current = null;
     } finally {
       setIsFavoriteLoading(false);
     }
@@ -265,13 +266,16 @@ export default function ClientCardViewPage() {
             <div className="lg:order-1 lg:col-span-5">
               <div className="glass-card rounded-2xl overflow-hidden shadow-lg relative">
                 <div className="aspect-[4/3] w-full bg-gray-100 dark:bg-dark-800">
-                  <img
+                  <Image
                     src={
                       card.img ||
                       card.image ||
                       "https://res.cloudinary.com/demo/image/upload/wines/default.jpg"
                     }
                     alt={card.name}
+                    width={1200}
+                    height={900}
+                    sizes="(max-width: 1024px) 100vw, 40vw"
                     className="w-full h-full object-contain"
                   />
                 </div>
