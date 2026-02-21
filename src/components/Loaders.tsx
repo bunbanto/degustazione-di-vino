@@ -44,3 +44,20 @@ export function RatingLoader() {
     </div>
   );
 }
+
+export function RandomWineButtonLoader() {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="relative flex h-4 w-4 items-center justify-center">
+        <span className="absolute inline-flex h-full w-full rounded-full bg-rose-300/70 dark:bg-rose-700/50 animate-ping" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br from-rose-600 to-amber-400 animate-spin" />
+      </span>
+      <span className="text-sm">Обираю...</span>
+      <span className="flex items-end gap-1" aria-hidden="true">
+        <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:-0.3s]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:-0.15s]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-bounce" />
+      </span>
+    </span>
+  );
+}

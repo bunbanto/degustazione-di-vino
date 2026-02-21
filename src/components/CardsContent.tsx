@@ -6,13 +6,17 @@ import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
 import Pagination from "@/components/Pagination";
-import { CardsContentLoader } from "@/components/Loaders";
+import {
+  CardsContentLoader,
+  RandomWineButtonLoader,
+} from "@/components/Loaders";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField, SortDirection } from "@/types";
 import { useUserStore } from "@/store/userStore";
 import { SORT_FIELDS } from "@/constants/sort";
 
 const ITEMS_PER_PAGE = 6;
+const RANDOM_WINE_DELAY_MS = 5000;
 
 interface CardsContentProps {
   initialFilters: FilterParams;
@@ -30,6 +34,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
   const [filters, setFilters] = useState<FilterParams>(initialFilters);
   const [currentPage, setCurrentPage] = useState(initialPage);
+  const [isRandomLoading, setIsRandomLoading] = useState(false);
 
   // Get current user from userStore
   const currentUser = useUserStore((state) => state.currentUser);
@@ -39,6 +44,9 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   const previousCardsRef = useRef<WineCard[] | null>(null);
   // Ref для відстеження зміни користувача
   const previousUserIdRef = useRef<string | null>(null);
+  const randomWineTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Fetch cards з кешуванням та fallback
   const fetchCards = useCallback(
@@ -140,6 +148,14 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     }
   }, [fetchCards, currentUserId]);
 
+  useEffect(() => {
+    return () => {
+      if (randomWineTimeoutRef.current) {
+        clearTimeout(randomWineTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const buildSearchParams = (sourceFilters: FilterParams, page: number) => {
     const params = new URLSearchParams();
 
@@ -189,14 +205,23 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   };
 
   const handleRandomWine = () => {
-    if (!cards.length) return;
+    if (!cards.length || isRandomLoading) return;
 
     const randomIndex = Math.floor(Math.random() * cards.length);
     const randomCard = cards[randomIndex];
 
-    if (randomCard?._id) {
-      router.push(`/cards/${randomCard._id}`);
+    if (!randomCard?._id) return;
+
+    setIsRandomLoading(true);
+
+    if (randomWineTimeoutRef.current) {
+      clearTimeout(randomWineTimeoutRef.current);
     }
+
+    randomWineTimeoutRef.current = setTimeout(() => {
+      setIsRandomLoading(false);
+      router.push(`/cards/${randomCard._id}`);
+    }, RANDOM_WINE_DELAY_MS);
   };
 
   const handleRate = async (id: string, rating: number): Promise<void> => {
@@ -434,19 +459,19 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                 <>
                   {/* Sort Controls */}
                   <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
-	                    <div className="flex items-center gap-2">
-	                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
-	                        Сортування:
-	                      </span>
-	                      <div className="flex items-center gap-2">
-	                        <label htmlFor="cards-sort-field" className="sr-only">
-	                          Поле сортування
-	                        </label>
-	                        <select
-	                          id="cards-sort-field"
-	                          value={filters.sort?.field || "name"}
-	                          onChange={(e) =>
-	                            handleFilterChange({
+                    <div className="flex items-center gap-2">
+                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
+                        Сортування:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <label htmlFor="cards-sort-field" className="sr-only">
+                          Поле сортування
+                        </label>
+                        <select
+                          id="cards-sort-field"
+                          value={filters.sort?.field || "name"}
+                          onChange={(e) =>
+                            handleFilterChange({
                               ...filters,
                               sort: {
                                 field: e.target.value as SortField,
@@ -491,11 +516,19 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                     <button
                       type="button"
                       onClick={handleRandomWine}
-                      disabled={!cards.length}
+                      disabled={!cards.length || isRandomLoading}
                       className="liquid-glass px-4 py-2 rounded-xl text-sm font-medium text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Відкрити випадкове вино"
+                      title={
+                        isRandomLoading
+                          ? "Підбираємо випадкове вино..."
+                          : "Відкрити випадкове вино"
+                      }
                     >
-                      Випадкове вино
+                      {isRandomLoading ? (
+                        <RandomWineButtonLoader />
+                      ) : (
+                        "Випадкове вино"
+                      )}
                     </button>
                   </div>
 
