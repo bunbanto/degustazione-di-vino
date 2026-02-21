@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
 import Pagination from "@/components/Pagination";
+import { CardsContentLoader } from "@/components/Loaders";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField, SortDirection } from "@/types";
 import { useUserStore } from "@/store/userStore";
@@ -414,11 +415,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
               )}
 
               {loading ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="liquid-glass rounded-full p-6">
-                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-rose-600"></div>
-                  </div>
-                </div>
+                <CardsContentLoader />
               ) : !cards || cards.length === 0 ? (
                 <div className="flex items-center justify-center h-64 liquid-glass rounded-2xl">
                   <div className="text-center">

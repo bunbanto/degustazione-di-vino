@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import CardsContent from "@/components/CardsContent";
+import { CardsPageSuspenseLoader } from "@/components/Loaders";
 import { FilterParams } from "@/types";
 
 interface ClientCardsPageProps {
@@ -42,15 +43,7 @@ function CardsPageContent({
 
 export default function ClientCardsPage(props: ClientCardsPageProps) {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-gradient-to-b from-amber-50 to-rose-50">
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-rose-600 text-lg">Завантаження...</div>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<CardsPageSuspenseLoader />}>
       <CardsPageContent {...props} />
     </Suspense>
   );

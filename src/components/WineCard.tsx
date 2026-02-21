@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 import EditCardModal from "@/components/EditCardModal";
+import { RatingLoader } from "@/components/Loaders";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
   getColorBadgeStyle,
@@ -433,11 +434,7 @@ export default function WineCardComponent({
                   </div>
                 );
               })}
-              {currentUserId && isRatingLoading && (
-                <div className="flex items-center gap-2 ml-2">
-                  <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
+              {currentUserId && isRatingLoading && <RatingLoader />}
             </div>
           </div>
 
