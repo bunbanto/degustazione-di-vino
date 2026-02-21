@@ -9,12 +9,7 @@ import FilterPanel from "@/components/FilterPanel";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField } from "@/types";
 import { withAuth } from "@/components/withAuth";
-
-const SORT_FIELDS: { value: SortField; label: string }[] = [
-  { value: "name", label: "За назвою" },
-  { value: "price", label: "За ціною" },
-  { value: "rating", label: "За рейтингом" },
-];
+import { SORT_FIELDS } from "@/constants/sort";
 
 function ClientFavoritesPage() {
   const router = useRouter();

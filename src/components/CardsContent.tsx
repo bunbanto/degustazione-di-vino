@@ -9,14 +9,9 @@ import Pagination from "@/components/Pagination";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField, SortDirection } from "@/types";
 import { useUserStore } from "@/store/userStore";
+import { SORT_FIELDS } from "@/constants/sort";
 
 const ITEMS_PER_PAGE = 6;
-
-const SORT_FIELDS: { value: SortField; label: string }[] = [
-  { value: "name", label: "За назвою" },
-  { value: "price", label: "За ціною" },
-  { value: "rating", label: "За рейтингом" },
-];
 
 interface CardsContentProps {
   initialFilters: FilterParams;

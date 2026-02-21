@@ -6,6 +6,12 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import CommentsSection from "./CommentsSection";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
+import {
+  getColorBadgeStyle,
+  getRatingColor,
+  getUserIdString,
+  isCardAuthor as checkCardAuthor,
+} from "@/lib/wineCardUtils";
 
 interface WineCardModalProps {
   card: WineCard;
@@ -73,22 +79,6 @@ function RatingListItem({
   );
 }
 
-// Helper to get userId string from various formats
-function getUserIdString(
-  userId:
-    | string
-    | { _id?: string; id?: string | number; name?: string }
-    | null
-    | undefined,
-): string {
-  if (!userId) return "";
-  if (typeof userId === "string") return userId;
-  return (
-    userId._id?.toString() ||
-    (userId.id !== undefined ? userId.id.toString() : "")
-  );
-}
-
 // Helper function to get username from Zustand store
 function getUsername(userId: string | { _id: string; name?: string }): string {
   if (typeof userId === "object" && userId.name) {
@@ -124,54 +114,7 @@ export default function WineCardModal({
   }, []);
 
   // Check if current user is the card author
-  const isCardAuthor = (() => {
-    if (!currentUserId) return false;
-
-    if (card.owner) {
-      const ownerId =
-        typeof card.owner === "object" ? card.owner._id : card.owner;
-      if (currentUserId && ownerId && currentUserId === ownerId.toString()) {
-        return true;
-      }
-    }
-
-    if (card.authorId) {
-      return currentUserId === card.authorId.toString();
-    }
-
-    return false;
-  })();
-
-  const getRatingColor = (rating: number) => {
-    if (rating >= 8) return "text-green-500";
-    if (rating >= 6) return "text-yellow-500";
-    if (rating >= 4) return "text-orange-500";
-    return "text-red-500";
-  };
-
-  const getColorBadgeStyle = (color: string) => {
-    const styles: Record<
-      string,
-      { bg: string; text: string; border?: string }
-    > = {
-      rosso: { bg: "bg-red-600", text: "text-white" },
-      bianco: {
-        bg: "bg-yellow-50 dark:bg-yellow-900/30",
-        text: "text-gray-800 dark:text-gray-200",
-        border: "border border-gray-200 dark:border-gray-700",
-      },
-      rosato: {
-        bg: "bg-pink-100 dark:bg-pink-900/30",
-        text: "text-gray-800 dark:text-gray-200",
-      },
-    };
-    return (
-      styles[color] || {
-        bg: "bg-gray-200 dark:bg-gray-700",
-        text: "text-gray-800 dark:text-gray-200",
-      }
-    );
-  };
+  const isCardAuthor = checkCardAuthor(card, currentUserId);
 
   const displayRating = card.rating || 0;
 
@@ -245,7 +188,7 @@ export default function WineCardModal({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <div
-                  className={`text-3xl font-bold ${getRatingColor(displayRating)}`}
+                  className={`text-3xl font-bold ${getRatingColor(displayRating, "modal")}`}
                 >
                   {displayRating.toFixed(1)}
                 </div>

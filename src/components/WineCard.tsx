@@ -8,6 +8,12 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 import EditCardModal from "@/components/EditCardModal";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
+import {
+  getColorBadgeStyle,
+  getRatingColor,
+  getUserIdString,
+  isCardAuthor as checkCardAuthor,
+} from "@/lib/wineCardUtils";
 
 interface WineCardProps {
   card: WineCardType;
@@ -55,22 +61,6 @@ function StarIcon({
   );
 }
 
-// Helper to get userId string from various formats
-function getUserIdString(
-  userId:
-    | string
-    | { _id?: string; id?: string | number; name?: string }
-    | null
-    | undefined,
-): string {
-  if (!userId) return "";
-  if (typeof userId === "string") return userId;
-  return (
-    userId._id?.toString() ||
-    (userId.id !== undefined ? userId.id.toString() : "")
-  );
-}
-
 export default function WineCardComponent({
   card,
   onRate,
@@ -112,34 +102,7 @@ export default function WineCardComponent({
   }, [card.isFavorite, card._id]);
 
   // Check if current user is the card author
-  const isCardAuthor = (() => {
-    if (!currentUserId && !currentUserEmail) {
-      return false;
-    }
-
-    if (card.owner) {
-      const ownerId =
-        typeof card.owner === "object" ? card.owner._id : card.owner;
-      const ownerEmail =
-        typeof card.owner === "object" ? card.owner.email : null;
-
-      if (currentUserId && ownerId && currentUserId === ownerId.toString()) {
-        return true;
-      }
-
-      if (currentUserEmail && ownerEmail && currentUserEmail === ownerEmail) {
-        return true;
-      }
-
-      return false;
-    }
-
-    if (card.authorId) {
-      return currentUserId === card.authorId.toString();
-    }
-
-    return false;
-  })();
+  const isCardAuthor = checkCardAuthor(card, currentUserId, currentUserEmail);
 
   // Store all usernames from card ratings in Zustand store
   useEffect(() => {
@@ -251,37 +214,6 @@ export default function WineCardComponent({
     },
     [card._id, onRate, userRating, isRatingLoading],
   );
-
-  const getRatingColor = (rating: number) => {
-    if (rating >= 8) return "text-green-500 dark:text-green-400";
-    if (rating >= 6) return "text-yellow-600 dark:text-yellow-500";
-    if (rating >= 4) return "text-orange-500";
-    return "text-red-500 dark:text-red-400";
-  };
-
-  const getColorBadgeStyle = (color: string) => {
-    const styles: Record<
-      string,
-      { bg: string; text: string; border?: string }
-    > = {
-      rosso: { bg: "bg-red-600", text: "text-white" },
-      bianco: {
-        bg: "bg-yellow-50 dark:bg-yellow-900/30",
-        text: "text-gray-800 dark:text-gray-200",
-        border: "border border-gray-200 dark:border-gray-700",
-      },
-      rosato: {
-        bg: "bg-pink-100 dark:bg-pink-900/30",
-        text: "text-gray-800 dark:text-gray-200",
-      },
-    };
-    return (
-      styles[color] || {
-        bg: "bg-gray-200 dark:bg-gray-700",
-        text: "text-gray-800 dark:text-gray-200",
-      }
-    );
-  };
 
   const displayRating = card.rating || 0;
   const currentRating = isRatingLoading
@@ -430,7 +362,7 @@ export default function WineCardComponent({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div
-                  className={`text-3xl font-bold ${getRatingColor(displayRating)}`}
+                  className={`text-3xl font-bold ${getRatingColor(displayRating, "card")}`}
                 >
                   {displayRating.toFixed(1)}
                 </div>
@@ -449,7 +381,7 @@ export default function WineCardComponent({
                     Ваш:
                   </span>
                   <span
-                    className={`text-lg font-bold ${getRatingColor(userRating)}`}
+                    className={`text-lg font-bold ${getRatingColor(userRating, "card")}`}
                   >
                     {userRating.toFixed(1)}
                   </span>
