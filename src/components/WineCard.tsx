@@ -217,9 +217,9 @@ export default function WineCardComponent({
   );
 
   const displayRating = card.rating || 0;
-  const currentRating = isRatingLoading
-    ? userRating ?? displayRating
-    : hoverRating || (userRating ?? displayRating);
+  // For visual stars, always use the average card rating as a base.
+  // Personal rating is shown separately as "Ваш:" to avoid hiding half-stars.
+  const currentRating = isRatingLoading ? displayRating : hoverRating || displayRating;
   const imageUrl =
     card.img ||
     card.image ||
@@ -395,8 +395,10 @@ export default function WineCardComponent({
               {stars.map((star) => {
                 const starValue = star;
                 const prevStarValue = star - 1;
-                const isFull = currentRating >= starValue;
-                const isHalf = !isFull && currentRating > prevStarValue;
+                const normalizedRating = Math.round(currentRating * 2) / 2;
+                const isFull = normalizedRating >= starValue;
+                const isHalf =
+                  !isFull && normalizedRating >= prevStarValue + 0.5;
 
                 return (
                   <div key={star} className="relative group/star">
