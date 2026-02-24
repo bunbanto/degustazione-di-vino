@@ -33,6 +33,35 @@ export function getDisplayRating(card: Pick<WineCard, "rating" | "ratings">): nu
   return Number.isFinite(fallback) ? fallback : 0;
 }
 
+export function getDisplayRatingCount(
+  card: Pick<WineCard, "ratingCount" | "ratings">,
+): number {
+  if (Array.isArray(card.ratings) && card.ratings.length > 0) {
+    return card.ratings.length;
+  }
+
+  const fallback = Number(card.ratingCount);
+  return Number.isFinite(fallback) ? fallback : 0;
+}
+
+export function normalizeRatingForStars(rating: number): number {
+  const safeRating = Number.isFinite(rating) ? rating : 0;
+  const clampedRating = Math.max(0, Math.min(10, safeRating));
+  const integerPart = Math.floor(clampedRating);
+  const fractionalPart = clampedRating - integerPart;
+  const epsilon = 1e-9;
+
+  if (fractionalPart < 0.5 - epsilon) {
+    return integerPart;
+  }
+
+  if (Math.abs(fractionalPart - 0.5) <= epsilon) {
+    return integerPart + 0.5;
+  }
+
+  return integerPart + 1;
+}
+
 export function isCardAuthor(
   card: WineCard | null,
   currentUserId: string | null,

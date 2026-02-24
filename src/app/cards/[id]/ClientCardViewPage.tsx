@@ -14,6 +14,8 @@ import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
   getColorBadgeStyle,
   getDisplayRating,
+  getDisplayRatingCount,
+  normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
   isCardAuthor as checkCardAuthor,
@@ -188,6 +190,8 @@ export default function ClientCardViewPage() {
   }
 
   const displayRating = getDisplayRating(card);
+  const displayRatingCount = getDisplayRatingCount(card);
+  const normalizedDisplayRating = normalizeRatingForStars(displayRating);
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
@@ -393,13 +397,14 @@ export default function ClientCardViewPage() {
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       <div>із 10</div>
-                      <div>({card.ratings?.length || 0} оцінок)</div>
+                      <div>({displayRatingCount} оцінок)</div>
                     </div>
                   </div>
                   <div className="flex gap-0.5">
                     {stars.map((star) => {
-                      const isFull = displayRating >= star;
-                      const isHalf = !isFull && displayRating >= star - 0.5;
+                      const isFull = normalizedDisplayRating >= star;
+                      const isHalf =
+                        !isFull && normalizedDisplayRating >= star - 0.5;
                       return (
                         <svg
                           key={star}
@@ -426,8 +431,9 @@ export default function ClientCardViewPage() {
                     </h3>
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                       {card.ratings.map((rating, idx) => {
-                        const normalizedRating =
-                          Math.round(rating.value * 2) / 2;
+                        const normalizedRating = normalizeRatingForStars(
+                          rating.value,
+                        );
                         const userIdStr = getUserIdString(rating.userId || "");
                         const displayUsername =
                           (typeof rating.userId === "object" &&

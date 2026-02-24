@@ -9,6 +9,7 @@ import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
   getColorBadgeStyle,
   getDisplayRating,
+  normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
   isCardAuthor as checkCardAuthor,
@@ -33,7 +34,7 @@ function RatingListItem({
   isCurrentUser: boolean;
 }) {
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  const normalizedRating = Math.round(rating * 2) / 2;
+  const normalizedRating = normalizeRatingForStars(rating);
 
   return (
     <div className="flex items-center justify-between py-2 border-b border-rose-100 dark:border-rose-900/30 last:border-0">
@@ -128,6 +129,7 @@ export default function WineCardModal({
   const isCardAuthor = checkCardAuthor(card, currentUserId);
 
   const displayRating = getDisplayRating(card);
+  const normalizedDisplayRating = normalizeRatingForStars(displayRating);
 
   if (!isOpen) return null;
 
@@ -209,8 +211,9 @@ export default function WineCardModal({
               </div>
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => {
-                  const isFull = displayRating >= star;
-                  const isHalf = !isFull && displayRating >= star - 0.5;
+                  const isFull = normalizedDisplayRating >= star;
+                  const isHalf =
+                    !isFull && normalizedDisplayRating >= star - 0.5;
                   return (
                     <svg
                       key={star}

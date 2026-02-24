@@ -10,6 +10,7 @@ import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField } from "@/types";
 import { withAuth } from "@/components/withAuth";
 import { SORT_FIELDS } from "@/constants/sort";
+import { getDisplayRating } from "@/lib/wineCardUtils";
 
 function ClientFavoritesPage() {
   const router = useRouter();
@@ -477,7 +478,7 @@ function ClientFavoritesPage() {
                         // Filter by min rating
                         if (
                           filters.minRating &&
-                          (card.rating || 0) < filters.minRating
+                          getDisplayRating(card) < filters.minRating
                         ) {
                           return false;
                         }

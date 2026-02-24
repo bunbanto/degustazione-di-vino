@@ -12,6 +12,8 @@ import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
   getColorBadgeStyle,
   getDisplayRating,
+  getDisplayRatingCount,
+  normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
   isCardAuthor as checkCardAuthor,
@@ -218,10 +220,7 @@ export default function WineCardComponent({
   );
 
   const displayRating = getDisplayRating(card);
-  const displayRatingCount =
-    Array.isArray(card.ratings) && card.ratings.length > 0
-      ? card.ratings.length
-      : (card.ratingCount ?? 0);
+  const displayRatingCount = getDisplayRatingCount(card);
   // For visual stars, always use the average card rating as a base.
   // Personal rating is shown separately as "Ваш:" to avoid hiding half-stars.
   const currentRating = isRatingLoading ? displayRating : hoverRating || displayRating;
@@ -400,7 +399,7 @@ export default function WineCardComponent({
               {stars.map((star) => {
                 const starValue = star;
                 const prevStarValue = star - 1;
-                const normalizedRating = Math.round(currentRating * 2) / 2;
+                const normalizedRating = normalizeRatingForStars(currentRating);
                 const isFull = normalizedRating >= starValue;
                 const isHalf =
                   !isFull && normalizedRating >= prevStarValue + 0.5;
