@@ -13,6 +13,7 @@ import { useUserStore } from "@/store/userStore";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
   getColorBadgeStyle,
+  getDisplayRating,
   getRatingColor,
   getUserIdString,
   isCardAuthor as checkCardAuthor,
@@ -186,7 +187,7 @@ export default function ClientCardViewPage() {
     );
   }
 
-  const displayRating = card.rating || 0;
+  const displayRating = getDisplayRating(card);
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (

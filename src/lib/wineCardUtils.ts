@@ -17,6 +17,22 @@ export function getUserIdString(userId: UserIdLike): string {
   );
 }
 
+export function getDisplayRating(card: Pick<WineCard, "rating" | "ratings">): number {
+  if (Array.isArray(card.ratings) && card.ratings.length > 0) {
+    const validRatings = card.ratings
+      .map((rating) => Number(rating.value))
+      .filter((value) => Number.isFinite(value));
+
+    if (validRatings.length > 0) {
+      const sum = validRatings.reduce((acc, value) => acc + value, 0);
+      return Math.round((sum / validRatings.length) * 10) / 10;
+    }
+  }
+
+  const fallback = Number(card.rating);
+  return Number.isFinite(fallback) ? fallback : 0;
+}
+
 export function isCardAuthor(
   card: WineCard | null,
   currentUserId: string | null,

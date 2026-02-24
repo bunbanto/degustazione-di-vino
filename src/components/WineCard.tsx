@@ -11,6 +11,7 @@ import { RatingLoader } from "@/components/Loaders";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
   getColorBadgeStyle,
+  getDisplayRating,
   getRatingColor,
   getUserIdString,
   isCardAuthor as checkCardAuthor,
@@ -216,7 +217,11 @@ export default function WineCardComponent({
     [card._id, onRate, userRating, isRatingLoading],
   );
 
-  const displayRating = card.rating || 0;
+  const displayRating = getDisplayRating(card);
+  const displayRatingCount =
+    Array.isArray(card.ratings) && card.ratings.length > 0
+      ? card.ratings.length
+      : (card.ratingCount ?? 0);
   // For visual stars, always use the average card rating as a base.
   // Personal rating is shown separately as "Ваш:" to avoid hiding half-stars.
   const currentRating = isRatingLoading ? displayRating : hoverRating || displayRating;
@@ -372,7 +377,7 @@ export default function WineCardComponent({
                     середній
                   </span>
                   <span className="text-xs text-gray-400 dark:text-gray-500">
-                    ({card.ratingCount || card.ratings?.length || 0})
+                    ({displayRatingCount})
                   </span>
                 </div>
               </div>

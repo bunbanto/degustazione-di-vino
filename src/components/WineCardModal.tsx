@@ -8,6 +8,7 @@ import CommentsSection from "./CommentsSection";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
   getColorBadgeStyle,
+  getDisplayRating,
   getRatingColor,
   getUserIdString,
   isCardAuthor as checkCardAuthor,
@@ -126,7 +127,7 @@ export default function WineCardModal({
   // Check if current user is the card author
   const isCardAuthor = checkCardAuthor(card, currentUserId);
 
-  const displayRating = card.rating || 0;
+  const displayRating = getDisplayRating(card);
 
   if (!isOpen) return null;
 
