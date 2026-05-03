@@ -10,7 +10,7 @@ import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard, FilterParams, SortField } from "@/types";
 import { withAuth } from "@/components/withAuth";
 import { SORT_FIELDS } from "@/constants/sort";
-import { getDisplayRating } from "@/lib/wineCardUtils";
+import { useUserStore } from "@/store/userStore";
 
 function ClientFavoritesPage() {
   const router = useRouter();
@@ -19,6 +19,8 @@ function ClientFavoritesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [filters, setFilters] = useState<FilterParams>({});
+  const currentUser = useUserStore((state) => state.currentUser);
+  const currentUserId = currentUser?.id?.toString() || currentUser?._id || null;
 
   // Ref для оптимістичних оновлень
   const previousCardsRef = useRef<WineCard[] | null>(null);
@@ -151,7 +153,9 @@ function ClientFavoritesPage() {
         cards,
         (newCards, confirmedIsFavorite) => {
           if (confirmedIsFavorite === false) {
-            setCards((prevCards) => prevCards.filter((card) => card._id !== cardId));
+            setCards((prevCards) =>
+              prevCards.filter((card) => card._id !== cardId),
+            );
             return;
           }
 
@@ -386,19 +390,22 @@ function ClientFavoritesPage() {
                 <>
                   {/* Sort Controls */}
                   <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
-	                    <div className="flex items-center gap-2">
-	                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
-	                        Сортування:
-	                      </span>
-	                      <div className="flex items-center gap-2">
-	                        <label htmlFor="favorites-sort-field" className="sr-only">
-	                          Поле сортування
-	                        </label>
-	                        <select
-	                          id="favorites-sort-field"
-	                          value={filters.sort?.field || "name"}
-	                          onChange={(e) => {
-	                            setFilters({
+                    <div className="flex items-center gap-2">
+                      <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
+                        Сортування:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <label
+                          htmlFor="favorites-sort-field"
+                          className="sr-only"
+                        >
+                          Поле сортування
+                        </label>
+                        <select
+                          id="favorites-sort-field"
+                          value={filters.sort?.field || "name"}
+                          onChange={(e) => {
+                            setFilters({
                               ...filters,
                               sort: {
                                 field: e.target.value as SortField,
@@ -446,55 +453,16 @@ function ClientFavoritesPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {cards
-                      .filter((card) => {
-                        // Filter by search
-                        if (filters.search) {
-                          const searchLower = filters.search.toLowerCase();
-                          const nameMatch = card.name
-                            ?.toLowerCase()
-                            .includes(searchLower);
-                          const wineryMatch = card.winery
-                            ?.toLowerCase()
-                            .includes(searchLower);
-                          if (!nameMatch && !wineryMatch) return false;
-                        }
-
-                        // Filter by type
-                        if (filters.type && card.type !== filters.type) {
-                          return false;
-                        }
-
-                        // Filter by color
-                        if (filters.color && card.color !== filters.color) {
-                          return false;
-                        }
-
-                        // Filter by frizzante
-                        if (filters.frizzante && !card.frizzante) {
-                          return false;
-                        }
-
-                        // Filter by min rating
-                        if (
-                          filters.minRating &&
-                          getDisplayRating(card) < filters.minRating
-                        ) {
-                          return false;
-                        }
-
-                        return true;
-                      })
-                      .map((card) => (
-                        <WineCardComponent
-                          key={card._id}
-                          card={card}
-                          onRate={handleRate}
-                          onToggleFavorite={handleToggleFavorite}
-                          onDelete={handleDelete}
-                          onCardSaved={handleCardSaved}
-                        />
-                      ))}
+                    {cards.map((card) => (
+                      <WineCardComponent
+                        key={card._id}
+                        card={card}
+                        onRate={handleRate}
+                        onToggleFavorite={handleToggleFavorite}
+                        onDelete={handleDelete}
+                        onCardSaved={handleCardSaved}
+                      />
+                    ))}
                   </div>
                 </>
               )}
