@@ -1,3 +1,9 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import { t } from "@/i18n/i18n";
+import { getLangFromPath } from "@/i18n/routeUtils";
+
 interface SpinnerProps {
   sizeClassName?: string;
   className?: string;
@@ -15,10 +21,15 @@ export function Spinner({
 }
 
 export function CardsPageSuspenseLoader() {
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-rose-50">
       <div className="flex items-center justify-center h-screen">
-        <div className="text-rose-600 text-lg">Завантаження...</div>
+        <div className="text-rose-600 text-lg">
+          {t(lang, "common.loading")}
+        </div>
       </div>
     </div>
   );
@@ -46,13 +57,16 @@ export function RatingLoader() {
 }
 
 export function RandomWineButtonLoader() {
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
+
   return (
     <span className="inline-flex items-center gap-2">
       <span className="relative flex h-4 w-4 items-center justify-center">
         <span className="absolute inline-flex h-full w-full rounded-full bg-rose-300/70 dark:bg-rose-700/50 animate-ping" />
         <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br from-rose-600 to-amber-400 animate-spin" />
       </span>
-      <span className="text-sm">Обираю...</span>
+      <span className="text-sm">{t(lang, "cards.random.loading")}</span>
       <span className="flex items-end gap-1" aria-hidden="true">
         <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:-0.3s]" />
         <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:-0.15s]" />

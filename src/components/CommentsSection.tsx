@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Comment, CommentsResponse } from "@/types";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
+import { t, tf } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 interface CommentsSectionProps {
   cardId: string;
@@ -18,6 +21,8 @@ export default function CommentsSection({
   onCommentAdded,
   onCommentDeleted,
 }: CommentsSectionProps) {
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -51,14 +56,14 @@ export default function CommentsSection({
         setPage(response.page);
         previousCommentsRef.current = null;
       } catch (err) {
-        setError(getApiErrorMessage(err, "Помилка завантаження коментарів"));
+        setError(getApiErrorMessage(err, t(lang, "status.commentsLoadError")));
       } finally {
         if (showLoading) {
           setLoading(false);
         }
       }
     },
-    [cardId, limit],
+    [cardId, limit, lang],
   );
 
   useEffect(() => {
@@ -84,7 +89,7 @@ export default function CommentsSection({
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token) {
-      setError("Щоб залишити коментар, увійдіть у систему.");
+      setError(t(lang, "status.commentLoginRequired"));
       return;
     }
 
@@ -101,7 +106,7 @@ export default function CommentsSection({
     const optimisticComment: Comment = {
       _id: `temp-${Date.now()}`,
       userId: currentUserId || "temp",
-      username: "Ви",
+      username: t(lang, "common.you"),
       text: newComment.trim(),
       createdAt: new Date().toISOString(),
     };
@@ -124,7 +129,7 @@ export default function CommentsSection({
         setComments(previousCommentsRef.current);
         previousCommentsRef.current = null;
       }
-      setError(getApiErrorMessage(err, "Помилка додавання коментаря"));
+      setError(getApiErrorMessage(err, t(lang, "status.commentAddError")));
     } finally {
       isAddingRef.current = false;
       setSubmitting(false);
@@ -132,7 +137,7 @@ export default function CommentsSection({
   };
 
   const handleDelete = async (commentId: string) => {
-    if (!confirm("Ви впевнені, що хочете видалити цей коментар?")) return;
+    if (!confirm(t(lang, "comments.confirmDelete"))) return;
 
     // Зберігаємо попередній стан
     if (!previousCommentsRef.current) {
@@ -158,7 +163,7 @@ export default function CommentsSection({
         setTotalComments(previousCommentsRef.current.length);
         previousCommentsRef.current = null;
       }
-      setError(getApiErrorMessage(err, "Помилка видалення коментаря"));
+      setError(getApiErrorMessage(err, t(lang, "status.commentDeleteError")));
     }
   };
 
@@ -171,7 +176,10 @@ export default function CommentsSection({
       hour: "2-digit",
       minute: "2-digit",
     };
-    return date.toLocaleDateString("uk-UA", options);
+    return date.toLocaleDateString(
+      lang === "uk" ? "uk-UA" : lang === "it" ? "it-IT" : "en-US",
+      options,
+    );
   };
 
   const isOwnComment = (comment: Comment) => {
@@ -192,7 +200,7 @@ export default function CommentsSection({
   return (
     <div className="bg-white/60 dark:bg-dark-800/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
       <h2 className="text-2xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-6">
-        Коментарі ({totalComments})
+        {tf(lang, "comments.title", { count: totalComments })}
       </h2>
 
       {/* Error message */}
@@ -207,13 +215,13 @@ export default function CommentsSection({
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="flex gap-4">
             <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-rose-400 to-amber-400 rounded-full flex items-center justify-center text-white font-bold">
-              {getUserInitial("Ви")}
+              {getUserInitial(t(lang, "common.you"))}
             </div>
             <div className="flex-1">
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Напишіть свій коментар..."
+                placeholder={t(lang, "comments.placeholder")}
                 rows={3}
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 resize-none"
                 disabled={submitting}
@@ -224,7 +232,9 @@ export default function CommentsSection({
                   disabled={submitting || !newComment.trim()}
                   className="px-6 py-2 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitting ? "Відправка..." : "Додати коментар"}
+                  {submitting
+                    ? t(lang, "comments.submitting")
+                    : t(lang, "comments.submit")}
                 </button>
               </div>
             </div>
@@ -232,12 +242,12 @@ export default function CommentsSection({
         </form>
       ) : (
         <div className="mb-8 rounded-xl border border-rose-200/70 bg-rose-50/70 p-4 text-sm text-rose-900 dark:border-rose-800/70 dark:bg-rose-900/20 dark:text-rose-200">
-          Щоб залишити коментар, потрібно{" "}
+          {t(lang, "comments.loginPrefix")}{" "}
           <Link
-            href="/login"
+            href={withLang("/login", lang)}
             className="font-semibold underline underline-offset-2 hover:text-rose-700 dark:hover:text-rose-100"
           >
-            увійти в акаунт
+            {t(lang, "comments.loginLink")}
           </Link>
           .
         </div>
@@ -247,7 +257,7 @@ export default function CommentsSection({
       {loading ? (
         <div className="text-center py-8">
           <div className="text-rose-600 dark:text-rose-400">
-            Завантаження коментарів...
+            {t(lang, "comments.loading")}
           </div>
         </div>
       ) : comments.length === 0 ? (
@@ -265,7 +275,7 @@ export default function CommentsSection({
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
             />
           </svg>
-          <p>Коментарів поки немає. Будьте першим!</p>
+          <p>{t(lang, "comments.empty")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -282,11 +292,11 @@ export default function CommentsSection({
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-gray-800 dark:text-gray-200">
-                    {comment.username || "Анонім"}
+                    {comment.username || t(lang, "common.anonymous")}
                   </span>
                   <span className="text-sm text-gray-400">
                     {isTempComment(comment._id)
-                      ? "Відправляється..."
+                      ? t(lang, "comments.sending")
                       : formatDate(comment.createdAt)}
                   </span>
                 </div>
@@ -300,7 +310,7 @@ export default function CommentsSection({
                       onClick={() => handleDelete(comment._id)}
                       className="mt-2 text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                     >
-                      Видалити
+                      {t(lang, "common.delete")}
                     </button>
                   )}
               </div>
@@ -317,17 +327,17 @@ export default function CommentsSection({
             disabled={page === 1 || loading}
             className="px-4 py-2 bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Попередня
+            {t(lang, "comments.previous")}
           </button>
           <span className="px-4 py-2 text-gray-600 dark:text-gray-400">
-            Сторінка {page} з {totalPages}
+            {tf(lang, "comments.page", { page, total: totalPages })}
           </span>
           <button
             onClick={() => fetchComments(page + 1)}
             disabled={page === totalPages || loading}
             className="px-4 py-2 bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Наступна
+            {t(lang, "comments.next")}
           </button>
         </div>
       )}

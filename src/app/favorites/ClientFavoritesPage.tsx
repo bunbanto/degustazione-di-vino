@@ -1,19 +1,29 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
-import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
+import {
+  cardsAPI,
+  cacheUtils,
+  getApiErrorMessage,
+  isApiNetworkError,
+} from "@/services/api";
 import { WineCard, FilterParams, SortField } from "@/types";
 import { withAuth } from "@/components/withAuth";
-import { SORT_FIELDS } from "@/constants/sort";
+import { SORT_FIELDS, getSortFieldLabel } from "@/constants/sort";
 import { useUserStore } from "@/store/userStore";
+import { t, tf } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 function ClientFavoritesPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
+  const localized = useCallback((path: string) => withLang(path, lang), [lang]);
 
   const [cards, setCards] = useState<WineCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +63,11 @@ function ClientFavoritesPage() {
         setCards(favoritesWithFlag);
         previousCardsRef.current = null;
       } catch (err: any) {
-        console.error("Error fetching favorites:", err);
+        if (isApiNetworkError(err)) {
+          console.warn("Favorites API is temporarily unreachable.");
+        } else {
+          console.error("Error fetching favorites:", err);
+        }
 
         // При помилці мережі, пробуємо з кешу
         if (!navigator.onLine) {
@@ -72,7 +86,7 @@ function ClientFavoritesPage() {
                 }),
               );
               setCards(favoritesWithFlag);
-              setError("Офлайн режим - показані кешовані улюблені");
+              setError(t(lang, "status.offlineCachedFavorites"));
               return;
             } catch (e) {
               console.error("Cache parse error:", e);
@@ -81,13 +95,15 @@ function ClientFavoritesPage() {
         }
 
         if (err.response?.status === 401) {
-          setError("Потрібно увійти в систему");
+          setError(t(lang, "status.loginRequired"));
           localStorage.removeItem("token");
-          setTimeout(() => router.push("/login"), 2000);
+          setTimeout(() => router.push(localized("/login")), 2000);
         } else if (err.response?.status === 403) {
-          setError("Доступ заборонено");
+          setError(t(lang, "status.forbidden"));
         } else {
-          setError(getApiErrorMessage(err, "Помилка завантаження улюблених"));
+          setError(
+            getApiErrorMessage(err, t(lang, "status.favoritesLoadError")),
+          );
         }
       } finally {
         if (showLoading) {
@@ -95,7 +111,7 @@ function ClientFavoritesPage() {
         }
       }
     },
-    [router],
+    [router, localized, lang],
   );
 
   // Initial fetch + перевірка зміни користувача
@@ -134,7 +150,7 @@ function ClientFavoritesPage() {
   const handleToggleFavorite = async (cardId: string): Promise<void> => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push(localized("/login"));
       throw new Error("No token");
     }
 
@@ -198,7 +214,7 @@ function ClientFavoritesPage() {
         previousCardsRef.current = null;
       }
       if (err.response?.status === 401) {
-        router.push("/login");
+        router.push(localized("/login"));
       }
       throw err;
     }
@@ -208,7 +224,7 @@ function ClientFavoritesPage() {
   const handleRate = async (id: string, rating: number): Promise<void> => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push(localized("/login"));
       throw new Error("No token");
     }
 
@@ -290,7 +306,7 @@ function ClientFavoritesPage() {
         previousCardsRef.current = null;
       }
       if (err.response?.status === 401) {
-        router.push("/login");
+        router.push(localized("/login"));
       }
       throw err;
     }
@@ -316,7 +332,7 @@ function ClientFavoritesPage() {
       // Відновлюємо картки при помилці
       fetchFavorites(false);
       if (err.response?.status === 401) {
-        router.push("/login");
+        router.push(localized("/login"));
       }
       throw err;
     }
@@ -335,10 +351,10 @@ function ClientFavoritesPage() {
           {/* Favorites Header */}
           <div className="liquid-glass rounded-2xl p-6 mb-6 text-center">
             <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-              Мої улюблені
+              {t(lang, "favorites.page.title")}
             </h1>
             <p className="text-rose-700 dark:text-rose-400 text-sm">
-              {cards.length} пропозицій у колекції
+              {tf(lang, "favorites.count", { count: cards.length })}
             </p>
           </div>
 
@@ -353,7 +369,7 @@ function ClientFavoritesPage() {
               {error && (
                 <div
                   className={`p-4 rounded-lg mb-6 ${
-                    error.includes("Офлайн")
+                    error.includes(t(lang, "status.offline"))
                       ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
                       : "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400"
                   }`}
@@ -365,7 +381,7 @@ function ClientFavoritesPage() {
               {loading ? (
                 <div className="flex items-center justify-center h-64">
                   <div className="text-rose-600 dark:text-rose-400 text-lg">
-                    Завантаження...
+                    {t(lang, "common.loading")}
                   </div>
                 </div>
               ) : !cards || cards.length === 0 ? (
@@ -373,16 +389,16 @@ function ClientFavoritesPage() {
                   <div className="text-center">
                     <div className="text-6xl mb-4">💔</div>
                     <p className="text-rose-700 dark:text-rose-400 text-lg">
-                      У вас поки немає улюблених вин
+                      {t(lang, "favorites.empty.title")}
                     </p>
                     <p className="text-rose-500 dark:text-rose-500 text-sm mt-2">
-                      Додавайте вина до улюблених, натискаючи на сердечко
+                      {t(lang, "favorites.empty.body")}
                     </p>
                     <Link
-                      href="/cards"
+                      href={localized("/cards")}
                       className="inline-block mt-4 px-6 py-2 bg-rose-600 dark:bg-rose-700 text-white rounded-full font-medium hover:bg-rose-700 dark:hover:bg-rose-600 transition-colors"
                     >
-                      Переглянути каталог
+                      {t(lang, "favorites.openCatalog")}
                     </Link>
                   </div>
                 </div>
@@ -392,14 +408,14 @@ function ClientFavoritesPage() {
                   <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
-                        Сортування:
+                        {t(lang, "cards.sort")}
                       </span>
                       <div className="flex items-center gap-2">
                         <label
                           htmlFor="favorites-sort-field"
                           className="sr-only"
                         >
-                          Поле сортування
+                          {t(lang, "cards.sort.field")}
                         </label>
                         <select
                           id="favorites-sort-field"
@@ -417,7 +433,7 @@ function ClientFavoritesPage() {
                         >
                           {SORT_FIELDS.map((field) => (
                             <option key={field.value} value={field.value}>
-                              {field.label}
+                              {getSortFieldLabel(field.value, lang)}
                             </option>
                           ))}
                         </select>
@@ -437,8 +453,8 @@ function ClientFavoritesPage() {
                           className="liquid-glass p-2 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors"
                           title={
                             filters.sort?.direction === "asc"
-                              ? "За зростанням"
-                              : "За спаданням"
+                              ? t(lang, "cards.sort.asc")
+                              : t(lang, "cards.sort.desc")
                           }
                         >
                           <span className="text-lg">
@@ -448,7 +464,9 @@ function ClientFavoritesPage() {
                       </div>
                     </div>
                     <div className="text-rose-600 dark:text-rose-500 text-sm">
-                      {cards.length} вин
+                      {tf(lang, "favorites.winesCount", {
+                        count: cards.length,
+                      })}
                     </div>
                   </div>
 

@@ -2,12 +2,15 @@
 
 import { FilterParams } from "@/types";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import {
   WINE_TYPES,
   WINE_COLORS,
   getWineTypeLabel,
   getWineColorLabel,
 } from "@/constants/wine";
+import { t } from "@/i18n/i18n";
+import { getLangFromPath } from "@/i18n/routeUtils";
 
 interface FilterPanelProps {
   filters: FilterParams;
@@ -18,6 +21,8 @@ export default function FilterPanel({
   filters,
   onFilterChange,
 }: FilterPanelProps) {
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const [localFilters, setLocalFilters] = useState<FilterParams>(filters);
 
   useEffect(() => {
@@ -71,25 +76,25 @@ export default function FilterPanel({
               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
             />
           </svg>
-          Фільтри
+          {t(lang, "filter.title")}
         </h2>
         <button
           onClick={clearFilters}
           className="text-sm text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline transition-colors"
         >
-          Очистити
+          {t(lang, "filter.clear")}
         </button>
       </div>
 
       {/* Search with liquid input */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Пошук
+          {t(lang, "filter.search")}
         </label>
         <div className="relative">
           <input
             type="text"
-            placeholder="Назва вина..."
+            placeholder={t(lang, "filter.search.placeholder")}
             value={localFilters.search || ""}
             onChange={(e) => handleChange("search", e.target.value)}
             className="liquid-input pl-24"
@@ -103,7 +108,7 @@ export default function FilterPanel({
           htmlFor="wine-type-filter"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
         >
-          Тип вина
+          {t(lang, "filter.type")}
         </label>
         <select
           id="wine-type-filter"
@@ -111,10 +116,10 @@ export default function FilterPanel({
           onChange={(e) => handleChange("type", e.target.value)}
           className="liquid-select"
         >
-          <option value="">Усі типи</option>
+          <option value="">{t(lang, "filter.type.all")}</option>
           {WINE_TYPES.map((type) => (
             <option key={type} value={type}>
-              {getWineTypeLabel(type)}
+              {getWineTypeLabel(type, lang)}
             </option>
           ))}
         </select>
@@ -126,7 +131,7 @@ export default function FilterPanel({
           htmlFor="wine-color-filter"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
         >
-          Колір
+          {t(lang, "filter.color")}
         </label>
         <select
           id="wine-color-filter"
@@ -134,10 +139,10 @@ export default function FilterPanel({
           onChange={(e) => handleChange("color", e.target.value)}
           className="liquid-select"
         >
-          <option value="">Усі кольори</option>
+          <option value="">{t(lang, "filter.color.all")}</option>
           {WINE_COLORS.map((color) => (
             <option key={color} value={color}>
-              {getWineColorLabel(color)}
+              {getWineColorLabel(color, lang)}
             </option>
           ))}
         </select>
@@ -167,14 +172,14 @@ export default function FilterPanel({
       {/* Price Range */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Ціна
+          {t(lang, "filter.price")}
         </label>
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <input
               type="number"
               min="0"
-              placeholder="Від"
+              placeholder={t(lang, "filter.price.from")}
               value={localFilters.minPrice || ""}
               onChange={(e) =>
                 handleChange(
@@ -190,7 +195,7 @@ export default function FilterPanel({
             <input
               type="number"
               min="0"
-              placeholder="До"
+              placeholder={t(lang, "filter.price.to")}
               value={localFilters.maxPrice || ""}
               onChange={(e) =>
                 handleChange(
@@ -207,7 +212,7 @@ export default function FilterPanel({
       {/* Minimum Rating with liquid slider */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          Мінімальний рейтинг
+          {t(lang, "filter.minRating")}
         </label>
         <div className="flex items-center gap-4">
           <input
@@ -248,7 +253,7 @@ export default function FilterPanel({
             d="M5 13l4 4L19 7"
           />
         </svg>
-        Застосувати
+        {t(lang, "filter.apply")}
       </button>
     </div>
   );

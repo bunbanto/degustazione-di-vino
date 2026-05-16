@@ -17,7 +17,8 @@ import {
 } from "@/lib/optimistic";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://wine-server-b5gr.onrender.com";
+  (process.env.NEXT_PUBLIC_API_URL || "https://wine-server-b5gr.onrender.com")
+    .replace(/\/$/, "");
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -32,6 +33,19 @@ const publicApi = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+const pendingCardsRequests = new Map<
+  string,
+  Promise<{
+    cards: WineCard[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  }>
+>();
 
 const DEFAULT_ERROR_MESSAGE = "Сталася помилка. Спробуйте ще раз.";
 
@@ -89,6 +103,10 @@ export function getApiErrorMessage(
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
 
+    if (!error.response) {
+      return fallbackMessage;
+    }
+
     if (status === 401) return "Сесія завершилась. Увійдіть у систему повторно.";
     if (status === 403) return "У вас немає доступу до цієї дії.";
 
@@ -110,6 +128,10 @@ export function getApiErrorMessage(
   }
 
   return fallbackMessage;
+}
+
+export function isApiNetworkError(error: unknown): boolean {
+  return axios.isAxiosError(error) && !error.response;
 }
 
 // Додавання токена до запитів
@@ -229,8 +251,17 @@ export const cardsAPI = {
       }
     }
 
+    const pendingRequest = pendingCardsRequests.get(cacheKey);
+    if (pendingRequest) {
+      return pendingRequest;
+    }
+
     // Немає кешу або помилка - робимо реальний запит
-    const result = await fetchCardsFromServer(filters, pagination);
+    const request = fetchCardsFromServer(filters, pagination).finally(() => {
+      pendingCardsRequests.delete(cacheKey);
+    });
+    pendingCardsRequests.set(cacheKey, request);
+    const result = await request;
 
     // Зберігаємо в кеш
     if (typeof window !== "undefined") {

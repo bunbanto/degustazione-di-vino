@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { authAPI, getApiErrorMessage } from "@/services/api";
 import { useUserStore } from "@/store/userStore";
+import { t } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 export default function ClientLoginPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -31,7 +35,7 @@ export default function ClientLoginPage() {
         );
         // After registration, switch to login mode
         setIsRegister(false);
-        setError("Реєстрація успішна! Тепер увійдіть.");
+        setError(t(lang, "status.registerSuccess"));
       } else {
         const response = await authAPI.login(formData.email, formData.password);
 
@@ -40,12 +44,12 @@ export default function ClientLoginPage() {
         const userData = {
           _id: serverUser._id,
           id: serverUser.id || serverUser._id,
-          name: serverUser.name || formData.name || "Користувач",
+          name: serverUser.name || formData.name || t(lang, "common.user"),
           username:
             serverUser.username ||
             serverUser.name ||
             formData.name ||
-            "Користувач",
+            t(lang, "common.user"),
           email: serverUser.email || formData.email,
           role: serverUser.role || "user",
           createdAt: serverUser.createdAt,
@@ -59,10 +63,10 @@ export default function ClientLoginPage() {
         // Sync user to Zustand store
         useUserStore.getState().setCurrentUser(userData);
 
-        router.push("/cards");
+        router.push(withLang("/cards", lang));
       }
     } catch (err) {
-      setError(getApiErrorMessage(err, "Сталася помилка. Спробуйте ще раз."));
+      setError(getApiErrorMessage(err, t(lang, "status.genericError")));
     } finally {
       setLoading(false);
     }
@@ -83,13 +87,15 @@ export default function ClientLoginPage() {
         {/* Logo/Title with glass effect */}
         <div className="text-center mb-8">
           <Link
-            href="/"
+            href={withLang("/", lang)}
             className="text-4xl font-serif font-bold text-rose-800 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors inline-block liquid-glass px-6 py-3 rounded-2xl"
           >
             🍷 Degustazione
           </Link>
           <p className="text-rose-600 dark:text-rose-400 mt-3 liquid-glass inline-block px-4 py-1.5 rounded-full text-sm">
-            {isRegister ? "Створіть акаунт" : "Увійдіть до акаунту"}
+            {isRegister
+              ? t(lang, "login.create")
+              : t(lang, "login.signInToAccount")}
           </p>
         </div>
 
@@ -98,7 +104,7 @@ export default function ClientLoginPage() {
           {error && (
             <div
               className={`mb-6 p-4 rounded-2xl text-sm backdrop-blur-md ${
-                error.includes("успішна")
+                error === t(lang, "status.registerSuccess")
                   ? "bg-green-100/80 dark:bg-green-900/50 text-green-700 dark:text-green-400"
                   : "bg-red-100/80 dark:bg-red-900/50 text-red-700 dark:text-red-400"
               }`}
@@ -111,7 +117,7 @@ export default function ClientLoginPage() {
             {isRegister && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Ваше ім&apos;я
+                  {t(lang, "login.name")}
                 </label>
                 <input
                   type="text"
@@ -121,7 +127,7 @@ export default function ClientLoginPage() {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   className="liquid-input"
-                  placeholder="Ваше ім'я"
+                  placeholder={t(lang, "login.name")}
                 />
               </div>
             )}
@@ -144,7 +150,7 @@ export default function ClientLoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Пароль
+                {t(lang, "login.password")}
               </label>
               <input
                 type="password"
@@ -167,10 +173,10 @@ export default function ClientLoginPage() {
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Завантаження...
+                  {t(lang, "login.loading")}
                 </>
               ) : isRegister ? (
-                "Зареєструватися"
+                t(lang, "login.register")
               ) : (
                 <>
                   <svg
@@ -186,7 +192,7 @@ export default function ClientLoginPage() {
                       d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
                     />
                   </svg>
-                  Увійти
+                  {t(lang, "nav.login")}
                 </>
               )}
             </button>
@@ -202,8 +208,8 @@ export default function ClientLoginPage() {
               className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm liquid-glass px-4 py-2 rounded-full transition-all hover:scale-105"
             >
               {isRegister
-                ? "Вже маєте акаунт? Увійдіть"
-                : "Немає акаунту? Зареєструйтеся"}
+                ? t(lang, "login.haveAccount")
+                : t(lang, "login.noAccount")}
             </button>
           </div>
         </div>
@@ -211,10 +217,10 @@ export default function ClientLoginPage() {
         {/* Back to Home with glass effect */}
         <div className="text-center mt-6">
           <Link
-            href="/"
+            href={withLang("/", lang)}
             className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm liquid-glass inline-block px-4 py-2 rounded-full transition-all hover:scale-105"
           >
-            ← Повернутися на головну
+            {t(lang, "login.backHome")}
           </Link>
         </div>
       </div>

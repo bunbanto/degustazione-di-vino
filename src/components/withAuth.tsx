@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, ComponentType } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 interface WithAuthProps {
   // Додаткові пропси, які можуть бути передані
@@ -15,6 +16,8 @@ interface WithAuthProps {
 export function withAuth<P extends object>(WrappedComponent: ComponentType<P>) {
   return function WithAuthComponent(props: P) {
     const router = useRouter();
+    const pathname = usePathname();
+    const lang = getLangFromPath(pathname);
     const { currentUser } = useUserStore();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,14 +30,14 @@ export function withAuth<P extends object>(WrappedComponent: ComponentType<P>) {
         // Немає токена - перенаправляємо на login
         setIsAuthenticated(false);
         setIsLoading(false);
-        router.push("/login");
+        router.push(withLang("/login", lang));
         return;
       }
 
       // Є токен - вважаємо авторизованим
       setIsAuthenticated(true);
       setIsLoading(false);
-    }, [router, currentUser]);
+    }, [router, currentUser, lang]);
 
     // Поки перевіряємо авторизацію - показуємо loading
     if (isLoading) {
@@ -112,13 +115,15 @@ export function AuthGuard({
   redirectTo?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push(redirectTo);
+      router.push(withLang(redirectTo, lang));
     }
-  }, [isAuthenticated, isLoading, router, redirectTo]);
+  }, [isAuthenticated, isLoading, router, redirectTo, lang]);
 
   if (isLoading) {
     return (

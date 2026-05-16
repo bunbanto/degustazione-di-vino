@@ -4,6 +4,7 @@ import { WineCard } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import CommentsSection from "./CommentsSection";
 import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
 import {
@@ -14,6 +15,8 @@ import {
   getUserIdString,
   isCardAuthor as checkCardAuthor,
 } from "@/lib/wineCardUtils";
+import { t, type Lang } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 interface WineCardModalProps {
   card: WineCard;
@@ -27,11 +30,13 @@ function RatingListItem({
   username,
   rating,
   isCurrentUser,
+  lang,
 }: {
   userId: string | { _id: string; name?: string };
   username: string;
   rating: number;
   isCurrentUser: boolean;
+  lang: Lang;
 }) {
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const normalizedRating = normalizeRatingForStars(rating);
@@ -50,7 +55,7 @@ function RatingListItem({
           </span>
           {isCurrentUser && (
             <span className="ml-2 text-xs liquid-glass bg-green-100/50 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
-              Ви
+              {t(lang, "common.you")}
             </span>
           )}
         </div>
@@ -104,6 +109,8 @@ export default function WineCardModal({
   isOpen,
   onClose,
 }: WineCardModalProps) {
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Get current user ID from localStorage
@@ -206,7 +213,7 @@ export default function WineCardModal({
                   {displayRating.toFixed(1)}
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  <div>із 10</div>
+                  <div>{t(lang, "common.outOfTen")}</div>
                 </div>
               </div>
               <div className="flex gap-0.5">
@@ -237,12 +244,12 @@ export default function WineCardModal({
           <div className="space-y-3 mb-4">
             <div className="flex flex-wrap gap-2">
               <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-rose-800 dark:text-rose-300">
-                {getWineTypeLabel(card.type)}
+                {getWineTypeLabel(card.type, lang)}
               </span>
               <span
                 className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize liquid-glass ${getColorBadgeStyle(card.color).border || ""}`}
               >
-                {getWineColorLabel(card.color)}
+                {getWineColorLabel(card.color, lang)}
               </span>
               {card.frizzante && (
                 <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">
@@ -255,7 +262,7 @@ export default function WineCardModal({
               {(card.year || card.anno) && (
                 <div className="liquid-glass rounded-xl p-2 text-center">
                   <div className="text-gray-500 dark:text-gray-400 text-xs">
-                    Рік
+                    {t(lang, "card.year")}
                   </div>
                   <div className="font-medium text-rose-800 dark:text-rose-300">
                     {card.year || card.anno}
@@ -265,7 +272,7 @@ export default function WineCardModal({
               {card.alcohol && (
                 <div className="liquid-glass rounded-xl p-2 text-center">
                   <div className="text-gray-500 dark:text-gray-400 text-xs">
-                    Алкоголь
+                    {t(lang, "card.alcohol")}
                   </div>
                   <div className="font-medium text-rose-800 dark:text-rose-300">
                     {card.alcohol}%
@@ -275,7 +282,7 @@ export default function WineCardModal({
               {card.price && (
                 <div className="liquid-glass rounded-xl p-2 text-center">
                   <div className="text-gray-500 dark:text-gray-400 text-xs">
-                    Ціна
+                    {t(lang, "card.price")}
                   </div>
                   <div className="font-medium text-rose-800 dark:text-rose-300">
                     {typeof card.price === "number"
@@ -338,7 +345,7 @@ export default function WineCardModal({
           {card.description && (
             <div className="mb-4 liquid-glass rounded-2xl p-4">
               <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Опис
+                {t(lang, "card.description")}
               </h4>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
                 {card.description}
@@ -350,7 +357,7 @@ export default function WineCardModal({
           {card.ratings && card.ratings.length > 0 && (
             <div className="border-t border-rose-200/30 dark:border-rose-800/30 pt-4 mb-4">
               <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3 liquid-glass inline-block px-3 py-1 rounded-full text-sm">
-                Оцінки користувачів ({card.ratings.length})
+                {t(lang, "card.userRatings")} ({card.ratings.length})
               </h4>
               <div className="max-h-48 overflow-y-auto space-y-1 liquid-glass rounded-2xl p-3">
                 {card.ratings.map((rating, idx) => {
@@ -367,6 +374,7 @@ export default function WineCardModal({
                       username={displayUsername}
                       rating={rating.value}
                       isCurrentUser={userIdStr === currentUserId}
+                      lang={lang}
                     />
                   );
                 })}
@@ -387,7 +395,7 @@ export default function WineCardModal({
           {/* Edit Button with liquid glass */}
           {isCardAuthor && (
             <Link
-              href={`/cards/${card._id}`}
+              href={withLang(`/cards/${card._id}`, lang)}
               className="mt-4 w-full py-3.5 liquid-btn-wine rounded-2xl font-semibold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
             >
               <svg
@@ -403,7 +411,7 @@ export default function WineCardModal({
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-              Редагувати картку
+              {t(lang, "card.edit")}
             </Link>
           )}
         </div>

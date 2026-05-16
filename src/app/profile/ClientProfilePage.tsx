@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { authAPI } from "@/services/api";
 import { cacheUtils } from "@/services/api";
 import { useUserStore } from "@/store/userStore";
+import { t } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 interface UserData {
   id?: string | number;
@@ -22,6 +24,8 @@ interface UserData {
 
 export default function ClientProfilePage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,7 +35,7 @@ export default function ClientProfilePage() {
     const loadUser = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push("/login");
+        router.push(withLang("/login", lang));
         return;
       }
 
@@ -74,23 +78,23 @@ export default function ClientProfilePage() {
       } catch (err: any) {
         console.error("Error loading profile:", err);
         if (err.response?.status === 401) {
-          router.push("/login");
+          router.push(withLang("/login", lang));
           return;
         }
-        setError("Не вдалося завантажити профіль");
+        setError(t(lang, "status.profileLoadError"));
       }
 
       setIsLoading(false);
     };
 
     loadUser();
-  }, [router, setCurrentUser]);
+  }, [lang, router, setCurrentUser]);
 
   const handleLogout = () => {
     cacheUtils.clearAll();
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    router.push("/");
+    router.push(withLang("/", lang));
   };
 
   if (isLoading) {
@@ -98,13 +102,15 @@ export default function ClientProfilePage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-amber-50 to-rose-50 dark:from-dark-900 dark:to-dark-800">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-600 mx-auto mb-4"></div>
-          <p className="text-rose-600 dark:text-rose-400">Завантаження...</p>
+          <p className="text-rose-600 dark:text-rose-400">
+            {t(lang, "common.loading")}
+          </p>
         </div>
       </div>
     );
   }
 
-  const displayName = user?.name || user?.username || "Користувач";
+  const displayName = user?.name || user?.username || t(lang, "common.user");
   const firstLetter = displayName[0]?.toUpperCase() || "?";
 
   return (
@@ -113,7 +119,7 @@ export default function ClientProfilePage() {
       <main className="pt-24 pb-12 px-4">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-8 text-center">
-            Особистий кабінет
+            {t(lang, "profile.dashboard")}
           </h1>
 
           {error && (
@@ -150,7 +156,7 @@ export default function ClientProfilePage() {
                   {user?.favoritesCount ?? "-"}
                 </div>
                 <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
-                  Улюблені
+                  {t(lang, "profile.favorites")}
                 </div>
               </div>
               <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
@@ -158,21 +164,28 @@ export default function ClientProfilePage() {
                   {user?.cardCount ?? "-"}
                 </div>
                 <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
-                  Мої вина
+                  {t(lang, "profile.myWines")}
                 </div>
               </div>
               <div className="text-center p-3 sm:p-4 bg-rose-50 dark:bg-dark-700 rounded-xl">
                 <div className="text-lg sm:text-3xl font-bold text-rose-600 dark:text-rose-400">
                   {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString("uk-UA", {
+                    ? new Date(user.createdAt).toLocaleDateString(
+                        lang === "uk"
+                          ? "uk-UA"
+                          : lang === "it"
+                            ? "it-IT"
+                            : "en-US",
+                        {
                         day: "2-digit",
                         month: "2-digit",
                         year: "2-digit",
-                      })
+                        },
+                      )
                     : "-"}
                 </div>
                 <div className="text-xs sm:text-sm text-rose-700 dark:text-rose-400">
-                  Дата реєстрації
+                  {t(lang, "profile.joined")}
                 </div>
               </div>
             </div>
@@ -182,7 +195,7 @@ export default function ClientProfilePage() {
                 onClick={handleLogout}
                 className="px-6 py-2 bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
               >
-                Вийти
+                {t(lang, "nav.logout")}
               </button>
             </div>
           </div>
@@ -190,11 +203,11 @@ export default function ClientProfilePage() {
           {/* Quick Links */}
           <div className="glass-card rounded-2xl p-6 shadow-xl">
             <h3 className="text-lg font-bold text-rose-900 dark:text-rose-300 mb-4">
-              Швидкі посилання
+              {t(lang, "profile.quickLinks")}
             </h3>
             <div className="space-y-3">
               <Link
-                href="/favorites"
+                href={withLang("/favorites", lang)}
                 className="flex items-center gap-4 p-4 bg-rose-50 dark:bg-dark-700 rounded-xl hover:bg-rose-100 dark:hover:bg-dark-600 transition-colors group"
               >
                 <div className="w-10 h-10 rounded-full bg-rose-200 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform">
@@ -214,16 +227,16 @@ export default function ClientProfilePage() {
                 </div>
                 <div>
                   <div className="font-medium text-rose-900 dark:text-rose-200">
-                    Мої улюблені
+                    {t(lang, "favorites.page.title")}
                   </div>
                   <div className="text-sm text-rose-600 dark:text-rose-400">
-                    Переглянути збережені вина
+                    {t(lang, "profile.savedWines")}
                   </div>
                 </div>
               </Link>
 
               <Link
-                href="/add-card"
+                href={withLang("/add-card", lang)}
                 className="flex items-center gap-4 p-4 bg-rose-50 dark:bg-dark-700 rounded-xl hover:bg-rose-100 dark:hover:bg-dark-600 transition-colors group"
               >
                 <div className="w-10 h-10 rounded-full bg-rose-200 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform">
@@ -243,16 +256,16 @@ export default function ClientProfilePage() {
                 </div>
                 <div>
                   <div className="font-medium text-rose-900 dark:text-rose-200">
-                    Додати вино
+                    {t(lang, "addcard.page.title")}
                   </div>
                   <div className="text-sm text-rose-600 dark:text-rose-400">
-                    Поділіться своїм улюбленим вином
+                    {t(lang, "profile.shareWine")}
                   </div>
                 </div>
               </Link>
 
               <Link
-                href="/cards"
+                href={withLang("/cards", lang)}
                 className="flex items-center gap-4 p-4 bg-rose-50 dark:bg-dark-700 rounded-xl hover:bg-rose-100 dark:hover:bg-dark-600 transition-colors group"
               >
                 <div className="w-10 h-10 rounded-full bg-rose-200 dark:bg-rose-900/50 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform">
@@ -272,10 +285,10 @@ export default function ClientProfilePage() {
                 </div>
                 <div>
                   <div className="font-medium text-rose-900 dark:text-rose-200">
-                    Каталог вин
+                    {t(lang, "profile.catalog")}
                   </div>
                   <div className="text-sm text-rose-600 dark:text-rose-400">
-                    Переглянути всі вина
+                    {t(lang, "profile.viewAllWines")}
                   </div>
                 </div>
               </Link>

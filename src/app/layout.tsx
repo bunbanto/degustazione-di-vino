@@ -79,6 +79,10 @@ export const viewport: Viewport = {
 const themeScript = `
   (function() {
     try {
+      var pathLang = window.location.pathname.split("/").filter(Boolean)[0];
+      if (pathLang === "uk" || pathLang === "en" || pathLang === "it") {
+        document.documentElement.lang = pathLang;
+      }
       var savedTheme = localStorage.getItem("theme");
       if (savedTheme === "dark") {
         document.documentElement.classList.add("dark");

@@ -1,3 +1,5 @@
+import { t, type Lang } from "@/i18n/i18n";
+
 export const WINE_TYPES = ["secco", "abboccato", "amabile", "dolce"] as const;
 export const WINE_COLORS = ["bianco", "rosso", "rosato"] as const;
 
@@ -17,11 +19,12 @@ const WINE_COLOR_LABELS: Record<WineColorValue, string> = {
   rosato: "Rosato",
 };
 
-export function getWineTypeLabel(value: string): string {
+export function getWineTypeLabel(value: string, lang?: Lang): string {
+  if (lang) return t(lang, `wine.type.${value}`);
   return WINE_TYPE_LABELS[value as WineTypeValue] || value;
 }
 
-export function getWineColorLabel(value: string): string {
+export function getWineColorLabel(value: string, lang?: Lang): string {
+  if (lang) return t(lang, `wine.color.${value}`);
   return WINE_COLOR_LABELS[value as WineColorValue] || value;
 }
-

@@ -1,10 +1,9 @@
-import ClientCardViewPage from "./ClientCardViewPage";
+import ClientCardViewPage from "@/app/cards/[id]/ClientCardViewPage";
 import type { Metadata } from "next";
-import { t, type Lang } from "@/i18n/i18n";
-import { getLocaleFromLang } from "@/i18n/i18n";
+import { getLocaleFromLang, t, type Lang } from "@/i18n/i18n";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ lang: Lang; id: string }>;
 }
 
 interface MetadataCard {
@@ -44,27 +43,30 @@ async function getCardData(id: string) {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  // This route DOES NOT include [lang], so keep metadata deterministic.
-  // Language-specific metadata is handled by /cards/[id]/[lang] route.
-  const lang: Lang = "uk";
+  const { lang, id } = await params;
   const locale = getLocaleFromLang(lang);
+  const card = (await getCardData(id)) as MetadataCard | null;
+  const canonicalUrl = `/${lang}/cards/${id}`;
 
-  const card = (await getCardData(resolvedParams.id)) as MetadataCard | null;
-  const canonicalUrl = `/cards/${resolvedParams.id}`;
-
-  if (card && card.name) {
+  if (card?.name) {
     const details: string[] = [];
     if (card.winery) details.push(card.winery);
     if (card.country) details.push(card.country);
-    if (card.year || card.anno) details.push(`${card.year || card.anno} рік`);
+    if (card.year || card.anno) {
+      details.push(
+        lang === "en"
+          ? `${card.year || card.anno}`
+          : lang === "it"
+            ? `anno ${card.year || card.anno}`
+            : `${card.year || card.anno} рік`,
+      );
+    }
     if (card.rating) details.push(`rating ${card.rating.toFixed(1)}/10`);
 
     const description =
       details.length > 0
         ? `${card.name} - ${details.join(", ")}.`
         : `${card.name}.`;
-
     const imageUrl = card.img || card.image || "/opengraph-image";
 
     return {
@@ -92,7 +94,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: t("uk", "cards.page.title"),
+    title: t(lang, "cards.page.title"),
     description: "",
     alternates: {
       canonical: canonicalUrl,
@@ -101,8 +103,6 @@ export async function generateMetadata({
 }
 
 export default async function CardViewPage({ params }: PageProps) {
-  // Note: this route is /cards/[id] (no [lang] param). Keep it functional but
-  // language-specific UI is handled by components/other [lang] routes.
   await params;
   return <ClientCardViewPage />;
 }

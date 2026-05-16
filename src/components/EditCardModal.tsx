@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { cardsAPI, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
 import {
@@ -10,6 +11,8 @@ import {
   getWineTypeLabel,
   getWineColorLabel,
 } from "@/constants/wine";
+import { t, tf } from "@/i18n/i18n";
+import { getLangFromPath } from "@/i18n/routeUtils";
 
 interface EditCardModalProps {
   card: WineCard;
@@ -26,7 +29,8 @@ export default function EditCardModal({
   onSaved,
   onDeleted,
 }: EditCardModalProps) {
-  const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState<string | undefined>(
@@ -80,18 +84,18 @@ export default function EditCardModal({
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
-      setUploadError("Дозволені формати: JPG, PNG, WebP");
+      setUploadError(t(lang, "form.image.allowed"));
       return false;
     }
 
     if (file.size > maxSize) {
-      setUploadError("Максимальний розмір файлу: 5MB");
+      setUploadError(t(lang, "form.image.maxSize"));
       return false;
     }
 
     setUploadError("");
     return true;
-  }, []);
+  }, [lang]);
 
   const handleFile = useCallback((file: File) => {
     if (validateFile(file)) {
@@ -168,14 +172,14 @@ export default function EditCardModal({
       onSaved();
       onClose();
     } catch (err) {
-      setError(getApiErrorMessage(err, "Помилка збереження картки"));
+      setError(getApiErrorMessage(err, t(lang, "card.saveError")));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Ви впевнені, що хочете видалити цю картку?")) return;
+    if (!confirm(t(lang, "card.deleteConfirm"))) return;
 
     setSaving(true);
     setError("");
@@ -189,7 +193,7 @@ export default function EditCardModal({
       }
       onClose();
     } catch (err) {
-      setError(getApiErrorMessage(err, "Помилка видалення картки"));
+      setError(getApiErrorMessage(err, t(lang, "card.deleteError")));
     } finally {
       setSaving(false);
     }
@@ -229,7 +233,7 @@ export default function EditCardModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b dark:border-dark-700">
           <h2 className="text-2xl font-serif font-bold text-rose-900 dark:text-rose-300">
-            Редагувати вино
+            {t(lang, "card.editWine")}
           </h2>
           <button
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
@@ -263,7 +267,7 @@ export default function EditCardModal({
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Назва вина *
+                {t(lang, "form.name")}
               </label>
               <input
                 type="text"
@@ -271,7 +275,7 @@ export default function EditCardModal({
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                placeholder="Наприклад: Chateau Margaux 2015"
+                placeholder={t(lang, "form.example.wine")}
               />
             </div>
 
@@ -282,7 +286,7 @@ export default function EditCardModal({
                   htmlFor="edit-card-type"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
-                  Тип вина *
+                  {t(lang, "filter.type")} *
                 </label>
                 <select
                   id="edit-card-type"
@@ -292,7 +296,7 @@ export default function EditCardModal({
                 >
                   {WINE_TYPES.map((type) => (
                     <option key={type} value={type}>
-                      {getWineTypeLabel(type)}
+                      {getWineTypeLabel(type, lang)}
                     </option>
                   ))}
                 </select>
@@ -303,7 +307,7 @@ export default function EditCardModal({
                   htmlFor="edit-card-color"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
-                  Колір *
+                  {t(lang, "filter.color")} *
                 </label>
                 <select
                   id="edit-card-color"
@@ -313,7 +317,7 @@ export default function EditCardModal({
                 >
                   {WINE_COLORS.map((color) => (
                     <option key={color} value={color}>
-                      {getWineColorLabel(color)}
+                      {getWineColorLabel(color, lang)}
                     </option>
                   ))}
                 </select>
@@ -343,7 +347,7 @@ export default function EditCardModal({
             {/* Winery */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Виноробня *
+                {t(lang, "form.winery")}
               </label>
               <input
                 type="text"
@@ -351,7 +355,7 @@ export default function EditCardModal({
                 value={formData.winery}
                 onChange={(e) => handleChange("winery", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                placeholder="Наприклад: Masso Antico"
+                placeholder={t(lang, "form.example.winery")}
               />
             </div>
 
@@ -359,27 +363,27 @@ export default function EditCardModal({
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Країна
+                  {t(lang, "form.country")}
                 </label>
                 <input
                   type="text"
                   value={formData.country}
                   onChange={(e) => handleChange("country", e.target.value)}
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                  placeholder="Наприклад: Італія"
+                  placeholder={t(lang, "form.example.country")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Регіон
+                  {t(lang, "form.region")}
                 </label>
                 <input
                   type="text"
                   value={formData.region}
                   onChange={(e) => handleChange("region", e.target.value)}
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                  placeholder="Наприклад: Південна Італія"
+                  placeholder={t(lang, "form.example.region")}
                 />
               </div>
             </div>
@@ -388,7 +392,7 @@ export default function EditCardModal({
             <div className="grid md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Рік вина
+                  {t(lang, "form.year")}
                 </label>
                 <input
                   type="number"
@@ -404,7 +408,7 @@ export default function EditCardModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Алкоголь (%) *
+                  {t(lang, "form.alcohol")}
                 </label>
                 <input
                   type="number"
@@ -422,7 +426,7 @@ export default function EditCardModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Ціна (€) *
+                  {t(lang, "form.price")}
                 </label>
                 <input
                   type="number"
@@ -434,7 +438,7 @@ export default function EditCardModal({
                     handleChange("price", parseFloat(e.target.value))
                   }
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                  placeholder="Наприклад: 25.50"
+                  placeholder={t(lang, "form.example.price")}
                 />
               </div>
             </div>
@@ -446,9 +450,11 @@ export default function EditCardModal({
                   {card.rating?.toFixed(1) || "0.0"}
                 </div>
                 <div className="flex gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <div>Середній рейтинг</div>
+                  <div>{t(lang, "card.averageRating")}</div>
                   <div className="text-gray-500">
-                    ({card.ratings?.length || 0} оцінок)
+                    {tf(lang, "common.ratingsCount", {
+                      count: card.ratings?.length || 0,
+                    })}
                   </div>
                 </div>
               </div>
@@ -457,7 +463,7 @@ export default function EditCardModal({
             {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Зображення
+                {t(lang, "form.image")}
               </label>
               {!imagePreview ? (
                 <div
@@ -486,9 +492,9 @@ export default function EditCardModal({
                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    <p className="text-sm">Натисніть або перетягніть фото</p>
+                    <p className="text-sm">{t(lang, "form.image.help")}</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                      JPG, PNG, WebP (до 5MB)
+                      {t(lang, "form.image.limit")}
                     </p>
                   </div>
                 </div>
@@ -531,14 +537,14 @@ export default function EditCardModal({
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Опис
+                {t(lang, "form.description")}
               </label>
               <textarea
                 rows={4}
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50 resize-none"
-                placeholder="Розкажіть про це вино..."
+                placeholder={t(lang, "form.description.placeholder")}
               />
             </div>
 
@@ -549,7 +555,7 @@ export default function EditCardModal({
                 disabled={saving}
                 className="flex-1 py-4 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all shadow-md disabled:opacity-50"
               >
-                {saving ? "Збереження..." : "Зберегти зміни"}
+                {saving ? t(lang, "card.saving") : t(lang, "card.saveChanges")}
               </button>
               <button
                 type="button"
@@ -557,7 +563,7 @@ export default function EditCardModal({
                 disabled={saving}
                 className="px-6 py-4 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg font-semibold hover:bg-red-200 dark:hover:bg-red-800/50 transition-all disabled:opacity-50"
               >
-                Видалити
+                {t(lang, "common.delete")}
               </button>
             </div>
           </form>

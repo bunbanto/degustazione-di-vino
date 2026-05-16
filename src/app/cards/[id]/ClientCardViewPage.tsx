@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { usePathname, useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
@@ -20,10 +20,14 @@ import {
   getUserIdString,
   isCardAuthor as checkCardAuthor,
 } from "@/lib/wineCardUtils";
+import { t, tf } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 export default function ClientCardViewPage() {
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const id = params.id as string;
 
   const [loading, setLoading] = useState(true);
@@ -75,9 +79,9 @@ export default function ClientCardViewPage() {
       } catch (err: any) {
         if (isMounted) {
           if (err?.response?.status === 404) {
-            setError("Картку не знайдено або її було видалено.");
+            setError(t(lang, "status.cardNotFound"));
           } else {
-            setError(getApiErrorMessage(err, "Помилка завантаження картки"));
+            setError(getApiErrorMessage(err, t(lang, "status.cardLoadError")));
           }
         }
       } finally {
@@ -92,7 +96,7 @@ export default function ClientCardViewPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, lang]);
 
   // Check if current user is the card author
   const isCardAuthor = checkCardAuthor(card, currentUserId);
@@ -101,7 +105,7 @@ export default function ClientCardViewPage() {
   const handleToggleFavorite = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push(withLang("/login", lang));
       return;
     }
 
@@ -152,7 +156,7 @@ export default function ClientCardViewPage() {
     await cardsAPI.delete(id);
     cacheUtils.clearCards();
     cacheUtils.clearFavorites();
-    router.push("/cards");
+    router.push(withLang("/cards", lang));
   };
 
   if (loading) {
@@ -161,7 +165,7 @@ export default function ClientCardViewPage() {
         <Navbar />
         <div className="flex items-center justify-center h-64 pt-24">
           <div className="text-rose-600 dark:text-rose-400 text-lg">
-            Завантаження...
+            {t(lang, "common.loading")}
           </div>
         </div>
       </div>
@@ -175,13 +179,13 @@ export default function ClientCardViewPage() {
         <div className="flex items-center justify-center h-64 pt-24">
           <div className="text-center">
             <div className="text-red-600 dark:text-red-400 text-lg mb-4">
-              {error || "Картка не знайдена"}
+              {error || t(lang, "status.cardMissing")}
             </div>
             <Link
-              href="/cards"
+              href={withLang("/cards", lang)}
               className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline"
             >
-              ← Повернутися до каталогу
+              {t(lang, "card.backCatalog")}
             </Link>
           </div>
         </div>
@@ -206,7 +210,7 @@ export default function ClientCardViewPage() {
               onClick={() => router.back()}
               className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 underline text-sm"
             >
-              ← Повернутися назад
+              {t(lang, "form.back")}
             </button>
           </div>
 
@@ -236,7 +240,9 @@ export default function ClientCardViewPage() {
                     isFavoriteLoading ? "opacity-50 cursor-wait" : ""
                   }`}
                   title={
-                    isFavorite ? "Видалити з улюблених" : "Додати до улюблених"
+                    isFavorite
+                      ? t(lang, "card.favorite.remove")
+                      : t(lang, "card.favorite.add")
                   }
                 >
                   <svg
@@ -282,17 +288,17 @@ export default function ClientCardViewPage() {
               {/* Wine Details */}
               <div className="glass-card rounded-2xl p-6 shadow-lg">
                 <h2 className="text-xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-4">
-                  Деталі
+                  {t(lang, "card.details")}
                 </h2>
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span className="px-3 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 rounded-full text-sm font-medium">
-                    {getWineTypeLabel(card.type)}
+                    {getWineTypeLabel(card.type, lang)}
                   </span>
                   <span
                     className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
                   >
-                    {getWineColorLabel(card.color)}
+                    {getWineColorLabel(card.color, lang)}
                   </span>
                   {card.frizzante && (
                     <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium">
@@ -305,7 +311,7 @@ export default function ClientCardViewPage() {
                   {(card.year || card.anno) && (
                     <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg text-center">
                       <div className="text-gray-500 dark:text-gray-400 text-xs">
-                        Рік
+                        {t(lang, "card.year")}
                       </div>
                       <div className="font-semibold dark:text-gray-200">
                         {card.year || card.anno}
@@ -315,7 +321,7 @@ export default function ClientCardViewPage() {
                   {card.alcohol && (
                     <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg text-center">
                       <div className="text-gray-500 dark:text-gray-400 text-xs">
-                        Алкоголь
+                        {t(lang, "card.alcohol")}
                       </div>
                       <div className="font-semibold dark:text-gray-200">
                         {card.alcohol}%
@@ -325,7 +331,7 @@ export default function ClientCardViewPage() {
                   {card.price && (
                     <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg text-center">
                       <div className="text-gray-500 dark:text-gray-400 text-xs">
-                        Ціна
+                        {t(lang, "card.price")}
                       </div>
                       <div className="font-semibold dark:text-gray-200">
                         {typeof card.price === "number"
@@ -396,8 +402,12 @@ export default function ClientCardViewPage() {
                       {displayRating.toFixed(1)}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                      <div>із 10</div>
-                      <div>({displayRatingCount} оцінок)</div>
+                      <div>{t(lang, "common.outOfTen")}</div>
+                      <div>
+                        {tf(lang, "common.ratingsCount", {
+                          count: displayRatingCount,
+                        })}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-0.5">
@@ -427,7 +437,7 @@ export default function ClientCardViewPage() {
                 {card.ratings && card.ratings.length > 0 && (
                   <div className="border-t border-amber-200 dark:border-dark-700 pt-4">
                     <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3">
-                      Оцінки користувачів
+                      {t(lang, "card.userRatings")}
                     </h3>
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                       {card.ratings.map((rating, idx) => {
@@ -454,11 +464,11 @@ export default function ClientCardViewPage() {
                                 </span>
                               </div>
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[100px]">
-                                {displayUsername || "Користувач"}
+                                {displayUsername || t(lang, "common.user")}
                               </span>
                               {userIdStr === currentUserId && (
                                 <span className="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
-                                  Ви
+                                  {t(lang, "common.you")}
                                 </span>
                               )}
                             </div>
@@ -514,7 +524,7 @@ export default function ClientCardViewPage() {
               {card.description && (
                 <div className="glass-card rounded-2xl p-6 shadow-lg">
                   <h2 className="text-xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-3">
-                    Опис
+                    {t(lang, "card.description")}
                   </h2>
                   <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                     {card.description}
@@ -556,7 +566,9 @@ export default function ClientCardViewPage() {
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
-                  {isFavorite ? "В улюблених" : "До улюблених"}
+                  {isFavorite
+                    ? t(lang, "card.favorite.in")
+                    : t(lang, "card.favorite.to")}
                 </button>
 
                 {/* Edit Button for Author */}
@@ -578,7 +590,7 @@ export default function ClientCardViewPage() {
                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                       />
                     </svg>
-                    Редагувати картку
+                    {t(lang, "card.edit")}
                   </button>
                 )}
               </div>

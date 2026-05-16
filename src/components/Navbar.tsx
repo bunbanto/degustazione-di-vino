@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cacheUtils } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUserStore } from "@/store/userStore";
+import { SUPPORTED_LANGS, t, type Lang } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const lang = getLangFromPath(pathname);
+
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentUser, checkAuth, logout } = useUserStore();
@@ -22,8 +27,46 @@ export default function Navbar() {
     cacheUtils.clearAll();
     logout();
     setIsAuthenticated(false);
-    window.location.href = "/";
+    window.location.assign(withLang("/", lang));
   };
+
+  const hrefCards = withLang("/cards", lang);
+  const hrefFavorites = withLang("/favorites", lang);
+  const hrefAddCard = withLang("/add-card", lang);
+  const hrefLogin = withLang("/login", lang);
+  const hrefProfile = withLang("/profile", lang);
+
+  const pathnameNoLang = (() => {
+    const cleanPath = pathname.replace(/\/(uk|en|it)(\/|$)/, "$2");
+    return cleanPath || "/";
+  })();
+
+  const getLanguageHref = (nextLang: Lang) => {
+    const query = searchParams.toString();
+    const href = withLang(pathnameNoLang, nextLang);
+    return query ? `${href}?${query}` : href;
+  };
+
+  const languageSwitcher = (
+    <div className="flex items-center gap-1 liquid-glass rounded-2xl p-1">
+      {SUPPORTED_LANGS.map((item) => (
+        <Link
+          key={item}
+          href={getLanguageHref(item)}
+          hrefLang={item}
+          aria-current={item === lang ? "true" : undefined}
+          className={`min-w-9 rounded-xl px-2.5 py-1.5 text-center text-xs font-semibold uppercase transition-all duration-300 ${
+            item === lang
+              ? "bg-rose-600 text-white shadow-sm dark:bg-rose-500"
+              : "text-gray-600 hover:bg-rose-100/60 dark:text-gray-300 dark:hover:bg-rose-900/30"
+          }`}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          {item}
+        </Link>
+      ))}
+    </div>
+  );
 
   // Loading state with liquid glass effect
   if (currentUser === undefined && !isAuthenticated) {
@@ -43,60 +86,59 @@ export default function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-50 liquid-glass-safe">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            {/* Logo with liquid glass effect */}
             <Link
-              href="/"
+              href={withLang("/", lang)}
               className="text-2xl font-serif font-bold text-rose-800 dark:text-rose-300 hover:text-rose-700 dark:hover:text-rose-200 transition-all duration-300 liquid-glass px-4 py-2 rounded-2xl"
             >
               🍷 Degustazione
             </Link>
 
-            {/* Desktop Navigation with glass buttons */}
             <div className="hidden lg:flex items-center gap-3">
               <Link
-                href="/cards"
+                href={hrefCards}
                 className={`px-4 py-2 rounded-2xl font-medium transition-all duration-300 liquid-glass ${
-                  pathname === "/cards"
+                  pathnameNoLang === "/cards"
                     ? "bg-rose-200/50 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300"
                     : "hover:bg-rose-100/50 dark:hover:bg-rose-900/30 text-gray-600 dark:text-gray-300"
                 }`}
               >
-                Каталог
+                {t(lang, "nav.catalog")}
               </Link>
 
               {isAuthenticated ? (
                 <>
                   <Link
-                    href="/favorites"
+                    href={hrefFavorites}
                     className={`px-4 py-2 rounded-2xl font-medium transition-all duration-300 liquid-glass ${
-                      pathname === "/favorites"
+                      pathnameNoLang === "/favorites"
                         ? "bg-rose-200/50 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300"
                         : "hover:bg-rose-100/50 dark:hover:bg-rose-900/30 text-gray-600 dark:text-gray-300"
                     }`}
                   >
-                    Мої улюблені
+                    {t(lang, "nav.favorites")}
                   </Link>
                   <Link
-                    href="/add-card"
+                    href={hrefAddCard}
                     className={`px-4 py-2 rounded-2xl font-medium transition-all duration-300 liquid-glass ${
-                      pathname === "/add-card"
+                      pathnameNoLang === "/add-card"
                         ? "bg-rose-200/50 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300"
                         : "hover:bg-rose-100/50 dark:hover:bg-rose-900/30 text-gray-600 dark:text-gray-300"
                     }`}
                   >
-                    Додати вино
+                    {t(lang, "nav.addWine")}
                   </Link>
                 </>
               ) : null}
 
-              {/* Theme Toggle with liquid glass */}
+              {languageSwitcher}
+
               <button
                 onClick={toggleTheme}
                 className="p-2.5 rounded-2xl liquid-glass text-rose-700 dark:text-amber-400 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300 hover:scale-105 active:scale-95"
                 aria-label={
                   theme === "dark"
-                    ? "Увімкнути світлу тему"
-                    : "Увімкнути темну тему"
+                    ? t(lang, "nav.theme.dark")
+                    : t(lang, "nav.theme.light")
                 }
               >
                 {theme === "dark" ? (
@@ -132,9 +174,8 @@ export default function Navbar() {
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-3">
-                  {/* Profile with liquid glass */}
                   <Link
-                    href="/profile"
+                    href={hrefProfile}
                     className="flex items-center gap-2 liquid-glass px-3 py-2 rounded-2xl hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
                   >
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white text-sm font-medium shadow-lg">
@@ -153,20 +194,19 @@ export default function Navbar() {
                     onClick={handleLogout}
                     className="px-4 py-2 rounded-2xl liquid-glass text-rose-700 dark:text-rose-400 font-medium hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300 hover:scale-105 active:scale-95"
                   >
-                    Вийти
+                    {t(lang, "nav.logout")}
                   </button>
                 </div>
               ) : (
                 <Link
-                  href="/login"
+                  href={hrefLogin}
                   className="px-6 py-2.5 rounded-2xl liquid-btn-wine font-medium hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
                 >
-                  Увійти
+                  {t(lang, "nav.login")}
                 </Link>
               )}
             </div>
 
-            {/* Mobile Menu Button with liquid glass */}
             <button
               className="lg:hidden p-2.5 rounded-2xl liquid-glass text-gray-600 dark:text-gray-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -196,39 +236,38 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Mobile Menu with liquid glass overlay */}
           {isMenuOpen && (
             <div className="lg:hidden py-4 border-t border-rose-200/30 dark:border-rose-800/30">
               <div className="flex flex-col gap-3">
                 <Link
-                  href="/cards"
+                  href={hrefCards}
                   className="px-4 py-3 rounded-2xl liquid-glass font-medium text-gray-700 dark:text-gray-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Каталог вин
+                  {t(lang, "nav.catalog")}
                 </Link>
                 {isAuthenticated ? (
                   <>
                     <Link
-                      href="/favorites"
+                      href={hrefFavorites}
                       className="px-4 py-3 rounded-2xl liquid-glass font-medium text-gray-700 dark:text-gray-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Мої улюблені
+                      {t(lang, "nav.favorites")}
                     </Link>
                     <Link
-                      href="/add-card"
+                      href={hrefAddCard}
                       className="px-4 py-3 rounded-2xl liquid-glass font-medium text-gray-700 dark:text-gray-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Додати вино
+                      {t(lang, "nav.addWine")}
                     </Link>
                     <Link
-                      href="/profile"
+                      href={hrefProfile}
                       className="px-4 py-3 rounded-2xl liquid-glass font-medium text-gray-700 dark:text-gray-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Мій профіль
+                      {t(lang, "nav.profile")}
                     </Link>
                     <button
                       onClick={() => {
@@ -237,20 +276,26 @@ export default function Navbar() {
                       }}
                       className="px-4 py-3 rounded-2xl liquid-glass text-left font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300"
                     >
-                      Вийти
+                      {t(lang, "nav.logout")}
                     </button>
                   </>
                 ) : (
                   <Link
-                    href="/login"
+                    href={hrefLogin}
                     className="px-4 py-3 rounded-2xl liquid-btn-wine text-center font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Увійти
+                    {t(lang, "nav.login")}
                   </Link>
                 )}
 
-                {/* Theme Toggle in Mobile Menu */}
+                <div className="flex items-center justify-between gap-3 rounded-2xl liquid-glass px-4 py-3">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {t(lang, "nav.language")}
+                  </span>
+                  {languageSwitcher}
+                </div>
+
                 <button
                   onClick={() => {
                     toggleTheme();
@@ -280,7 +325,9 @@ export default function Navbar() {
                       />
                     )}
                   </svg>
-                  {theme === "dark" ? "Світла тема" : "Темна тема"}
+                  {theme === "dark"
+                    ? t(lang, "nav.theme.dark")
+                    : t(lang, "nav.theme.light")}
                 </button>
               </div>
             </div>
@@ -288,7 +335,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Add spacer to account for fixed navbar */}
       <div className="h-16" />
     </>
   );

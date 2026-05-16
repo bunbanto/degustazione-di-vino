@@ -4,7 +4,7 @@ import { WineCard as WineCardType } from "@/types";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 import EditCardModal from "@/components/EditCardModal";
 import { RatingLoader } from "@/components/Loaders";
@@ -18,6 +18,8 @@ import {
   getUserIdString,
   isCardAuthor as checkCardAuthor,
 } from "@/lib/wineCardUtils";
+import { t } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 interface WineCardProps {
   card: WineCardType;
@@ -73,6 +75,8 @@ export default function WineCardComponent({
   onCardSaved,
 }: WineCardProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
   const [userRating, setUserRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState(0);
   const [isRatingLoading, setIsRatingLoading] = useState(false);
@@ -154,7 +158,7 @@ export default function WineCardComponent({
   const handleToggleFavorite = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push(withLang("/login", lang));
       return;
     }
 
@@ -181,7 +185,7 @@ export default function WineCardComponent({
     } finally {
       setIsFavoriteLoading(false);
     }
-  }, [card._id, isFavorite, onToggleFavorite, router]);
+  }, [card._id, isFavorite, lang, onToggleFavorite, router]);
 
   const handleRate = useCallback(
     async (rating: number) => {
@@ -222,7 +226,7 @@ export default function WineCardComponent({
   const displayRating = getDisplayRating(card);
   const displayRatingCount = getDisplayRatingCount(card);
   // For visual stars, always use the average card rating as a base.
-  // Personal rating is shown separately as "Ваш:" to avoid hiding half-stars.
+  // Personal rating is shown separately to avoid hiding half-stars.
   const currentRating = isRatingLoading ? displayRating : hoverRating || displayRating;
   const imageUrl =
     card.img ||
@@ -257,7 +261,7 @@ export default function WineCardComponent({
               <div
                 className={`${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium shadow-lg border border-white/20 ${getColorBadgeStyle(card.color).border || ""}`}
               >
-                {getWineColorLabel(card.color)}
+                {getWineColorLabel(card.color, lang)}
               </div>
             )}
             {card.frizzante && (
@@ -279,7 +283,11 @@ export default function WineCardComponent({
             className={`absolute top-4 right-4 liquid-glass p-2.5 rounded-full transition-all duration-300 z-40 hover:scale-110 active:scale-95 ${
               isFavoriteLoading ? "opacity-50 cursor-wait" : ""
             }`}
-            title={isFavorite ? "Видалити з улюблених" : "Додати до улюблених"}
+            title={
+              isFavorite
+                ? t(lang, "card.favorite.remove")
+                : t(lang, "card.favorite.add")
+            }
           >
             <svg
               className={`w-5 h-5 transition-all duration-300 ${
@@ -310,14 +318,14 @@ export default function WineCardComponent({
             </span>
           )}
 
-          {/* Overlay with "Детальніше" text */}
+          {/* Details link overlay */}
           <div className="absolute inset-0 bg-black/0 dark:bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center z-30">
             <Link
-              href={`/cards/${card._id}`}
+              href={withLang(`/cards/${card._id}`, lang)}
               onClick={(e) => e.stopPropagation()}
               className="text-white opacity-0 group-hover:opacity-100 transition-all duration-500 font-semibold liquid-glass px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 cursor-pointer"
             >
-              Детальніше →
+              {t(lang, "card.more")}
             </Link>
           </div>
         </div>
@@ -339,11 +347,11 @@ export default function WineCardComponent({
           <div className="flex items-center gap-2 mb-4 flex-wrap justify-between">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 bg-rose-100/80 dark:bg-rose-900/50 backdrop-blur text-rose-800 dark:text-rose-300 rounded-full text-xs font-medium">
-                {getWineTypeLabel(card.type)}
+                {getWineTypeLabel(card.type, lang)}
               </span>
               {(card.year || card.anno) && (
                 <span className="text-gray-500 dark:text-gray-400 text-sm">
-                  {card.year || card.anno} р.
+                  {card.year || card.anno}
                 </span>
               )}
               {card.alcohol && (
@@ -373,7 +381,7 @@ export default function WineCardComponent({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs text-gray-400 dark:text-gray-500">
-                    середній
+                    {t(lang, "card.average")}
                   </span>
                   <span className="text-xs text-gray-400 dark:text-gray-500">
                     ({displayRatingCount})
@@ -383,7 +391,7 @@ export default function WineCardComponent({
               {currentUserId && userRating !== null && (
                 <div className="flex items-center gap-2 liquid-glass px-3 py-1.5 rounded-xl">
                   <span className="text-xs text-green-600 dark:text-green-400">
-                    Ваш:
+                    {t(lang, "card.yourRating")}
                   </span>
                   <span
                     className={`text-lg font-bold ${getRatingColor(userRating, "card")}`}
@@ -509,7 +517,7 @@ export default function WineCardComponent({
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-              Редагувати
+              {t(lang, "card.editShort")}
             </button>
           )}
         </div>
@@ -541,7 +549,7 @@ export default function WineCardComponent({
             type="button"
             className="absolute top-4 right-4 liquid-glass rounded-full p-2 text-white/80 hover:text-white hover:bg-white/20 transition-all z-10"
             onClick={() => setIsImageModalOpen(false)}
-            aria-label="Закрити модалку з фото"
+            aria-label={t(lang, "card.closeImage")}
           >
             <svg
               className="w-8 h-8"

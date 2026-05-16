@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import WineCardComponent from "@/components/WineCard";
 import FilterPanel from "@/components/FilterPanel";
@@ -10,10 +10,17 @@ import {
   CardsContentLoader,
   RandomWineButtonLoader,
 } from "@/components/Loaders";
-import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
+import {
+  cardsAPI,
+  cacheUtils,
+  getApiErrorMessage,
+  isApiNetworkError,
+} from "@/services/api";
 import { WineCard, FilterParams, SortField, SortDirection } from "@/types";
 import { useUserStore } from "@/store/userStore";
-import { SORT_FIELDS } from "@/constants/sort";
+import { SORT_FIELDS, getSortFieldLabel } from "@/constants/sort";
+import { t, tf } from "@/i18n/i18n";
+import { getLangFromPath, withLang } from "@/i18n/routeUtils";
 
 const ITEMS_PER_PAGE = 6;
 const RANDOM_WINE_DELAY_MS = 5000;
@@ -25,6 +32,9 @@ interface CardsContentProps {
 
 function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = getLangFromPath(pathname);
+  const localized = useCallback((path: string) => withLang(path, lang), [lang]);
 
   const [cards, setCards] = useState<WineCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +77,11 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         setTotalCount(response.total);
         previousCardsRef.current = null;
       } catch (err: any) {
-        console.error("Error fetching cards:", err);
+        if (isApiNetworkError(err)) {
+          console.warn("Cards API is temporarily unreachable.");
+        } else {
+          console.error("Error fetching cards:", err);
+        }
 
         // При помилці мережі, пробуємо отримати з кешу
         if (!navigator.onLine) {
@@ -83,7 +97,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
               setCards(payload?.cards || []);
               setTotalPages(payload?.totalPages || 1);
               setTotalCount(payload?.total || 0);
-              setError("Офлайн режим - показані кешовані дані");
+              setError(t(lang, "status.offlineCachedCards"));
               return;
             } catch (e) {
               console.error("Cache parse error:", e);
@@ -92,13 +106,13 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         }
 
         if (err.response?.status === 401) {
-          setError("Потрібно увійти в систему");
+          setError(t(lang, "status.loginRequired"));
           localStorage.removeItem("token");
-          setTimeout(() => router.push("/login"), 2000);
+          setTimeout(() => router.push(localized("/login")), 2000);
         } else if (err.response?.status === 403) {
-          setError("Доступ заборонено");
+          setError(t(lang, "status.forbidden"));
         } else {
-          setError(getApiErrorMessage(err, "Помилка завантаження карток"));
+          setError(getApiErrorMessage(err, t(lang, "status.cardsLoadError")));
         }
       } finally {
         if (showLoading) {
@@ -106,7 +120,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         }
       }
     },
-    [filters, currentPage, router],
+    [filters, currentPage, router, localized, lang],
   );
 
   // Sync user names from cards to Zustand store
@@ -191,7 +205,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     // Update URL
     const params = buildSearchParams(newFilters, 1);
 
-    router.push(`/cards?${params.toString()}`);
+    router.push(localized(`/cards?${params.toString()}`));
   };
 
   const handlePageChange = (page: number) => {
@@ -200,7 +214,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     // Update URL
     const params = buildSearchParams(filters, page);
 
-    router.push(`/cards?${params.toString()}`);
+    router.push(localized(`/cards?${params.toString()}`));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -220,14 +234,14 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
     randomWineTimeoutRef.current = setTimeout(() => {
       setIsRandomLoading(false);
-      router.push(`/cards/${randomCard._id}`);
+      router.push(localized(`/cards/${randomCard._id}`));
     }, RANDOM_WINE_DELAY_MS);
   };
 
   const handleRate = async (id: string, rating: number): Promise<void> => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push(localized("/login"));
       throw new Error("No token");
     }
 
@@ -298,7 +312,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         previousCardsRef.current = null;
       }
       if (err.response?.status === 401) {
-        router.push("/login");
+        router.push(localized("/login"));
       }
       throw err;
     }
@@ -307,7 +321,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
   const handleToggleFavorite = async (cardId: string): Promise<void> => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push(localized("/login"));
       throw new Error("No token");
     }
 
@@ -352,7 +366,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
         previousCardsRef.current = null;
       }
       if (err.response?.status === 401) {
-        router.push("/login");
+        router.push(localized("/login"));
       }
       throw err;
     }
@@ -380,7 +394,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
 
         // Update URL
         const params = buildSearchParams(filters, newPage);
-        router.push(`/cards?${params.toString()}`);
+        router.push(localized(`/cards?${params.toString()}`));
       }
 
       // Оновлюємо дані з сервера
@@ -390,7 +404,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       // Відновлюємо картки при помилці
       fetchCards(false);
       if (err.response?.status === 401) {
-        router.push("/login");
+        router.push(localized("/login"));
       }
       throw err;
     }
@@ -409,10 +423,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
           {/* Catalog Header */}
           <div className="liquid-glass rounded-2xl p-6 mb-6 text-center">
             <h1 className="text-3xl font-serif font-bold text-rose-900 dark:text-rose-300 mb-2">
-              Каталог
+              {t(lang, "cards.page.title")}
             </h1>
             <p className="text-rose-700 dark:text-rose-400 text-sm">
-              {totalCount} пропозицій
+              {tf(lang, "cards.count", { count: totalCount })}
             </p>
           </div>
 
@@ -430,7 +444,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
               {error && (
                 <div
                   className={`p-4 rounded-2xl mb-6 liquid-glass ${
-                    error.includes("Офлайн")
+                    error.includes(t(lang, "status.offline"))
                       ? "bg-amber-100/80 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
                       : "bg-red-100/80 dark:bg-red-900/50 text-red-700 dark:text-red-400"
                   }`}
@@ -448,10 +462,10 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                       <span className="text-5xl">🍷</span>
                     </div>
                     <p className="text-rose-700 dark:text-rose-400 text-lg">
-                      Вина не знайдено
+                      {t(lang, "cards.empty.title")}
                     </p>
                     <p className="text-rose-500 dark:text-rose-500 text-sm mt-2">
-                      Спробуйте змінити фільтри
+                      {t(lang, "cards.empty.body")}
                     </p>
                   </div>
                 </div>
@@ -461,11 +475,11 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                   <div className="liquid-glass rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-rose-700 dark:text-rose-400 text-sm font-medium">
-                        Сортування:
+                        {t(lang, "cards.sort")}
                       </span>
                       <div className="flex items-center gap-2">
                         <label htmlFor="cards-sort-field" className="sr-only">
-                          Поле сортування
+                          {t(lang, "cards.sort.field")}
                         </label>
                         <select
                           id="cards-sort-field"
@@ -483,7 +497,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                         >
                           {SORT_FIELDS.map((field) => (
                             <option key={field.value} value={field.value}>
-                              {field.label}
+                              {getSortFieldLabel(field.value, lang)}
                             </option>
                           ))}
                         </select>
@@ -503,8 +517,8 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                           className="liquid-glass p-2 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors"
                           title={
                             filters.sort?.direction === "asc"
-                              ? "За зростанням"
-                              : "За спаданням"
+                              ? t(lang, "cards.sort.asc")
+                              : t(lang, "cards.sort.desc")
                           }
                         >
                           <span className="text-lg">
@@ -520,14 +534,14 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
                       className="liquid-glass px-4 py-2 rounded-xl text-sm font-medium text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       title={
                         isRandomLoading
-                          ? "Підбираємо випадкове вино..."
-                          : "Відкрити випадкове вино"
+                          ? t(lang, "cards.random.loading")
+                          : t(lang, "cards.random.open")
                       }
                     >
                       {isRandomLoading ? (
                         <RandomWineButtonLoader />
                       ) : (
-                        "Випадкове вино"
+                        t(lang, "cards.random.button")
                       )}
                     </button>
                   </div>
