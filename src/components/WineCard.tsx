@@ -225,9 +225,7 @@ export default function WineCardComponent({
 
   const displayRating = getDisplayRating(card);
   const displayRatingCount = getDisplayRatingCount(card);
-  // For visual stars, always use the average card rating as a base.
-  // Personal rating is shown separately to avoid hiding half-stars.
-  const currentRating = isRatingLoading ? displayRating : hoverRating || displayRating;
+  const currentRating = hoverRating || userRating || 0;
   const imageUrl =
     card.img ||
     card.image ||
