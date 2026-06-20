@@ -10,6 +10,7 @@ import {
   WINE_COLORS,
   getWineTypeLabel,
   getWineColorLabel,
+  isWineDrinkType,
 } from "@/constants/wine";
 import { t, tf } from "@/i18n/i18n";
 import { getLangFromPath } from "@/i18n/routeUtils";
@@ -42,13 +43,13 @@ export default function EditCardModal({
 
   const [formData, setFormData] = useState({
     name: "",
-    type: "secco",
+    type: "wine",
     color: "bianco",
     frizzante: false,
     winery: "",
     country: "",
     region: "",
-    anno: new Date().getFullYear(),
+    anno: "" as number | "",
     alcohol: 12,
     price: 0,
     description: "",
@@ -56,19 +57,27 @@ export default function EditCardModal({
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [removeImageFlag, setRemoveImageFlag] = useState(false);
+  const showWineFields = isWineDrinkType(formData.type);
+
+  const getDefaultAlcoholForType = (type: string) => {
+    if (type === "liqueur") return 20;
+    if (isWineDrinkType(type)) return 12;
+    if (type === "other") return formData.alcohol;
+    return 40;
+  };
 
   // Initialize form data when card changes
   useEffect(() => {
     if (card && isOpen) {
       setFormData({
         name: card.name || "",
-        type: card.type || "secco",
+        type: card.type || "wine",
         color: card.color || "bianco",
         frizzante: card.frizzante || false,
         winery: card.winery || "",
         country: card.country || "",
         region: card.region || "",
-        anno: card.anno || card.year || new Date().getFullYear(),
+        anno: card.anno ?? card.year ?? "",
         alcohol: card.alcohol || 12,
         price: typeof card.price === "number" ? card.price : 0,
         description: card.description || "",
@@ -165,7 +174,13 @@ export default function EditCardModal({
     try {
       await cardsAPI.update(
         card._id,
-        formData,
+        {
+          ...formData,
+          anno: formData.anno === "" ? undefined : formData.anno,
+          color: showWineFields ? formData.color : "bianco",
+          frizzante: showWineFields ? formData.frizzante : false,
+          region: showWineFields ? formData.region : undefined,
+        },
         imageFile || undefined,
         removeImageFlag,
       );
@@ -200,6 +215,23 @@ export default function EditCardModal({
   };
 
   const handleChange = (field: string, value: string | number | boolean) => {
+    if (field === "type" && typeof value === "string") {
+      const currentDefaultAlcohol = getDefaultAlcoholForType(formData.type);
+      const nextDefaultAlcohol = getDefaultAlcoholForType(value);
+
+      setFormData({
+        ...formData,
+        type: value,
+        color: isWineDrinkType(value) ? formData.color : "bianco",
+        frizzante: isWineDrinkType(value) ? formData.frizzante : false,
+        alcohol:
+          formData.alcohol === currentDefaultAlcohol
+            ? nextDefaultAlcohol
+            : formData.alcohol,
+      });
+      return;
+    }
+
     setFormData({ ...formData, [field]: value });
   };
 
@@ -280,7 +312,11 @@ export default function EditCardModal({
             </div>
 
             {/* Type and Color Row */}
-            <div className="grid md:grid-cols-2 gap-6">
+            <div
+              className={`grid gap-6 ${
+                showWineFields ? "md:grid-cols-2" : "md:grid-cols-1"
+              }`}
+            >
               <div>
                 <label
                   htmlFor="edit-card-type"
@@ -302,30 +338,32 @@ export default function EditCardModal({
                 </select>
               </div>
 
-              <div>
-                <label
-                  htmlFor="edit-card-color"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  {t(lang, "filter.color")} *
-                </label>
-                <select
-                  id="edit-card-color"
-                  value={formData.color}
-                  onChange={(e) => handleChange("color", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                >
-                  {WINE_COLORS.map((color) => (
-                    <option key={color} value={color}>
-                      {getWineColorLabel(color, lang)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {showWineFields && (
+                <div>
+                  <label
+                    htmlFor="edit-card-color"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
+                    {t(lang, "filter.color")} *
+                  </label>
+                  <select
+                    id="edit-card-color"
+                    value={formData.color}
+                    onChange={(e) => handleChange("color", e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                  >
+                    {WINE_COLORS.map((color) => (
+                      <option key={color} value={color}>
+                        {getWineColorLabel(color, lang)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Frizzante Checkbox */}
-            <div>
+            {showWineFields && <div>
               <label className="flex items-center gap-3 cursor-pointer group">
                 <div className="relative">
                   <input
@@ -342,12 +380,12 @@ export default function EditCardModal({
                   Frizzante
                 </span>
               </label>
-            </div>
+            </div>}
 
             {/* Winery */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t(lang, "form.winery")}
+                {showWineFields ? t(lang, "form.winery") : t(lang, "form.producer")}
               </label>
               <input
                 type="text"
@@ -355,12 +393,20 @@ export default function EditCardModal({
                 value={formData.winery}
                 onChange={(e) => handleChange("winery", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                placeholder={t(lang, "form.example.winery")}
+                placeholder={
+                  showWineFields
+                    ? t(lang, "form.example.winery")
+                    : t(lang, "form.example.producer")
+                }
               />
             </div>
 
             {/* Country and Region Row */}
-            <div className="grid md:grid-cols-2 gap-6">
+            <div
+              className={`grid gap-6 ${
+                showWineFields ? "md:grid-cols-2" : "md:grid-cols-1"
+              }`}
+            >
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t(lang, "form.country")}
@@ -374,37 +420,42 @@ export default function EditCardModal({
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t(lang, "form.region")}
-                </label>
-                <input
-                  type="text"
-                  value={formData.region}
-                  onChange={(e) => handleChange("region", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                  placeholder={t(lang, "form.example.region")}
-                />
-              </div>
+              {showWineFields && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t(lang, "form.region")}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.region}
+                    onChange={(e) => handleChange("region", e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                    placeholder={t(lang, "form.example.region")}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Year, Alcohol and Price Row */}
             <div className="grid md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t(lang, "form.year")}
-                </label>
-                <input
-                  type="number"
-                  min="1900"
-                  max="2030"
-                  value={formData.anno}
-                  onChange={(e) =>
-                    handleChange("anno", parseInt(e.target.value))
-                  }
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                />
-              </div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t(lang, "form.year")}
+                  </label>
+                  <input
+                    type="number"
+                    min="1900"
+                    max="2030"
+                    value={formData.anno}
+                    onChange={(e) =>
+                      handleChange(
+                        "anno",
+                        e.target.value === "" ? "" : parseInt(e.target.value),
+                      )
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                  />
+                </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -414,7 +465,7 @@ export default function EditCardModal({
                   type="number"
                   required
                   min="0"
-                  max="20"
+                  max="100"
                   step="0.5"
                   value={formData.alcohol}
                   onChange={(e) =>

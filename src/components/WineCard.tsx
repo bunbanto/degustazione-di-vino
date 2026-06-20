@@ -8,7 +8,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 import EditCardModal from "@/components/EditCardModal";
 import { RatingLoader } from "@/components/Loaders";
-import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
+import {
+  getWineTypeLabel,
+  getWineColorLabel,
+  isWineDrinkType,
+} from "@/constants/wine";
 import {
   getColorBadgeStyle,
   getDisplayRating,
@@ -230,6 +234,7 @@ export default function WineCardComponent({
     card.img ||
     card.image ||
     "https://res.cloudinary.com/demo/image/upload/wines/default.jpg";
+  const showWineFields = isWineDrinkType(card.type);
 
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -255,14 +260,14 @@ export default function WineCardComponent({
 
           {/* Glass badges */}
           <div className="absolute top-4 left-4 flex flex-col items-start gap-2 z-20">
-            {card.color && (
+            {showWineFields && card.color && (
               <div
                 className={`${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium shadow-lg border border-white/20 ${getColorBadgeStyle(card.color).border || ""}`}
               >
                 {getWineColorLabel(card.color, lang)}
               </div>
             )}
-            {card.frizzante && (
+            {showWineFields && card.frizzante && (
               <div className="bg-amber-500/90 backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium text-white shadow-lg border border-white/20">
                 Frizzante
               </div>
@@ -470,7 +475,7 @@ export default function WineCardComponent({
                 {card.country}
               </span>
             )}
-            {card.region && (
+            {showWineFields && card.region && (
               <span className="flex items-center gap-1.5 liquid-glass px-2.5 py-1 rounded-full">
                 <svg
                   className="w-4 h-4"

@@ -341,16 +341,16 @@ export const cardsAPI = {
     const formData = new FormData();
 
     formData.append("name", card.name || "");
-    formData.append("type", card.type || "secco");
+    formData.append("type", card.type || "wine");
     formData.append("color", card.color || "bianco");
     formData.append("frizzante", String(card.frizzante || false));
     formData.append("winery", card.winery || "");
     formData.append("country", card.country || "");
-    formData.append("region", card.region || "");
-    formData.append(
-      "anno",
-      String(card.anno || card.year || new Date().getFullYear()),
-    );
+    if (card.region) formData.append("region", card.region);
+    if (card.anno !== undefined && card.anno !== null)
+      formData.append("anno", String(card.anno));
+    else if (card.year !== undefined && card.year !== null)
+      formData.append("anno", String(card.year));
     formData.append("alcohol", String(card.alcohol || 12));
     formData.append("price", String(card.price || 0));
     formData.append("description", card.description || "");
@@ -391,8 +391,9 @@ export const cardsAPI = {
     if (card.winery !== undefined) formData.append("winery", card.winery);
     if (card.country !== undefined) formData.append("country", card.country);
     if (card.region !== undefined) formData.append("region", card.region);
-    if (card.anno !== undefined) formData.append("anno", String(card.anno));
-    else if (card.year !== undefined)
+    if (card.anno !== undefined && card.anno !== null)
+      formData.append("anno", String(card.anno));
+    else if (card.year !== undefined && card.year !== null)
       formData.append("anno", String(card.year));
     if (card.alcohol !== undefined)
       formData.append("alcohol", String(card.alcohol));

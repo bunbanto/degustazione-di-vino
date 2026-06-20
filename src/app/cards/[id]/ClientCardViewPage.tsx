@@ -10,7 +10,11 @@ import { WineCard } from "@/types";
 import CommentsSection from "@/components/CommentsSection";
 import EditCardModal from "@/components/EditCardModal";
 import { useUserStore } from "@/store/userStore";
-import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
+import {
+  getWineTypeLabel,
+  getWineColorLabel,
+  isWineDrinkType,
+} from "@/constants/wine";
 import {
   getColorBadgeStyle,
   getDisplayRating,
@@ -34,6 +38,7 @@ export default function ClientCardViewPage() {
   const [error, setError] = useState("");
   const [card, setCard] = useState<WineCard | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const showWineFields = isWineDrinkType(card?.type);
 
   // Get current user from userStore
   const currentUser = useUserStore((state) => state.currentUser);
@@ -295,12 +300,14 @@ export default function ClientCardViewPage() {
                   <span className="px-3 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 rounded-full text-sm font-medium">
                     {getWineTypeLabel(card.type, lang)}
                   </span>
-                  <span
-                    className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
-                  >
-                    {getWineColorLabel(card.color, lang)}
-                  </span>
-                  {card.frizzante && (
+                  {showWineFields && (
+                    <span
+                      className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
+                    >
+                      {getWineColorLabel(card.color, lang)}
+                    </span>
+                  )}
+                  {showWineFields && card.frizzante && (
                     <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium">
                       Frizzante
                     </span>
@@ -342,7 +349,7 @@ export default function ClientCardViewPage() {
                   )}
                 </div>
 
-                {(card.country || card.region) && (
+                {(card.country || (showWineFields && card.region)) && (
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
                     {card.country && (
                       <span className="flex items-center gap-1">
@@ -362,7 +369,7 @@ export default function ClientCardViewPage() {
                         {card.country}
                       </span>
                     )}
-                    {card.region && (
+                    {showWineFields && card.region && (
                       <span className="flex items-center gap-1">
                         <svg
                           className="w-5 h-5"

@@ -6,7 +6,11 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import CommentsSection from "./CommentsSection";
-import { getWineTypeLabel, getWineColorLabel } from "@/constants/wine";
+import {
+  getWineTypeLabel,
+  getWineColorLabel,
+  isWineDrinkType,
+} from "@/constants/wine";
 import {
   getColorBadgeStyle,
   getDisplayRating,
@@ -111,6 +115,7 @@ export default function WineCardModal({
 }: WineCardModalProps) {
   const pathname = usePathname();
   const lang = getLangFromPath(pathname);
+  const showWineFields = isWineDrinkType(card.type);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Get current user ID from localStorage
@@ -246,12 +251,14 @@ export default function WineCardModal({
               <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-rose-800 dark:text-rose-300">
                 {getWineTypeLabel(card.type, lang)}
               </span>
-              <span
-                className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize liquid-glass ${getColorBadgeStyle(card.color).border || ""}`}
-              >
-                {getWineColorLabel(card.color, lang)}
-              </span>
-              {card.frizzante && (
+              {showWineFields && (
+                <span
+                  className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize liquid-glass ${getColorBadgeStyle(card.color).border || ""}`}
+                >
+                  {getWineColorLabel(card.color, lang)}
+                </span>
+              )}
+              {showWineFields && card.frizzante && (
                 <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">
                   Frizzante
                 </span>
@@ -293,7 +300,7 @@ export default function WineCardModal({
               )}
             </div>
 
-            {(card.country || card.region) && (
+            {(card.country || (showWineFields && card.region)) && (
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 {card.country && (
                   <span className="flex items-center gap-1.5 liquid-glass px-2.5 py-1 rounded-full">

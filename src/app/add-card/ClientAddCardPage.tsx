@@ -12,6 +12,7 @@ import {
   WINE_COLORS,
   getWineTypeLabel,
   getWineColorLabel,
+  isWineDrinkType,
 } from "@/constants/wine";
 import { t } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
@@ -29,19 +30,27 @@ function ClientAddCardPage() {
 
   const [formData, setFormData] = useState({
     name: "",
-    type: "secco",
+    type: "wine",
     color: "bianco",
     frizzante: false,
     winery: "",
     country: "",
     region: "",
-    anno: new Date().getFullYear(),
+    anno: "" as number | "",
     alcohol: 12,
     price: 0,
     description: "",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const showWineFields = isWineDrinkType(formData.type);
+
+  const getDefaultAlcoholForType = (type: string) => {
+    if (type === "liqueur") return 20;
+    if (type === "wine") return 12;
+    if (type === "other") return formData.alcohol;
+    return 40;
+  };
 
   const validateFile = useCallback((file: File): boolean => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -127,7 +136,16 @@ function ClientAddCardPage() {
     setError("");
 
     try {
-      await cardsAPI.create(formData, imageFile || undefined);
+      await cardsAPI.create(
+        {
+          ...formData,
+          anno: formData.anno === "" ? undefined : formData.anno,
+          color: showWineFields ? formData.color : "bianco",
+          frizzante: showWineFields ? formData.frizzante : false,
+          region: showWineFields ? formData.region : undefined,
+        },
+        imageFile || undefined,
+      );
       router.push(withLang("/cards", lang));
     } catch (err) {
       setError(getApiErrorMessage(err, t(lang, "status.createCardError")));
@@ -137,6 +155,23 @@ function ClientAddCardPage() {
   };
 
   const handleChange = (field: string, value: string | number | boolean) => {
+    if (field === "type" && typeof value === "string") {
+      const currentDefaultAlcohol = getDefaultAlcoholForType(formData.type);
+      const nextDefaultAlcohol = getDefaultAlcoholForType(value);
+
+      setFormData({
+        ...formData,
+        type: value,
+        color: isWineDrinkType(value) ? formData.color : "bianco",
+        frizzante: isWineDrinkType(value) ? formData.frizzante : false,
+        alcohol:
+          formData.alcohol === currentDefaultAlcohol
+            ? nextDefaultAlcohol
+            : formData.alcohol,
+      });
+      return;
+    }
+
     setFormData({ ...formData, [field]: value });
   };
 
@@ -196,7 +231,11 @@ function ClientAddCardPage() {
               </div>
 
               {/* Type and Color Row */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div
+                className={`grid gap-6 ${
+                  showWineFields ? "md:grid-cols-2" : "md:grid-cols-1"
+                }`}
+              >
                 <div>
                   <label
                     htmlFor="add-card-type"
@@ -218,30 +257,32 @@ function ClientAddCardPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="add-card-color"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                  >
-                    {t(lang, "filter.color")} *
-                  </label>
-                  <select
-                    id="add-card-color"
-                    value={formData.color}
-                    onChange={(e) => handleChange("color", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                  >
-                    {WINE_COLORS.map((color) => (
-                      <option key={color} value={color}>
-                        {getWineColorLabel(color, lang)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {showWineFields && (
+                  <div>
+                    <label
+                      htmlFor="add-card-color"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    >
+                      {t(lang, "filter.color")} *
+                    </label>
+                    <select
+                      id="add-card-color"
+                      value={formData.color}
+                      onChange={(e) => handleChange("color", e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                    >
+                      {WINE_COLORS.map((color) => (
+                        <option key={color} value={color}>
+                          {getWineColorLabel(color, lang)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* Frizzante Checkbox */}
-              <div>
+              {showWineFields && <div>
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative">
                     <input
@@ -258,10 +299,14 @@ function ClientAddCardPage() {
                     Frizzante
                   </span>
                 </label>
-              </div>
+              </div>}
 
               {/* Country and Region Row */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div
+                className={`grid gap-6 ${
+                  showWineFields ? "md:grid-cols-2" : "md:grid-cols-1"
+                }`}
+              >
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t(lang, "form.country")}
@@ -275,24 +320,26 @@ function ClientAddCardPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t(lang, "form.region")}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.region}
-                    onChange={(e) => handleChange("region", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                    placeholder={t(lang, "form.example.region")}
-                  />
-                </div>
+                {showWineFields && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t(lang, "form.region")}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.region}
+                      onChange={(e) => handleChange("region", e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                      placeholder={t(lang, "form.example.region")}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Winery - Required */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t(lang, "form.winery")}
+                  {showWineFields ? t(lang, "form.winery") : t(lang, "form.producer")}
                 </label>
                 <input
                   type="text"
@@ -300,7 +347,11 @@ function ClientAddCardPage() {
                   value={formData.winery}
                   onChange={(e) => handleChange("winery", e.target.value)}
                   className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                  placeholder={t(lang, "form.example.winery")}
+                  placeholder={
+                    showWineFields
+                      ? t(lang, "form.example.winery")
+                      : t(lang, "form.example.producer")
+                  }
                 />
               </div>
 
@@ -316,7 +367,10 @@ function ClientAddCardPage() {
                     max="2030"
                     value={formData.anno}
                     onChange={(e) =>
-                      handleChange("anno", parseInt(e.target.value))
+                      handleChange(
+                        "anno",
+                        e.target.value === "" ? "" : parseInt(e.target.value),
+                      )
                     }
                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
                   />
@@ -330,7 +384,7 @@ function ClientAddCardPage() {
                     type="number"
                     required
                     min="0"
-                    max="20"
+                    max="100"
                     step="0.5"
                     value={formData.alcohol}
                     onChange={(e) =>
