@@ -9,7 +9,9 @@ import CommentsSection from "./CommentsSection";
 import {
   getWineTypeLabel,
   getWineColorLabel,
+  isBeerDrinkType,
   isWineDrinkType,
+  hasDrinkColorOptions,
 } from "@/constants/wine";
 import {
   getColorBadgeStyle,
@@ -116,6 +118,8 @@ export default function WineCardModal({
   const pathname = usePathname();
   const lang = getLangFromPath(pathname);
   const showWineFields = isWineDrinkType(card.type);
+  const showBeerFields = isBeerDrinkType(card.type);
+  const showColorFields = hasDrinkColorOptions(card.type);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Get current user ID from localStorage
@@ -251,7 +255,7 @@ export default function WineCardModal({
               <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-rose-800 dark:text-rose-300">
                 {getWineTypeLabel(card.type, lang)}
               </span>
-              {showWineFields && (
+              {showColorFields && (
                 <span
                   className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize liquid-glass ${getColorBadgeStyle(card.color).border || ""}`}
                 >
@@ -261,6 +265,11 @@ export default function WineCardModal({
               {showWineFields && card.frizzante && (
                 <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">
                   Frizzante
+                </span>
+              )}
+              {showBeerFields && card.unfiltered && (
+                <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">
+                  {t(lang, "filter.unfiltered")}
                 </span>
               )}
             </div>

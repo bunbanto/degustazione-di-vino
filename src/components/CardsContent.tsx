@@ -176,6 +176,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
     if (sourceFilters.type) params.set("type", sourceFilters.type);
     if (sourceFilters.color) params.set("color", sourceFilters.color);
     if (sourceFilters.frizzante === true) params.set("frizzante", "true");
+    if (sourceFilters.unfiltered === true) params.set("unfiltered", "true");
     if (sourceFilters.minRating !== undefined) {
       params.set("minRating", sourceFilters.minRating.toString());
     }

@@ -11,7 +11,9 @@ import { RatingLoader } from "@/components/Loaders";
 import {
   getWineTypeLabel,
   getWineColorLabel,
+  isBeerDrinkType,
   isWineDrinkType,
+  hasDrinkColorOptions,
 } from "@/constants/wine";
 import {
   getColorBadgeStyle,
@@ -235,6 +237,8 @@ export default function WineCardComponent({
     card.image ||
     "https://res.cloudinary.com/demo/image/upload/wines/default.jpg";
   const showWineFields = isWineDrinkType(card.type);
+  const showBeerFields = isBeerDrinkType(card.type);
+  const showColorFields = hasDrinkColorOptions(card.type);
 
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -260,7 +264,7 @@ export default function WineCardComponent({
 
           {/* Glass badges */}
           <div className="absolute top-4 left-4 flex flex-col items-start gap-2 z-20">
-            {showWineFields && card.color && (
+            {showColorFields && card.color && (
               <div
                 className={`${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium shadow-lg border border-white/20 ${getColorBadgeStyle(card.color).border || ""}`}
               >
@@ -270,6 +274,11 @@ export default function WineCardComponent({
             {showWineFields && card.frizzante && (
               <div className="bg-amber-500/90 backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium text-white shadow-lg border border-white/20">
                 Frizzante
+              </div>
+            )}
+            {showBeerFields && card.unfiltered && (
+              <div className="bg-amber-600/90 backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium text-white shadow-lg border border-white/20">
+                {t(lang, "filter.unfiltered")}
               </div>
             )}
           </div>

@@ -16,9 +16,9 @@ import {
   optimisticManager,
 } from "@/lib/optimistic";
 
-const API_BASE_URL =
-  (process.env.NEXT_PUBLIC_API_URL || "https://wine-server-b5gr.onrender.com")
-    .replace(/\/$/, "");
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "https://wine-server-b5gr.onrender.com"
+).replace(/\/$/, "");
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -107,7 +107,8 @@ export function getApiErrorMessage(
       return fallbackMessage;
     }
 
-    if (status === 401) return "Сесія завершилась. Увійдіть у систему повторно.";
+    if (status === 401)
+      return "Сесія завершилась. Увійдіть у систему повторно.";
     if (status === 403) return "У вас немає доступу до цієї дії.";
 
     const serverMessage = getMessageFromPayload(error.response?.data);
@@ -134,6 +135,32 @@ export function isApiNetworkError(error: unknown): boolean {
   return axios.isAxiosError(error) && !error.response;
 }
 
+function handleAuthFailure() {
+  if (typeof window === "undefined") return;
+
+  try {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  } catch {
+    // ignore
+  }
+
+  // Best-effort clear zustand store without importing to avoid cycles
+  try {
+    const store = require("@/store/userStore");
+    store.useUserStore.getState().setCurrentUser(null);
+  } catch {
+    // ignore
+  }
+
+  const pathname = window.location.pathname;
+  const first = pathname.split("/").filter(Boolean)[0];
+  const lang =
+    first === "uk" || first === "en" || first === "it" ? first : "uk";
+
+  window.location.assign(`/${lang}/login`);
+}
+
 // Додавання токена до запитів
 api.interceptors.request.use((config) => {
   const token =
@@ -143,6 +170,17 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Глобальний обробник 401/403
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401 || error?.response?.status === 403) {
+      handleAuthFailure();
+    }
+    return Promise.reject(error);
+  },
+);
 
 // Кеш-ключі
 const CACHE_KEYS = {
@@ -156,7 +194,6 @@ const CACHE_KEYS = {
   user: () => hybridCache["generateKey"]("user", "profile"),
 };
 
-// Допоміжна функція для генерації ключа кешу
 function generateCacheKey(type: string, identifier: string | object): string {
   const id =
     typeof identifier === "object" ? JSON.stringify(identifier) : identifier;
@@ -181,7 +218,6 @@ export const authAPI = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
     const response = await api.post("/auth/login", { email, password });
 
-    // Зберігаємо в localStorage
     if (typeof window !== "undefined") {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
@@ -201,9 +237,7 @@ export const authAPI = {
   },
 };
 
-// API карток із кешуванням
 export const cardsAPI = {
-  // Отримати всі картки з кешуванням і фоновою перевіркою актуальності
   getAll: async (
     filters?: FilterParams,
     pagination?: PaginationParams,
@@ -218,7 +252,6 @@ export const cardsAPI = {
   }> => {
     const cacheKey = generateCacheKey("cards", { filters, pagination });
 
-    // Спочатку пробуємо з кешу
     if (typeof window !== "undefined") {
       const cached = hybridCache.get<{
         cards: WineCard[];
@@ -231,19 +264,15 @@ export const cardsAPI = {
       }>(cacheKey);
 
       if (cached.data && cached.fromCache) {
-        // Якщо дані є в кеші і вони свіжі - повертаємо одразу
         if (!cached.isStale && !cached.needsRevalidate) {
           return cached.data;
         }
 
-        // Якщо дані застарілі - повертаємо кеш і запускаємо фонове оновлення
         if (cached.isStale && cached.data) {
-          // Фонове оновлення
           fetchCardsInBackground(filters, pagination, cacheKey);
           return cached.data;
         }
 
-        // Якщо дані потрібно оновити - повертаємо кеш і оновлюємо
         if (cached.needsRevalidate && cached.data) {
           fetchCardsInBackground(filters, pagination, cacheKey);
           return cached.data;
@@ -252,18 +281,15 @@ export const cardsAPI = {
     }
 
     const pendingRequest = pendingCardsRequests.get(cacheKey);
-    if (pendingRequest) {
-      return pendingRequest;
-    }
+    if (pendingRequest) return pendingRequest;
 
-    // Немає кешу або помилка - робимо реальний запит
     const request = fetchCardsFromServer(filters, pagination).finally(() => {
       pendingCardsRequests.delete(cacheKey);
     });
+
     pendingCardsRequests.set(cacheKey, request);
     const result = await request;
 
-    // Зберігаємо в кеш
     if (typeof window !== "undefined") {
       hybridCache.set(cacheKey, result, hybridCache.getTTLForType("cardsTTL"));
     }
@@ -271,11 +297,9 @@ export const cardsAPI = {
     return result;
   },
 
-  // Отримати одну картку з кешуванням
   getById: async (id: string): Promise<WineCard> => {
     const cacheKey = generateCacheKey("card", id);
 
-    // Спочатку пробуємо з кешу
     if (typeof window !== "undefined") {
       const cached = hybridCache.get<WineCard>(cacheKey);
 
@@ -283,7 +307,6 @@ export const cardsAPI = {
         return cached.data;
       }
 
-      // Якщо дані застарілі - повертаємо кеш і оновлюємо в фоні
       if (cached.isStale && cached.data) {
         api
           .get(`/cards/${id}`)
@@ -305,11 +328,11 @@ export const cardsAPI = {
             );
           })
           .catch(console.error);
+
         return cached.data;
       }
     }
 
-    // Робимо реальний запит (з fallback без токена, якщо токен прострочений)
     let response;
     try {
       response = await api.get(`/cards/${id}`);
@@ -321,7 +344,6 @@ export const cardsAPI = {
       }
     }
 
-    // Зберігаємо в кеш
     if (typeof window !== "undefined") {
       hybridCache.set(
         cacheKey,
@@ -333,7 +355,6 @@ export const cardsAPI = {
     return response.data;
   },
 
-  // Створити картку з очищенням кешу
   create: async (
     card: Partial<WineCard>,
     imageFile?: File,
@@ -344,6 +365,7 @@ export const cardsAPI = {
     formData.append("type", card.type || "wine");
     formData.append("color", card.color || "bianco");
     formData.append("frizzante", String(card.frizzante || false));
+    formData.append("unfiltered", String(card.unfiltered || false));
     formData.append("winery", card.winery || "");
     formData.append("country", card.country || "");
     if (card.region) formData.append("region", card.region);
@@ -356,17 +378,12 @@ export const cardsAPI = {
     formData.append("description", card.description || "");
     formData.append("rating", String(card.rating || 0));
 
-    if (imageFile) {
-      formData.append("img", imageFile);
-    }
+    if (imageFile) formData.append("img", imageFile);
 
     const response = await api.post("/cards", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
-    // Очищуємо кеш карток після створення
     if (typeof window !== "undefined") {
       hybridCache.clearByType("cards");
     }
@@ -374,7 +391,6 @@ export const cardsAPI = {
     return response.data;
   },
 
-  // Оновити картку з очищенням кешу
   update: async (
     id: string,
     card: Partial<WineCard>,
@@ -388,6 +404,8 @@ export const cardsAPI = {
     if (card.color !== undefined) formData.append("color", card.color);
     if (card.frizzante !== undefined)
       formData.append("frizzante", String(card.frizzante));
+    if (card.unfiltered !== undefined)
+      formData.append("unfiltered", String(card.unfiltered));
     if (card.winery !== undefined) formData.append("winery", card.winery);
     if (card.country !== undefined) formData.append("country", card.country);
     if (card.region !== undefined) formData.append("region", card.region);
@@ -401,21 +419,14 @@ export const cardsAPI = {
     if (card.description !== undefined)
       formData.append("description", card.description);
 
-    if (removeImageFlag) {
+    if (removeImageFlag)
       formData.append("removeImage", String(removeImageFlag));
-    }
-
-    if (imageFile) {
-      formData.append("img", imageFile);
-    }
+    if (imageFile) formData.append("img", imageFile);
 
     const response = await api.put(`/cards/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
-    // Очищуємо кеш після оновлення
     if (typeof window !== "undefined") {
       hybridCache.remove(generateCacheKey("card", id));
       hybridCache.clearByType("cards");
@@ -424,11 +435,9 @@ export const cardsAPI = {
     return response.data;
   },
 
-  // Видалити картку з очищенням кешу
   delete: async (id: string): Promise<void> => {
     const response = await api.delete(`/cards/${id}`);
 
-    // Очищуємо кеш після видалення
     if (typeof window !== "undefined") {
       hybridCache.remove(generateCacheKey("card", id));
       hybridCache.clearByType("cards");
@@ -438,14 +447,12 @@ export const cardsAPI = {
     return response.data;
   },
 
-  // Оцінити картку з оптимістичним оновленням
   rate: async (
     id: string,
     rating: number,
     currentCards?: WineCard[],
     onOptimisticUpdate?: (newCards: WineCard[]) => void,
   ): Promise<{ averageRating: number; ratingCount: number }> => {
-    // Отримуємо username з localStorage
     let username = "";
     try {
       const userStr = localStorage.getItem("user");
@@ -457,10 +464,8 @@ export const cardsAPI = {
       console.error("Error getting user:", e);
     }
 
-    // Зберігаємо попередній стан для відкату
     const previousCards = currentCards ? [...currentCards] : null;
 
-    // Оптимістичне оновлення
     if (currentCards && onOptimisticUpdate) {
       const optimistic = createOptimisticRatingUpdate(currentCards, id, rating);
       onOptimisticUpdate(optimistic.updatedCards);
@@ -472,18 +477,13 @@ export const cardsAPI = {
         username,
       });
 
-      // Очищуємо кеш після успішного оцінювання
       if (typeof window !== "undefined") {
-        // Очищуємо кеш цієї картки
         hybridCache.remove(generateCacheKey("card", id));
-        // Очищуємо кеш списку карток
         hybridCache.clearByType("cards");
       }
 
-      // Повертаємо дані про рейтинг з відповіді сервера
       return response.data;
     } catch (error) {
-      // Відкат при помилці
       if (previousCards && onOptimisticUpdate) {
         onOptimisticUpdate(previousCards);
       }
@@ -491,7 +491,6 @@ export const cardsAPI = {
     }
   },
 
-  // API коментарів
   getComments: async (
     cardId: string,
     page: number = 1,
@@ -499,7 +498,6 @@ export const cardsAPI = {
   ): Promise<CommentsResponse> => {
     const cacheKey = generateCacheKey("comments", { cardId, page, limit });
 
-    // Пробуємо з кешу
     if (typeof window !== "undefined") {
       const cached = hybridCache.get<CommentsResponse>(cacheKey);
       if (cached.data && cached.fromCache && !cached.isStale) {
@@ -525,7 +523,6 @@ export const cardsAPI = {
   addComment: async (cardId: string, text: string): Promise<WineCard> => {
     const response = await api.post(`/cards/${cardId}/comments`, { text });
 
-    // Очищуємо кеш коментарів
     if (typeof window !== "undefined") {
       const commentsPrefix = `wine-cache:comments:`;
       const keysToRemove: string[] = [];
@@ -536,7 +533,6 @@ export const cardsAPI = {
         }
       }
       keysToRemove.forEach((key) => localStorage.removeItem(key));
-      // Очищуємо деталі картки
       hybridCache.remove(generateCacheKey("card", cardId));
     }
 
@@ -549,7 +545,6 @@ export const cardsAPI = {
   ): Promise<{ message: string; cardId: string }> => {
     const response = await api.delete(`/cards/${cardId}/comments/${commentId}`);
 
-    // Очищуємо кеш
     if (typeof window !== "undefined") {
       const commentsPrefix = `wine-cache:comments:`;
       const keysToRemove: string[] = [];
@@ -566,11 +561,9 @@ export const cardsAPI = {
     return response.data;
   },
 
-  // API обраного з кешуванням та оптимістичним оновленням
   getFavorites: async (filters?: FilterParams): Promise<FavoritesResponse> => {
     const cacheKey = generateCacheKey("favorites", { filters });
 
-    // Пробуємо з кешу
     if (typeof window !== "undefined") {
       const cached = hybridCache.get<FavoritesResponse>(cacheKey);
       if (cached.data && cached.fromCache && !cached.isStale) {
@@ -578,7 +571,6 @@ export const cardsAPI = {
       }
     }
 
-    // Будуємо параметри запиту
     const params = new URLSearchParams();
     if (filters?.sort) {
       params.set("sortField", filters.sort.field);
@@ -607,15 +599,12 @@ export const cardsAPI = {
       confirmedIsFavorite?: boolean,
     ) => void,
   ): Promise<{ isFavorite: boolean; cardId: string; message: string }> => {
-    // Зберігаємо попередній стан
     const previousFavorites = currentFavorites ? [...currentFavorites] : null;
 
-    // Визначаємо очікуваний новий стан для оптимістичного оновлення
     const expectedIsFavorite = currentFavorites
       ? !currentFavorites.find((c) => c._id === cardId)?.isFavorite
       : true;
 
-    // Оптимістичне оновлення
     if (currentFavorites && onOptimisticUpdate) {
       const optimistic = createOptimisticFavoriteUpdate(
         currentFavorites,
@@ -632,13 +621,10 @@ export const cardsAPI = {
       }>(`/favorites/${cardId}`);
       const confirmedIsFavorite = response.data.isFavorite;
 
-      // Оновлюємо кеш
       if (typeof window !== "undefined") {
         hybridCache.clearByType("favorites");
       }
 
-      // Повторно викликаємо callback з підтвердженим станом від сервера
-      // щоб компонент міг оновити UI правильним станом
       if (currentFavorites && onOptimisticUpdate) {
         const updatedFavorites = currentFavorites.map((card) =>
           card._id === cardId
@@ -650,7 +636,6 @@ export const cardsAPI = {
 
       return response.data;
     } catch (error) {
-      // Відкат при помилці
       if (previousFavorites && onOptimisticUpdate) {
         onOptimisticUpdate(previousFavorites);
       }
@@ -664,7 +649,6 @@ export const cardsAPI = {
   },
 };
 
-// Допоміжна функція для фонової вибірки карток
 async function fetchCardsInBackground(
   filters?: FilterParams,
   pagination?: PaginationParams,
@@ -680,7 +664,6 @@ async function fetchCardsInBackground(
   }
 }
 
-// Функція вибірки карток з сервера
 async function fetchCardsFromServer(
   filters?: FilterParams,
   pagination?: PaginationParams,
@@ -692,6 +675,7 @@ async function fetchCardsFromServer(
     if (filters.type) params.set("type", filters.type);
     if (filters.color) params.set("color", filters.color);
     if (filters.frizzante) params.set("frizzante", "true");
+    if (filters.unfiltered) params.set("unfiltered", "true");
     if (filters.minRating)
       params.set("minRating", filters.minRating.toString());
     if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
@@ -723,38 +707,28 @@ async function fetchCardsFromServer(
   };
 }
 
-// Утиліти для кешу
 export const cacheUtils = {
-  // Очистити весь кеш
   clearAll: () => {
     if (typeof window !== "undefined") {
       hybridCache.invalidate();
     }
   },
-
-  // Очистити кеш карток
   clearCards: () => {
     if (typeof window !== "undefined") {
       hybridCache.clearByType("cards");
     }
   },
-
-  // Очистити кеш обраного
   clearFavorites: () => {
     if (typeof window !== "undefined") {
       hybridCache.clearByType("favorites");
     }
   },
-
-  // Отримати статистику кешу
   getStats: () => {
     if (typeof window !== "undefined") {
       return hybridCache.getStats();
     }
     return { size: 0, entries: 0, version: "N/A" };
   },
-
-  // Відкатити всі оптимістичні оновлення
   rollbackAll: () => {
     optimisticManager.rollbackAll();
   },

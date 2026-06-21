@@ -134,6 +134,16 @@ export function getColorBadgeStyle(color: string): {
       bg: "bg-pink-100 dark:bg-pink-900/30",
       text: "text-gray-800 dark:text-gray-200",
     },
+    light: {
+      bg: "bg-amber-100 dark:bg-amber-900/40",
+      text: "text-amber-900 dark:text-amber-200",
+      border: "border border-amber-200 dark:border-amber-700",
+    },
+    dark: {
+      bg: "bg-stone-800 dark:bg-stone-950",
+      text: "text-white dark:text-stone-100",
+      border: "border border-stone-700 dark:border-stone-600",
+    },
   };
 
   return (

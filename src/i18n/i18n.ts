@@ -96,6 +96,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "filter.type.all": "Усі типи",
     "filter.color": "Колір",
     "filter.color.all": "Усі кольори",
+    "filter.unfiltered": "Нефільтроване",
     "filter.price": "Ціна",
     "filter.price.from": "Від",
     "filter.price.to": "До",
@@ -107,6 +108,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "sort.rating": "За рейтингом",
 
     "wine.type.wine": "Вино",
+    "wine.type.beer": "Пиво",
     "wine.type.whiskey": "Віскі",
     "wine.type.brandy": "Бренді",
     "wine.type.gin": "Джин",
@@ -122,6 +124,8 @@ export const messages: Record<Lang, Record<string, string>> = {
     "wine.color.bianco": "Bianco",
     "wine.color.rosso": "Rosso",
     "wine.color.rosato": "Rosato",
+    "wine.color.light": "Світле",
+    "wine.color.dark": "Темне",
 
     "form.name": "Назва напою *",
     "form.winery": "Виноробня *",
@@ -307,6 +311,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "filter.type.all": "All types",
     "filter.color": "Color",
     "filter.color.all": "All colors",
+    "filter.unfiltered": "Unfiltered",
     "filter.price": "Price",
     "filter.price.from": "From",
     "filter.price.to": "To",
@@ -318,6 +323,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "sort.rating": "By rating",
 
     "wine.type.wine": "Wine",
+    "wine.type.beer": "Beer",
     "wine.type.whiskey": "Whiskey",
     "wine.type.brandy": "Brandy",
     "wine.type.gin": "Gin",
@@ -333,6 +339,8 @@ export const messages: Record<Lang, Record<string, string>> = {
     "wine.color.bianco": "White",
     "wine.color.rosso": "Red",
     "wine.color.rosato": "Rose",
+    "wine.color.light": "Light",
+    "wine.color.dark": "Dark",
 
     "form.name": "Drink name *",
     "form.winery": "Winery *",
@@ -517,6 +525,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "filter.type.all": "Tutti i tipi",
     "filter.color": "Colore",
     "filter.color.all": "Tutti i colori",
+    "filter.unfiltered": "Non filtrata",
     "filter.price": "Prezzo",
     "filter.price.from": "Da",
     "filter.price.to": "A",
@@ -528,6 +537,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "sort.rating": "Per valutazione",
 
     "wine.type.wine": "Vino",
+    "wine.type.beer": "Birra",
     "wine.type.whiskey": "Whisky",
     "wine.type.brandy": "Brandy",
     "wine.type.gin": "Gin",
@@ -543,6 +553,8 @@ export const messages: Record<Lang, Record<string, string>> = {
     "wine.color.bianco": "Bianco",
     "wine.color.rosso": "Rosso",
     "wine.color.rosato": "Rosato",
+    "wine.color.light": "Chiara",
+    "wine.color.dark": "Scura",
 
     "form.name": "Nome della bevanda *",
     "form.winery": "Cantina *",

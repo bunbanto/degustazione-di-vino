@@ -9,10 +9,13 @@ import { WineCard } from "@/types";
 import { withAuth } from "@/components/withAuth";
 import {
   WINE_TYPES,
-  WINE_COLORS,
+  getDrinkColorOptions,
+  getDefaultColorForType,
   getWineTypeLabel,
   getWineColorLabel,
+  isBeerDrinkType,
   isWineDrinkType,
+  hasDrinkColorOptions,
 } from "@/constants/wine";
 import { t } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
@@ -33,6 +36,7 @@ function ClientAddCardPage() {
     type: "wine",
     color: "bianco",
     frizzante: false,
+    unfiltered: false,
     winery: "",
     country: "",
     region: "",
@@ -44,10 +48,14 @@ function ClientAddCardPage() {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const showWineFields = isWineDrinkType(formData.type);
+  const showBeerFields = isBeerDrinkType(formData.type);
+  const showColorFields = hasDrinkColorOptions(formData.type);
+  const colorOptions = getDrinkColorOptions(formData.type);
 
   const getDefaultAlcoholForType = (type: string) => {
+    if (type === "beer") return 5;
     if (type === "liqueur") return 20;
-    if (type === "wine") return 12;
+    if (isWineDrinkType(type)) return 12;
     if (type === "other") return formData.alcohol;
     return 40;
   };
@@ -140,8 +148,9 @@ function ClientAddCardPage() {
         {
           ...formData,
           anno: formData.anno === "" ? undefined : formData.anno,
-          color: showWineFields ? formData.color : "bianco",
+          color: showColorFields ? formData.color : "bianco",
           frizzante: showWineFields ? formData.frizzante : false,
+          unfiltered: showBeerFields ? formData.unfiltered : false,
           region: showWineFields ? formData.region : undefined,
         },
         imageFile || undefined,
@@ -162,8 +171,13 @@ function ClientAddCardPage() {
       setFormData({
         ...formData,
         type: value,
-        color: isWineDrinkType(value) ? formData.color : "bianco",
+        color: hasDrinkColorOptions(value)
+          ? getDrinkColorOptions(value).includes(formData.color)
+            ? formData.color
+            : getDefaultColorForType(value)
+          : "bianco",
         frizzante: isWineDrinkType(value) ? formData.frizzante : false,
+        unfiltered: isBeerDrinkType(value) ? formData.unfiltered : false,
         alcohol:
           formData.alcohol === currentDefaultAlcohol
             ? nextDefaultAlcohol
@@ -233,7 +247,7 @@ function ClientAddCardPage() {
               {/* Type and Color Row */}
               <div
                 className={`grid gap-6 ${
-                  showWineFields ? "md:grid-cols-2" : "md:grid-cols-1"
+                  showColorFields ? "md:grid-cols-2" : "md:grid-cols-1"
                 }`}
               >
                 <div>
@@ -257,7 +271,7 @@ function ClientAddCardPage() {
                   </select>
                 </div>
 
-                {showWineFields && (
+                {showColorFields && (
                   <div>
                     <label
                       htmlFor="add-card-color"
@@ -271,7 +285,7 @@ function ClientAddCardPage() {
                       onChange={(e) => handleChange("color", e.target.value)}
                       className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
                     >
-                      {WINE_COLORS.map((color) => (
+                      {colorOptions.map((color) => (
                         <option key={color} value={color}>
                           {getWineColorLabel(color, lang)}
                         </option>
@@ -297,6 +311,25 @@ function ClientAddCardPage() {
                   </div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
                     Frizzante
+                  </span>
+                </label>
+              </div>}
+
+              {showBeerFields && <div>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={formData.unfiltered}
+                      onChange={(e) =>
+                        handleChange("unfiltered", e.target.checked)
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-10 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
+                    {t(lang, "filter.unfiltered")}
                   </span>
                 </label>
               </div>}

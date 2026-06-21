@@ -13,6 +13,7 @@ export interface WineCard {
   type: string;
   color: string;
   frizzante?: boolean;
+  unfiltered?: boolean;
   winery?: string;
   country?: string;
   region?: string;
@@ -92,6 +93,7 @@ export interface FilterParams {
   type?: string;
   color?: string;
   frizzante?: boolean;
+  unfiltered?: boolean;
   minRating?: number;
   maxRating?: number;
   minPrice?: number;

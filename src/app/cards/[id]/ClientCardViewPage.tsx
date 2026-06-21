@@ -13,7 +13,9 @@ import { useUserStore } from "@/store/userStore";
 import {
   getWineTypeLabel,
   getWineColorLabel,
+  isBeerDrinkType,
   isWineDrinkType,
+  hasDrinkColorOptions,
 } from "@/constants/wine";
 import {
   getColorBadgeStyle,
@@ -39,6 +41,8 @@ export default function ClientCardViewPage() {
   const [card, setCard] = useState<WineCard | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const showWineFields = isWineDrinkType(card?.type);
+  const showBeerFields = isBeerDrinkType(card?.type);
+  const showColorFields = hasDrinkColorOptions(card?.type);
 
   // Get current user from userStore
   const currentUser = useUserStore((state) => state.currentUser);
@@ -300,7 +304,7 @@ export default function ClientCardViewPage() {
                   <span className="px-3 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 rounded-full text-sm font-medium">
                     {getWineTypeLabel(card.type, lang)}
                   </span>
-                  {showWineFields && (
+                  {showColorFields && (
                     <span
                       className={`px-3 py-1 ${getColorBadgeStyle(card.color).bg} ${getColorBadgeStyle(card.color).text} rounded-full text-sm font-medium capitalize ${getColorBadgeStyle(card.color).border || ""}`}
                     >
@@ -310,6 +314,11 @@ export default function ClientCardViewPage() {
                   {showWineFields && card.frizzante && (
                     <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium">
                       Frizzante
+                    </span>
+                  )}
+                  {showBeerFields && card.unfiltered && (
+                    <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium">
+                      {t(lang, "filter.unfiltered")}
                     </span>
                   )}
                 </div>

@@ -5,10 +5,12 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   WINE_TYPES,
-  WINE_COLORS,
+  getDrinkColorOptions,
   getWineTypeLabel,
   getWineColorLabel,
+  isBeerDrinkType,
   isWineDrinkType,
+  hasDrinkColorOptions,
 } from "@/constants/wine";
 import { t } from "@/i18n/i18n";
 import { getLangFromPath } from "@/i18n/routeUtils";
@@ -26,13 +28,37 @@ export default function FilterPanel({
   const lang = getLangFromPath(pathname);
   const [localFilters, setLocalFilters] = useState<FilterParams>(filters);
   const showWineFilters = isWineDrinkType(localFilters.type);
+  const showBeerFilters = isBeerDrinkType(localFilters.type);
+  const showColorFilters = hasDrinkColorOptions(localFilters.type);
+  const colorOptions = getDrinkColorOptions(localFilters.type);
 
   const sanitizeFiltersForType = (nextFilters: FilterParams): FilterParams => {
-    if (isWineDrinkType(nextFilters.type)) return nextFilters;
+    if (isWineDrinkType(nextFilters.type)) {
+      const { unfiltered, color, ...sanitizedFilters } = nextFilters;
+      void unfiltered;
+      return {
+        ...sanitizedFilters,
+        ...(color && getDrinkColorOptions(nextFilters.type).includes(color)
+          ? { color }
+          : {}),
+      };
+    }
 
-    const { color, frizzante, ...sanitizedFilters } = nextFilters;
+    if (isBeerDrinkType(nextFilters.type)) {
+      const { frizzante, color, ...sanitizedFilters } = nextFilters;
+      void frizzante;
+      return {
+        ...sanitizedFilters,
+        ...(color && getDrinkColorOptions(nextFilters.type).includes(color)
+          ? { color }
+          : {}),
+      };
+    }
+
+    const { color, frizzante, unfiltered, ...sanitizedFilters } = nextFilters;
     void color;
     void frizzante;
+    void unfiltered;
     return sanitizedFilters;
   };
 
@@ -141,9 +167,9 @@ export default function FilterPanel({
         </select>
       </div>
 
-      {showWineFilters && (
+      {showColorFilters && (
         <>
-          {/* Wine Color with liquid select */}
+          {/* Drink Color with liquid select */}
           <div className="mb-6">
             <label
               htmlFor="wine-color-filter"
@@ -158,7 +184,7 @@ export default function FilterPanel({
               className="liquid-select"
             >
               <option value="">{t(lang, "filter.color.all")}</option>
-              {WINE_COLORS.map((color) => (
+              {colorOptions.map((color) => (
                 <option key={color} value={color}>
                   {getWineColorLabel(color, lang)}
                 </option>
@@ -166,29 +192,55 @@ export default function FilterPanel({
             </select>
           </div>
 
-          {/* Frizzante Checkbox with liquid toggle */}
-          <div className="mb-6">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={localFilters.frizzante === true}
-                  onChange={(e) =>
-                    handleChange(
-                      "frizzante",
-                      e.target.checked ? true : undefined,
-                    )
-                  }
-                  className="sr-only peer"
-                />
-                <div className="w-10 h-6 liquid-glass rounded-full peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 cursor-pointer transition-all"></div>
-                <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-gray-200 rounded-full shadow-md transition-all peer-checked:translate-x-4 peer-checked:bg-rose-500"></div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
-                Frizzante
-              </span>
-            </label>
-          </div>
+          {showWineFilters && (
+            <div className="mb-6">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={localFilters.frizzante === true}
+                    onChange={(e) =>
+                      handleChange(
+                        "frizzante",
+                        e.target.checked ? true : undefined,
+                      )
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-10 h-6 liquid-glass rounded-full peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 cursor-pointer transition-all"></div>
+                  <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-gray-200 rounded-full shadow-md transition-all peer-checked:translate-x-4 peer-checked:bg-rose-500"></div>
+                </div>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
+                  Frizzante
+                </span>
+              </label>
+            </div>
+          )}
+
+          {showBeerFilters && (
+            <div className="mb-6">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={localFilters.unfiltered === true}
+                    onChange={(e) =>
+                      handleChange(
+                        "unfiltered",
+                        e.target.checked ? true : undefined,
+                      )
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-10 h-6 liquid-glass rounded-full peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 cursor-pointer transition-all"></div>
+                  <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-gray-200 rounded-full shadow-md transition-all peer-checked:translate-x-4 peer-checked:bg-amber-600"></div>
+                </div>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
+                  {t(lang, "filter.unfiltered")}
+                </span>
+              </label>
+            </div>
+          )}
         </>
       )}
 

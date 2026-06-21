@@ -21,6 +21,8 @@ function CardsPageContent({
     type: searchParams.get("type") || undefined,
     color: searchParams.get("color") || undefined,
     frizzante: searchParams.get("frizzante") === "true" ? true : undefined,
+    unfiltered:
+      searchParams.get("unfiltered") === "true" ? true : undefined,
     minRating: searchParams.get("minRating")
       ? parseFloat(searchParams.get("minRating")!)
       : undefined,
