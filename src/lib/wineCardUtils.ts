@@ -44,6 +44,22 @@ export function getDisplayRatingCount(
   return Number.isFinite(fallback) ? fallback : 0;
 }
 
+export function getDisplayVolume(
+  card: Pick<WineCard, "volume">,
+): string | null {
+  if (card.volume === undefined || card.volume === null || card.volume === "") {
+    return null;
+  }
+
+  const volume = Number(card.volume);
+
+  if (!Number.isFinite(volume) || volume <= 0) {
+    return null;
+  }
+
+  return Number.isInteger(volume) ? `${volume} ml` : `${volume.toFixed(2)} ml`;
+}
+
 export function normalizeRatingForStars(rating: number): number {
   const safeRating = Number.isFinite(rating) ? rating : 0;
   const clampedRating = Math.max(0, Math.min(10, safeRating));

@@ -31,7 +31,21 @@ function ClientAddCardPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    type: string;
+    color: string;
+    frizzante: boolean;
+    unfiltered: boolean;
+    winery: string;
+    country: string;
+    region: string;
+    anno: number | "";
+    alcohol: number;
+    price: number;
+    description: string;
+    volume: number | "";
+  }>({
     name: "",
     type: "wine",
     color: "bianco",
@@ -44,6 +58,7 @@ function ClientAddCardPage() {
     alcohol: 12,
     price: 0,
     description: "",
+    volume: "" as number | "",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -60,35 +75,41 @@ function ClientAddCardPage() {
     return 40;
   };
 
-  const validateFile = useCallback((file: File): boolean => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
+  const validateFile = useCallback(
+    (file: File): boolean => {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      const maxSize = 5 * 1024 * 1024; // 5MB
 
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError(t(lang, "form.image.allowed"));
-      return false;
-    }
+      if (!allowedTypes.includes(file.type)) {
+        setUploadError(t(lang, "form.image.allowed"));
+        return false;
+      }
 
-    if (file.size > maxSize) {
-      setUploadError(t(lang, "form.image.maxSize"));
-      return false;
-    }
+      if (file.size > maxSize) {
+        setUploadError(t(lang, "form.image.maxSize"));
+        return false;
+      }
 
-    setUploadError("");
-    return true;
-  }, [lang]);
+      setUploadError("");
+      return true;
+    },
+    [lang],
+  );
 
-  const handleFile = useCallback((file: File) => {
-    if (validateFile(file)) {
-      setImageFile(file);
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }, [validateFile]);
+  const handleFile = useCallback(
+    (file: File) => {
+      if (validateFile(file)) {
+        setImageFile(file);
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    [validateFile],
+  );
 
   // Drag & Drop handlers
   useEffect(() => {
@@ -148,6 +169,9 @@ function ClientAddCardPage() {
         {
           ...formData,
           anno: formData.anno === "" ? undefined : formData.anno,
+          volume:
+            formData.volume === "" ? undefined : (formData.volume as number),
+
           color: showColorFields ? formData.color : "bianco",
           frizzante: showWineFields ? formData.frizzante : false,
           unfiltered: showBeerFields ? formData.unfiltered : false,
@@ -296,43 +320,47 @@ function ClientAddCardPage() {
               </div>
 
               {/* Frizzante Checkbox */}
-              {showWineFields && <div>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={formData.frizzante}
-                      onChange={(e) =>
-                        handleChange("frizzante", e.target.checked)
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-10 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
-                    Frizzante
-                  </span>
-                </label>
-              </div>}
+              {showWineFields && (
+                <div>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={formData.frizzante}
+                        onChange={(e) =>
+                          handleChange("frizzante", e.target.checked)
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
+                      Frizzante
+                    </span>
+                  </label>
+                </div>
+              )}
 
-              {showBeerFields && <div>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      checked={formData.unfiltered}
-                      onChange={(e) =>
-                        handleChange("unfiltered", e.target.checked)
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-10 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
-                    {t(lang, "filter.unfiltered")}
-                  </span>
-                </label>
-              </div>}
+              {showBeerFields && (
+                <div>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={formData.unfiltered}
+                        onChange={(e) =>
+                          handleChange("unfiltered", e.target.checked)
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
+                      {t(lang, "filter.unfiltered")}
+                    </span>
+                  </label>
+                </div>
+              )}
 
               {/* Country and Region Row */}
               <div
@@ -372,7 +400,9 @@ function ClientAddCardPage() {
               {/* Winery - Required */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {showWineFields ? t(lang, "form.winery") : t(lang, "form.producer")}
+                  {showWineFields
+                    ? t(lang, "form.winery")
+                    : t(lang, "form.producer")}
                 </label>
                 <input
                   type="text"
@@ -388,8 +418,8 @@ function ClientAddCardPage() {
                 />
               </div>
 
-              {/* Year, Alcohol and Price Row */}
-              <div className="grid md:grid-cols-3 gap-6">
+              {/* Year, Alcohol, Volume and Price Row */}
+              <div className="grid md:grid-cols-4 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t(lang, "form.year")}
@@ -424,6 +454,26 @@ function ClientAddCardPage() {
                       handleChange("alcohol", parseFloat(e.target.value))
                     }
                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t(lang, "form.volume")}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.volume}
+                    onChange={(e) =>
+                      handleChange(
+                        "volume",
+                        e.target.value === "" ? "" : parseFloat(e.target.value),
+                      )
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                    placeholder="ml"
                   />
                 </div>
 
@@ -540,7 +590,9 @@ function ClientAddCardPage() {
                 disabled={loading}
                 className="w-full py-4 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-lg font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? t(lang, "login.loading") : t(lang, "addcard.page.title")}
+                {loading
+                  ? t(lang, "login.loading")
+                  : t(lang, "addcard.page.title")}
               </button>
             </form>
           </div>

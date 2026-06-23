@@ -19,6 +19,7 @@ import {
   getColorBadgeStyle,
   getDisplayRating,
   getDisplayRatingCount,
+  getDisplayVolume,
   normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
@@ -231,6 +232,7 @@ export default function WineCardComponent({
 
   const displayRating = getDisplayRating(card);
   const displayRatingCount = getDisplayRatingCount(card);
+  const displayVolume = getDisplayVolume(card);
   const currentRating = hoverRating || userRating || 0;
   const imageUrl =
     card.img ||
@@ -344,9 +346,7 @@ export default function WineCardComponent({
 
         {/* Content with liquid glass effect */}
         <div className="p-5">
-          <h3
-            className="text-xl font-bold text-rose-900 dark:text-rose-300 mb-1 line-clamp-1"
-          >
+          <h3 className="text-xl font-bold text-rose-900 dark:text-rose-300 mb-1 line-clamp-1">
             {card.name}
           </h3>
 
@@ -369,6 +369,11 @@ export default function WineCardComponent({
               {card.alcohol && (
                 <span className="text-gray-500 dark:text-gray-400 text-sm">
                   {card.alcohol}%
+                </span>
+              )}
+              {displayVolume && (
+                <span className="text-gray-500 dark:text-gray-400 text-sm">
+                  {displayVolume}
                 </span>
               )}
             </div>

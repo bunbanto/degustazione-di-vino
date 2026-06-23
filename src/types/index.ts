@@ -22,6 +22,8 @@ export interface WineCard {
   alcohol?: number;
   rating: number; // Average rating from server
   ratingCount?: number;
+  volume?: number | string; // ml
+
   ratings?: Array<{
     userId: { _id: string; name?: string } | string;
     value: number;

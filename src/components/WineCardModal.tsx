@@ -16,6 +16,7 @@ import {
 import {
   getColorBadgeStyle,
   getDisplayRating,
+  getDisplayVolume,
   normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
@@ -145,6 +146,7 @@ export default function WineCardModal({
   const isCardAuthor = checkCardAuthor(card, currentUserId);
 
   const displayRating = getDisplayRating(card);
+  const displayVolume = getDisplayVolume(card);
   const normalizedDisplayRating = normalizeRatingForStars(displayRating);
 
   if (!isOpen) return null;
@@ -274,7 +276,7 @@ export default function WineCardModal({
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-2 text-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
               {(card.year || card.anno) && (
                 <div className="liquid-glass rounded-xl p-2 text-center">
                   <div className="text-gray-500 dark:text-gray-400 text-xs">
@@ -292,6 +294,16 @@ export default function WineCardModal({
                   </div>
                   <div className="font-medium text-rose-800 dark:text-rose-300">
                     {card.alcohol}%
+                  </div>
+                </div>
+              )}
+              {displayVolume && (
+                <div className="liquid-glass rounded-xl p-2 text-center">
+                  <div className="text-gray-500 dark:text-gray-400 text-xs">
+                    {t(lang, "card.volume")}
+                  </div>
+                  <div className="font-medium text-rose-800 dark:text-rose-300">
+                    {displayVolume}
                   </div>
                 </div>
               )}

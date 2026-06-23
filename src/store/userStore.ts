@@ -39,22 +39,27 @@ export const useUserStore = create<UserStore>()(
 
       setCurrentUser: (user) => {
         set({ currentUser: user });
-        // Also add current user to userNames dictionary
-        if (user) {
-          const userId = user.id?.toString() || user._id?.toString() || "";
-          const username = user.username || user.name || "";
-          if (userId && username) {
-            set((state) => ({
-              userNames: {
-                ...state.userNames,
-                [userId]: username,
-              },
-            }));
-          }
-          // Update localStorage with user data including stats
+        if (!user) {
           if (typeof window !== "undefined") {
-            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.removeItem("user");
           }
+          return;
+        }
+
+        // Also add current user to userNames dictionary
+        const userId = user.id?.toString() || user._id?.toString() || "";
+        const username = user.username || user.name || "";
+        if (userId && username) {
+          set((state) => ({
+            userNames: {
+              ...state.userNames,
+              [userId]: username,
+            },
+          }));
+        }
+        // Update localStorage with user data including stats
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(user));
         }
       },
 
@@ -91,10 +96,14 @@ export const useUserStore = create<UserStore>()(
             return true;
           } catch (e) {
             console.error("Error parsing user from localStorage:", e);
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            set({ currentUser: null });
             return false;
           }
         }
 
+        set({ currentUser: null });
         return false;
       },
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { cacheUtils } from "@/services/api";
+import { authAPI, cacheUtils, clearAuthSession } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUserStore } from "@/store/userStore";
 import { SUPPORTED_LANGS, t, type Lang } from "@/i18n/i18n";
@@ -18,10 +18,82 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentUser, checkAuth, logout } = useUserStore();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    setIsAuthenticated(checkAuth());
-  }, [checkAuth]);
+    let cancelled = false;
+
+    const verifyAuth = async () => {
+      const hasCachedSession = checkAuth();
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+      if (!token) {
+        logout();
+        if (!cancelled) {
+          setIsAuthenticated(false);
+          setIsCheckingAuth(false);
+        }
+        return;
+      }
+
+      if (!cancelled) {
+        setIsCheckingAuth(true);
+        setIsAuthenticated(hasCachedSession);
+      }
+
+      try {
+        const profileResp = await authAPI.getProfile();
+        const profileData = (profileResp as any)?.user || profileResp;
+
+        if (!profileData) {
+          throw new Error("Profile response is empty");
+        }
+
+        const userData = {
+          id: profileData.id || profileData._id,
+          _id: profileData._id,
+          name: profileData.name,
+          username: profileData.username,
+          email: profileData.email,
+          role: profileData.role,
+          createdAt: profileData.createdAt,
+          cardCount: profileData.cardCount ?? 0,
+          favoritesCount: profileData.favoritesCount ?? 0,
+        };
+
+        useUserStore.getState().setCurrentUser(userData);
+        if (!cancelled) {
+          setIsAuthenticated(true);
+        }
+      } catch {
+        clearAuthSession();
+        if (!cancelled) {
+          setIsAuthenticated(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsCheckingAuth(false);
+        }
+      }
+    };
+
+    verifyAuth();
+
+    const handleAuthChanged = () => {
+      if (!localStorage.getItem("token")) {
+        setIsAuthenticated(false);
+        setIsCheckingAuth(false);
+      }
+    };
+
+    window.addEventListener("auth:changed", handleAuthChanged);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("auth:changed", handleAuthChanged);
+    };
+  }, [checkAuth, logout, pathname]);
 
   const handleLogout = () => {
     cacheUtils.clearAll();
@@ -69,7 +141,7 @@ export default function Navbar() {
   );
 
   // Loading state with liquid glass effect
-  if (currentUser === undefined && !isAuthenticated) {
+  if (isCheckingAuth && !currentUser) {
     return (
       <nav className="fixed top-0 left-0 right-0 z-50 liquid-glass-safe h-16">
         <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-center">

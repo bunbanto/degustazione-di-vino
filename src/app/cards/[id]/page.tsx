@@ -13,6 +13,7 @@ interface MetadataCard {
   country?: string;
   year?: number;
   anno?: number;
+  volume?: number | string;
   rating?: number;
   img?: string;
   image?: string;
@@ -58,6 +59,7 @@ export async function generateMetadata({
     if (card.winery) details.push(card.winery);
     if (card.country) details.push(card.country);
     if (card.year || card.anno) details.push(`${card.year || card.anno} рік`);
+    if (card.volume) details.push(`${card.volume} мл`);
     if (card.rating) details.push(`rating ${card.rating.toFixed(1)}/10`);
 
     const description =

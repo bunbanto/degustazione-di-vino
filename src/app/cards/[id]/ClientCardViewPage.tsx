@@ -21,6 +21,7 @@ import {
   getColorBadgeStyle,
   getDisplayRating,
   getDisplayRatingCount,
+  getDisplayVolume,
   normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
@@ -204,6 +205,7 @@ export default function ClientCardViewPage() {
 
   const displayRating = getDisplayRating(card);
   const displayRatingCount = getDisplayRatingCount(card);
+  const displayVolume = getDisplayVolume(card);
   const normalizedDisplayRating = normalizeRatingForStars(displayRating);
   const stars = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -323,7 +325,7 @@ export default function ClientCardViewPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   {(card.year || card.anno) && (
                     <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg text-center">
                       <div className="text-gray-500 dark:text-gray-400 text-xs">
@@ -341,6 +343,16 @@ export default function ClientCardViewPage() {
                       </div>
                       <div className="font-semibold dark:text-gray-200">
                         {card.alcohol}%
+                      </div>
+                    </div>
+                  )}
+                  {displayVolume && (
+                    <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg text-center">
+                      <div className="text-gray-500 dark:text-gray-400 text-xs">
+                        {t(lang, "card.volume")}
+                      </div>
+                      <div className="font-semibold dark:text-gray-200">
+                        {displayVolume}
                       </div>
                     </div>
                   )}

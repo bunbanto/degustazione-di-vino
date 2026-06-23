@@ -7,7 +7,7 @@ export default async function NotFoundPage({
   params: Promise<{ lang: Lang }>;
 }) {
   const resolvedParams = await params;
-  const lang = resolvedParams.lang;
+  const lang = resolvedParams?.lang ?? "uk";
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

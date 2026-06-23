@@ -15,6 +15,7 @@ import {
   createOptimisticFavoriteUpdate,
   optimisticManager,
 } from "@/lib/optimistic";
+import { useUserStore } from "@/store/userStore";
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL || "https://wine-server-b5gr.onrender.com"
@@ -135,7 +136,7 @@ export function isApiNetworkError(error: unknown): boolean {
   return axios.isAxiosError(error) && !error.response;
 }
 
-function handleAuthFailure() {
+function clearAuthSession() {
   if (typeof window === "undefined") return;
 
   try {
@@ -145,21 +146,42 @@ function handleAuthFailure() {
     // ignore
   }
 
-  // Best-effort clear zustand store without importing to avoid cycles
-  try {
-    const store = require("@/store/userStore");
-    store.useUserStore.getState().setCurrentUser(null);
-  } catch {
-    // ignore
-  }
+  useUserStore.getState().setCurrentUser(null);
+  window.dispatchEvent(new Event("auth:changed"));
+}
 
+function getLoginPath() {
   const pathname = window.location.pathname;
   const first = pathname.split("/").filter(Boolean)[0];
   const lang =
     first === "uk" || first === "en" || first === "it" ? first : "uk";
 
-  window.location.assign(`/${lang}/login`);
+  return `/${lang}/login`;
 }
+
+function isProtectedPath(pathname: string) {
+  const pathWithoutLang = pathname.replace(/^\/(uk|en|it)(?=\/|$)/, "") || "/";
+  return (
+    pathWithoutLang.startsWith("/add-card") ||
+    pathWithoutLang.startsWith("/favorites") ||
+    pathWithoutLang.startsWith("/profile")
+  );
+}
+
+function handleAuthFailure(requestUrl?: string) {
+  if (typeof window === "undefined") return;
+
+  clearAuthSession();
+  const pathname = window.location.pathname;
+  const isLoginPage = /^\/(uk|en|it)?\/?login\/?$/.test(pathname);
+  const isProfileCheck = requestUrl?.includes("/auth/profile");
+
+  if (!isLoginPage && !isProfileCheck && isProtectedPath(pathname)) {
+    window.location.assign(getLoginPath());
+  }
+}
+
+export { clearAuthSession };
 
 // Додавання токена до запитів
 api.interceptors.request.use((config) => {
@@ -175,8 +197,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401 || error?.response?.status === 403) {
-      handleAuthFailure();
+    if (error?.response?.status === 401) {
+      handleAuthFailure(error.config?.url);
     }
     return Promise.reject(error);
   },
@@ -207,7 +229,7 @@ export const authAPI = {
     email: string,
     password: string,
   ): Promise<AuthResponse> => {
-    const response = await api.post("/auth/register", {
+    const response = await publicApi.post("/auth/register", {
       name,
       email,
       password,
@@ -216,7 +238,7 @@ export const authAPI = {
   },
 
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await api.post("/auth/login", { email, password });
+    const response = await publicApi.post("/auth/login", { email, password });
 
     if (typeof window !== "undefined") {
       localStorage.setItem("token", response.data.token);
@@ -378,6 +400,10 @@ export const cardsAPI = {
     formData.append("description", card.description || "");
     formData.append("rating", String(card.rating || 0));
 
+    if (card.volume !== undefined && card.volume !== null) {
+      formData.append("volume", String(card.volume));
+    }
+
     if (imageFile) formData.append("img", imageFile);
 
     const response = await api.post("/cards", formData, {
@@ -418,6 +444,10 @@ export const cardsAPI = {
     if (card.price !== undefined) formData.append("price", String(card.price));
     if (card.description !== undefined)
       formData.append("description", card.description);
+
+    if (card.volume !== undefined && card.volume !== null) {
+      formData.append("volume", String(card.volume));
+    }
 
     if (removeImageFlag)
       formData.append("removeImage", String(removeImageFlag));
