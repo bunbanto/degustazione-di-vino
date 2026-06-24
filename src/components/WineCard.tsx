@@ -196,6 +196,11 @@ export default function WineCardComponent({
 
   const handleRate = useCallback(
     async (rating: number) => {
+      if (!currentUserId) {
+        router.push(withLang("/login", lang));
+        return;
+      }
+
       if (isRatingRef.current || isRatingLoading) {
         return;
       }
@@ -227,7 +232,7 @@ export default function WineCardComponent({
         setIsRatingLoading(false);
       }
     },
-    [card._id, onRate, userRating, isRatingLoading],
+    [card._id, currentUserId, isRatingLoading, lang, onRate, router, userRating],
   );
 
   const displayRating = getDisplayRating(card);
