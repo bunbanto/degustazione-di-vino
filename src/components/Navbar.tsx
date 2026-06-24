@@ -53,8 +53,8 @@ export default function Navbar() {
         const userData = {
           id: profileData.id || profileData._id,
           _id: profileData._id,
-          name: profileData.name,
-          username: profileData.username,
+          name: profileData.name || profileData.username || "",
+          username: profileData.username || profileData.name || "",
           email: profileData.email,
           role: profileData.role,
           createdAt: profileData.createdAt,
