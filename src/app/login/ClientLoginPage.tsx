@@ -7,6 +7,7 @@ import { authAPI, getApiErrorMessage } from "@/services/api";
 import { useUserStore } from "@/store/userStore";
 import { t } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
+import { getUserRole } from "@/lib/wineCardUtils";
 
 export default function ClientLoginPage() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function ClientLoginPage() {
             formData.name ||
             t(lang, "common.user"),
           email: serverUser.email || formData.email,
-          role: serverUser.role || "user",
+          role: getUserRole(serverUser),
           createdAt: serverUser.createdAt,
           cardCount: serverUser.cardCount ?? 0,
           favoritesCount: serverUser.favoritesCount ?? 0,

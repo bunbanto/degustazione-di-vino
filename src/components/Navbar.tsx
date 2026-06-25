@@ -8,6 +8,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useUserStore } from "@/store/userStore";
 import { SUPPORTED_LANGS, t, type Lang } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
+import { getUserRole } from "@/lib/wineCardUtils";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -56,7 +57,7 @@ export default function Navbar() {
           name: profileData.name || profileData.username || "",
           username: profileData.username || profileData.name || "",
           email: profileData.email,
-          role: profileData.role,
+          role: getUserRole(profileData),
           createdAt: profileData.createdAt,
           cardCount: profileData.cardCount ?? 0,
           favoritesCount: profileData.favoritesCount ?? 0,

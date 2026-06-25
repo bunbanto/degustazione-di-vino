@@ -22,6 +22,12 @@ export function isAdminUser(user: Pick<User, "email" | "role"> | null): boolean 
   return !!user && (isAdminEmail(user.email) || user.role === "admin");
 }
 
+export function getUserRole(
+  user: Pick<User, "email"> & { role?: string | null },
+): "admin" | "user" {
+  return isAdminEmail(user.email) || user.role === "admin" ? "admin" : "user";
+}
+
 export function getUserIdString(userId: UserIdLike): string {
   if (!userId) return "";
   if (typeof userId === "string") return userId;

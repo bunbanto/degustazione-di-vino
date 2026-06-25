@@ -9,6 +9,7 @@ import { cacheUtils } from "@/services/api";
 import { useUserStore } from "@/store/userStore";
 import { t } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
+import { getUserRole } from "@/lib/wineCardUtils";
 
 interface UserData {
   id?: string | number;
@@ -66,7 +67,7 @@ export default function ClientProfilePage() {
           name: profileData.name || profileData.username || "",
           username: profileData.username || profileData.name || "",
           email: profileData.email || "",
-          role: profileData.role || "user",
+          role: getUserRole(profileData),
           createdAt: profileData.createdAt,
           cardCount: profileData.cardCount ?? 0,
           favoritesCount: profileData.favoritesCount ?? 0,

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useUserStore } from "@/store/userStore";
 import { withLang, getLangFromPath } from "@/i18n/routeUtils";
 import { authAPI } from "@/services/api";
+import { getUserRole } from "@/lib/wineCardUtils";
 
 /**
  * HOC для захисту компонентів, що вимагають авторизації.
@@ -42,7 +43,7 @@ export function withAuth<P extends object>(WrappedComponent: ComponentType<P>) {
               name: profileData.name || profileData.username || "",
               username: profileData.username || profileData.name || "",
               email: profileData.email,
-              role: profileData.role,
+              role: getUserRole(profileData),
               createdAt: profileData.createdAt,
               cardCount: profileData.cardCount ?? 0,
               favoritesCount: profileData.favoritesCount ?? 0,
