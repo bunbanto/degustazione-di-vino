@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import AdminEditHistory from "./AdminEditHistory";
 import CommentsSection from "./CommentsSection";
 import {
   getWineTypeLabel,
@@ -382,6 +383,8 @@ export default function WineCardModal({
               </p>
             </div>
           )}
+
+          <AdminEditHistory edits={card.adminEdits} lang={lang} compact />
 
           {/* All Ratings List with liquid glass */}
           {card.ratings && card.ratings.length > 0 && (

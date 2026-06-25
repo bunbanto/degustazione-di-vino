@@ -5,6 +5,7 @@ import { usePathname, useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import AdminEditHistory from "@/components/AdminEditHistory";
 import { cardsAPI, cacheUtils, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
 import CommentsSection from "@/components/CommentsSection";
@@ -559,6 +560,8 @@ export default function ClientCardViewPage() {
                   </p>
                 </div>
               )}
+
+              <AdminEditHistory edits={card.adminEdits} lang={lang} />
 
               {/* Action Buttons */}
               <div className="flex gap-4">

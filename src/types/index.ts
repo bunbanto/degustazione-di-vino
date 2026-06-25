@@ -6,6 +6,21 @@ export interface Comment {
   createdAt: string;
 }
 
+export interface AdminEditChange {
+  field: string;
+  oldValue?: unknown;
+  newValue?: unknown;
+}
+
+export interface AdminEdit {
+  _id?: string;
+  adminId?: string;
+  adminName?: string;
+  adminEmail?: string;
+  changedAt: string;
+  changes: AdminEditChange[];
+}
+
 export interface WineCard {
   _id: string;
   id?: number;
@@ -36,6 +51,7 @@ export interface WineCard {
   price: number | string;
   authorId?: number;
   owner?: { _id: string; email?: string; name?: string };
+  adminEdits?: AdminEdit[];
   createdAt?: string;
   isFavorite?: boolean; // Whether the current user has marked this card as favorite
 }
