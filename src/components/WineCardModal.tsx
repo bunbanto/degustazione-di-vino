@@ -1,6 +1,6 @@
 "use client";
 
-import { WineCard } from "@/types";
+import { User, WineCard } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -20,7 +20,7 @@ import {
   normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
-  isCardAuthor as checkCardAuthor,
+  canManageCard,
 } from "@/lib/wineCardUtils";
 import { t, type Lang } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
@@ -122,6 +122,7 @@ export default function WineCardModal({
   const showBeerFields = isBeerDrinkType(card.type);
   const showColorFields = hasDrinkColorOptions(card.type);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Get current user ID from localStorage
   useEffect(() => {
@@ -136,14 +137,15 @@ export default function WineCardModal({
           (user._id ? user._id.toString() : null) ||
           btoa(user.email || "").slice(0, 24);
         setCurrentUserId(userId);
+        setCurrentUser(user);
       } catch (e) {
         console.error("Error parsing user:", e);
       }
     }
   }, []);
 
-  // Check if current user is the card author
-  const isCardAuthor = checkCardAuthor(card, currentUserId);
+  // Check if current user can manage the card
+  const canManageCurrentCard = canManageCard(card, currentUser);
 
   const displayRating = getDisplayRating(card);
   const displayVolume = getDisplayVolume(card);
@@ -421,7 +423,7 @@ export default function WineCardModal({
           </div>
 
           {/* Edit Button with liquid glass */}
-          {isCardAuthor && (
+          {canManageCurrentCard && (
             <Link
               href={withLang(`/cards/${card._id}`, lang)}
               className="mt-4 w-full py-3.5 liquid-btn-wine rounded-2xl font-semibold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"

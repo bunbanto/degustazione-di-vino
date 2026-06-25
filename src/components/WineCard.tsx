@@ -23,7 +23,7 @@ import {
   normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
-  isCardAuthor as checkCardAuthor,
+  canManageCard,
 } from "@/lib/wineCardUtils";
 import { t } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
@@ -108,7 +108,6 @@ export default function WineCardComponent({
 
   // Get current user ID from userStore
   const currentUserId = currentUser?.id?.toString() || currentUser?._id || null;
-  const currentUserEmail = currentUser?.email || null;
 
   // Sync favorite state when card prop changes
   useEffect(() => {
@@ -116,8 +115,8 @@ export default function WineCardComponent({
     previousFavoriteRef.current = !!card.isFavorite;
   }, [card.isFavorite, card._id]);
 
-  // Check if current user is the card author
-  const isCardAuthor = checkCardAuthor(card, currentUserId, currentUserEmail);
+  // Check if current user can manage the card
+  const canManageCurrentCard = canManageCard(card, currentUser);
 
   // Store all usernames from card ratings in Zustand store
   useEffect(() => {
@@ -520,8 +519,8 @@ export default function WineCardComponent({
             )}
           </div>
 
-          {/* Edit Button for Author with liquid glass */}
-          {isCardAuthor && (
+          {/* Edit Button for owner or admin */}
+          {canManageCurrentCard && (
             <button
               onClick={() => setIsEditModalOpen(true)}
               className="mt-5 w-full py-3 liquid-glass rounded-2xl font-semibold text-rose-700 dark:text-rose-400 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all duration-300 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"

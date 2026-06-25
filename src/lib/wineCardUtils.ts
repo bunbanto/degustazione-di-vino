@@ -1,4 +1,5 @@
 import { WineCard } from "@/types";
+import type { User } from "@/types";
 
 type UserIdLike =
   | string
@@ -7,6 +8,19 @@ type UserIdLike =
   | undefined;
 
 type RatingColorVariant = "card" | "details" | "modal";
+const ADMIN_EMAIL = "bunbanto@gmail.com";
+
+function normalizeEmail(email: string | null | undefined): string {
+  return email?.trim().toLowerCase() || "";
+}
+
+export function isAdminEmail(email: string | null | undefined): boolean {
+  return normalizeEmail(email) === ADMIN_EMAIL;
+}
+
+export function isAdminUser(user: Pick<User, "email" | "role"> | null): boolean {
+  return !!user && (isAdminEmail(user.email) || user.role === "admin");
+}
 
 export function getUserIdString(userId: UserIdLike): string {
   if (!userId) return "";
@@ -96,7 +110,11 @@ export function isCardAuthor(
       return true;
     }
 
-    if (currentUserEmail && ownerEmail && currentUserEmail === ownerEmail) {
+    if (
+      currentUserEmail &&
+      ownerEmail &&
+      normalizeEmail(currentUserEmail) === normalizeEmail(ownerEmail)
+    ) {
       return true;
     }
 
@@ -108,6 +126,20 @@ export function isCardAuthor(
   }
 
   return false;
+}
+
+export function canManageCard(
+  card: WineCard | null,
+  currentUser: Pick<User, "id" | "_id" | "email" | "role"> | null,
+): boolean {
+  if (isAdminUser(currentUser)) {
+    return true;
+  }
+
+  const currentUserId =
+    currentUser?.id?.toString() || currentUser?._id?.toString() || null;
+
+  return isCardAuthor(card, currentUserId, currentUser?.email ?? null);
 }
 
 export function getRatingColor(

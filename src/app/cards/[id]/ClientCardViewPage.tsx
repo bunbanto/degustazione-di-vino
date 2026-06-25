@@ -25,7 +25,7 @@ import {
   normalizeRatingForStars,
   getRatingColor,
   getUserIdString,
-  isCardAuthor as checkCardAuthor,
+  canManageCard,
 } from "@/lib/wineCardUtils";
 import { t, tf } from "@/i18n/i18n";
 import { getLangFromPath, withLang } from "@/i18n/routeUtils";
@@ -108,8 +108,8 @@ export default function ClientCardViewPage() {
     };
   }, [id, lang]);
 
-  // Check if current user is the card author
-  const isCardAuthor = checkCardAuthor(card, currentUserId);
+  // Check if current user can manage the card
+  const canManageCurrentCard = canManageCard(card, currentUser);
 
   // Handle toggle favorite
   const handleToggleFavorite = async () => {
@@ -599,8 +599,8 @@ export default function ClientCardViewPage() {
                     : t(lang, "card.favorite.to")}
                 </button>
 
-                {/* Edit Button for Author */}
-                {isCardAuthor && (
+                {/* Edit Button for owner or admin */}
+                {canManageCurrentCard && (
                   <button
                     onClick={() => setIsEditModalOpen(true)}
                     className="flex-1 py-4 bg-gradient-to-r from-rose-600 to-rose-500 dark:from-rose-700 dark:to-rose-600 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-rose-600 dark:hover:from-rose-600 dark:hover:to-rose-500 transition-all shadow-lg flex items-center justify-center gap-2"
