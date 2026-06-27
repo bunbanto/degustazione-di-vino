@@ -1,6 +1,6 @@
 import ClientCardViewPage from "./ClientCardViewPage";
 import type { Metadata } from "next";
-import { t, type Lang } from "@/i18n/i18n";
+import { DEFAULT_LANG, t } from "@/i18n/i18n";
 import { getLocaleFromLang } from "@/i18n/i18n";
 
 interface PageProps {
@@ -48,7 +48,7 @@ export async function generateMetadata({
   const resolvedParams = await params;
   // This route DOES NOT include [lang], so keep metadata deterministic.
   // Language-specific metadata is handled by /cards/[id]/[lang] route.
-  const lang: Lang = "uk";
+  const lang = DEFAULT_LANG;
   const locale = getLocaleFromLang(lang);
 
   const card = (await getCardData(resolvedParams.id)) as MetadataCard | null;
@@ -94,7 +94,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: t("uk", "cards.page.title"),
+    title: t(DEFAULT_LANG, "cards.page.title"),
     description: "",
     alternates: {
       canonical: canonicalUrl,

@@ -16,6 +16,7 @@ import {
   optimisticManager,
 } from "@/lib/optimistic";
 import { useUserStore } from "@/store/userStore";
+import { DEFAULT_LANG } from "@/i18n/i18n";
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL || "https://wine-server-b5gr.onrender.com"
@@ -154,7 +155,7 @@ function getLoginPath() {
   const pathname = window.location.pathname;
   const first = pathname.split("/").filter(Boolean)[0];
   const lang =
-    first === "uk" || first === "en" || first === "it" ? first : "uk";
+    first === "uk" || first === "en" || first === "it" ? first : DEFAULT_LANG;
 
   return `/${lang}/login`;
 }

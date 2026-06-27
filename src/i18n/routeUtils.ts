@@ -1,4 +1,4 @@
-import type { Lang } from "./i18n";
+import { DEFAULT_LANG, type Lang } from "./i18n";
 
 export const LANGS: Lang[] = ["uk", "en", "it"];
 
@@ -8,7 +8,9 @@ export function isLangSegment(s: string): s is Lang {
 
 export function getLangFromPath(pathname: string): Lang {
   const firstSegment = pathname.split("/").filter(Boolean)[0];
-  return firstSegment && isLangSegment(firstSegment) ? firstSegment : "uk";
+  return firstSegment && isLangSegment(firstSegment)
+    ? firstSegment
+    : DEFAULT_LANG;
 }
 
 export function withLang(path: string, lang: Lang): string {

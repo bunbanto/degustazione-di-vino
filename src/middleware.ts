@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { DEFAULT_LANG, SUPPORTED_LANGS } from "@/i18n/i18n";
 
-const SUPPORTED = ["uk", "en", "it"];
+const SUPPORTED = SUPPORTED_LANGS as readonly string[];
 
 function pickLang(req: NextRequest): string {
   const url = req.nextUrl;
@@ -12,7 +13,7 @@ function pickLang(req: NextRequest): string {
   // very small heuristic
   if (accept.toLowerCase().includes("it")) return "it";
   if (accept.toLowerCase().includes("en")) return "en";
-  return "uk";
+  return DEFAULT_LANG;
 }
 
 export function middleware(req: NextRequest) {

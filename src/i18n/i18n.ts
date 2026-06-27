@@ -1,11 +1,12 @@
 export type Lang = "uk" | "en" | "it";
 
 export const SUPPORTED_LANGS: Lang[] = ["uk", "en", "it"];
+export const DEFAULT_LANG: Lang = "en";
 
 export function getLangFromSegment(maybeLang: string | undefined): Lang {
   const lang = (maybeLang || "").toLowerCase();
   if (lang === "uk" || lang === "en" || lang === "it") return lang;
-  return "uk";
+  return DEFAULT_LANG;
 }
 
 export function getLocaleFromLang(lang: Lang): string {

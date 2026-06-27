@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { t, type Lang } from "@/i18n/i18n";
+import { DEFAULT_LANG, t, type Lang } from "@/i18n/i18n";
 
 export default async function NotFoundPage({
   params,
@@ -7,7 +7,7 @@ export default async function NotFoundPage({
   params: Promise<{ lang: Lang }>;
 }) {
   const resolvedParams = await params;
-  const lang = resolvedParams?.lang ?? "uk";
+  const lang = resolvedParams?.lang ?? DEFAULT_LANG;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

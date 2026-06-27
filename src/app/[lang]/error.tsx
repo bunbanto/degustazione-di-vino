@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { t, type Lang } from "@/i18n/i18n";
+import { DEFAULT_LANG, t, type Lang } from "@/i18n/i18n";
 import { usePathname } from "next/navigation";
 
 interface ErrorPageProps {
@@ -14,7 +14,7 @@ function currentLangFromPath(pathname: string): Lang {
   const parts = pathname.split("/").filter(Boolean);
   const lang = parts.find((p) => p === "uk" || p === "en" || p === "it");
   return (
-    lang === "uk" || lang === "en" || lang === "it" ? lang : "uk"
+    lang === "uk" || lang === "en" || lang === "it" ? lang : DEFAULT_LANG
   ) as Lang;
 }
 

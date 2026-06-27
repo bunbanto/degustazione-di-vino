@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Footer from "@/components/Footer";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { DEFAULT_LANG, getLocaleFromLang } from "@/i18n/i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "uk_UA",
+    locale: getLocaleFromLang(DEFAULT_LANG),
     url: "/",
     siteName: SITE_NAME,
     title: `${SITE_NAME} | Відкрийте світ вин`,
@@ -101,7 +102,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="uk" suppressHydrationWarning>
+    <html lang={DEFAULT_LANG} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
