@@ -4,18 +4,6 @@ import { DEFAULT_LANG, SUPPORTED_LANGS } from "@/i18n/i18n";
 
 const SUPPORTED = SUPPORTED_LANGS as readonly string[];
 
-function pickLang(req: NextRequest): string {
-  const url = req.nextUrl;
-  const first = url.pathname.split("/").filter(Boolean)[0];
-  if (SUPPORTED.includes(first || "")) return first;
-
-  const accept = req.headers.get("accept-language") || "";
-  // very small heuristic
-  if (accept.toLowerCase().includes("it")) return "it";
-  if (accept.toLowerCase().includes("en")) return "en";
-  return DEFAULT_LANG;
-}
-
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;
   // Skip static files
@@ -31,8 +19,7 @@ export function middleware(req: NextRequest) {
 
   const firstSegment = url.pathname.split("/").filter(Boolean)[0];
   if (!SUPPORTED.includes(firstSegment || "")) {
-    const lang = pickLang(req);
-    url.pathname = `/${lang}${url.pathname === "/" ? "" : url.pathname}`;
+    url.pathname = `/${DEFAULT_LANG}${url.pathname === "/" ? "" : url.pathname}`;
     return NextResponse.redirect(url);
   }
 
