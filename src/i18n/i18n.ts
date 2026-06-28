@@ -1,7 +1,5 @@
-export type Lang = "uk" | "en" | "it";
-
-export const SUPPORTED_LANGS: Lang[] = ["uk", "en", "it"];
-export const DEFAULT_LANG: Lang = "en";
+export { DEFAULT_LANG, SUPPORTED_LANGS, type Lang } from "./locales";
+import { DEFAULT_LANG, type Lang } from "./locales";
 
 export function getLangFromSegment(maybeLang: string | undefined): Lang {
   const lang = (maybeLang || "").toLowerCase();

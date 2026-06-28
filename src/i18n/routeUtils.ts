@@ -1,4 +1,4 @@
-import { DEFAULT_LANG, type Lang } from "./i18n";
+import { DEFAULT_LANG, type Lang } from "./locales";
 
 export const LANGS: Lang[] = ["uk", "en", "it"];
 
