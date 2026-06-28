@@ -19,6 +19,7 @@ function CardsPageContent({
 
   const filters: FilterParams = initialFilters || {
     type: searchParams.get("type") || undefined,
+    sweetness: searchParams.get("sweetness") || undefined,
     color: searchParams.get("color") || undefined,
     frizzante: searchParams.get("frizzante") === "true" ? true : undefined,
     unfiltered:

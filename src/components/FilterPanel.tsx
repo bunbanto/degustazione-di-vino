@@ -4,10 +4,12 @@ import { FilterParams } from "@/types";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
+  WINE_SWEETNESS,
   WINE_TYPES,
   getDrinkColorOptions,
   getWineTypeLabel,
   getWineColorLabel,
+  getWineStyleLabel,
   isBeerDrinkType,
   isWineDrinkType,
   hasDrinkColorOptions,
@@ -45,8 +47,9 @@ export default function FilterPanel({
     }
 
     if (isBeerDrinkType(nextFilters.type)) {
-      const { frizzante, color, ...sanitizedFilters } = nextFilters;
+      const { frizzante, sweetness, color, ...sanitizedFilters } = nextFilters;
       void frizzante;
+      void sweetness;
       return {
         ...sanitizedFilters,
         ...(color && getDrinkColorOptions(nextFilters.type).includes(color)
@@ -55,9 +58,11 @@ export default function FilterPanel({
       };
     }
 
-    const { color, frizzante, unfiltered, ...sanitizedFilters } = nextFilters;
+    const { color, frizzante, sweetness, unfiltered, ...sanitizedFilters } =
+      nextFilters;
     void color;
     void frizzante;
+    void sweetness;
     void unfiltered;
     return sanitizedFilters;
   };
@@ -193,28 +198,52 @@ export default function FilterPanel({
           </div>
 
           {showWineFilters && (
-            <div className="mb-6">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={localFilters.frizzante === true}
-                    onChange={(e) =>
-                      handleChange(
-                        "frizzante",
-                        e.target.checked ? true : undefined,
-                      )
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className="w-10 h-6 liquid-glass rounded-full peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 cursor-pointer transition-all"></div>
-                  <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-gray-200 rounded-full shadow-md transition-all peer-checked:translate-x-4 peer-checked:bg-rose-500"></div>
-                </div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
-                  Frizzante
-                </span>
-              </label>
-            </div>
+            <>
+              <div className="mb-6">
+                <label
+                  htmlFor="wine-sweetness-filter"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  {t(lang, "filter.sweetness")}
+                </label>
+                <select
+                  id="wine-sweetness-filter"
+                  value={localFilters.sweetness || ""}
+                  onChange={(e) => handleChange("sweetness", e.target.value)}
+                  className="liquid-select"
+                >
+                  <option value="">{t(lang, "filter.sweetness.all")}</option>
+                  {WINE_SWEETNESS.map((sweetness) => (
+                    <option key={sweetness} value={sweetness}>
+                      {getWineStyleLabel(sweetness, lang)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-6">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={localFilters.frizzante === true}
+                      onChange={(e) =>
+                        handleChange(
+                          "frizzante",
+                          e.target.checked ? true : undefined,
+                        )
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-10 h-6 liquid-glass rounded-full peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-900 cursor-pointer transition-all"></div>
+                    <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-gray-200 rounded-full shadow-md transition-all peer-checked:translate-x-4 peer-checked:bg-rose-500"></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors">
+                    Frizzante
+                  </span>
+                </label>
+              </div>
+            </>
           )}
 
           {showBeerFilters && (

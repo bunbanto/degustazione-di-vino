@@ -10,6 +10,7 @@ import CommentsSection from "./CommentsSection";
 import {
   getWineTypeLabel,
   getWineColorLabel,
+  getWineStyleLabel,
   isBeerDrinkType,
   isWineDrinkType,
   hasDrinkColorOptions,
@@ -122,6 +123,7 @@ export default function WineCardModal({
   const showWineFields = isWineDrinkType(card.type);
   const showBeerFields = isBeerDrinkType(card.type);
   const showColorFields = hasDrinkColorOptions(card.type);
+  const wineStyleLabel = getWineStyleLabel(card.sweetness, lang, card.type);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
@@ -270,6 +272,11 @@ export default function WineCardModal({
               {showWineFields && card.frizzante && (
                 <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-amber-700 dark:text-amber-400">
                   Frizzante
+                </span>
+              )}
+              {showWineFields && wineStyleLabel && (
+                <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-rose-700 dark:text-rose-400">
+                  {wineStyleLabel}
                 </span>
               )}
               {showBeerFields && card.unfiltered && (

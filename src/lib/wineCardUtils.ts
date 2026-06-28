@@ -1,5 +1,6 @@
 import { WineCard } from "@/types";
 import type { User } from "@/types";
+import { normalizeDrinkColor } from "@/constants/wine";
 
 type UserIdLike =
   | string
@@ -177,6 +178,7 @@ export function getColorBadgeStyle(color: string): {
   text: string;
   border?: string;
 } {
+  const normalizedColor = normalizeDrinkColor(color) || color;
   const styles: Record<string, { bg: string; text: string; border?: string }> = {
     rosso: { bg: "bg-red-600", text: "text-white" },
     bianco: {
@@ -201,7 +203,7 @@ export function getColorBadgeStyle(color: string): {
   };
 
   return (
-    styles[color] || {
+    styles[normalizedColor] || {
       bg: "bg-gray-200 dark:bg-gray-700",
       text: "text-gray-800 dark:text-gray-200",
     }

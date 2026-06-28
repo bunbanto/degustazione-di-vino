@@ -6,14 +6,19 @@ import { usePathname } from "next/navigation";
 import { cardsAPI, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
 import {
+  WINE_SWEETNESS,
   WINE_TYPES,
   getDrinkColorOptions,
   getDefaultColorForType,
   getWineTypeLabel,
   getWineColorLabel,
+  getWineStyleLabel,
   isBeerDrinkType,
   isWineDrinkType,
   hasDrinkColorOptions,
+  normalizeDrinkColor,
+  normalizeWineStyle,
+  normalizeWineType,
 } from "@/constants/wine";
 import { t, tf } from "@/i18n/i18n";
 import { getLangFromPath } from "@/i18n/routeUtils";
@@ -47,6 +52,7 @@ export default function EditCardModal({
   const [formData, setFormData] = useState({
     name: "",
     type: "wine",
+    sweetness: "secco",
     color: "bianco",
     frizzante: false,
     unfiltered: false,
@@ -78,15 +84,18 @@ export default function EditCardModal({
   // Initialize form data when card changes
   useEffect(() => {
     if (card && isOpen) {
-      const cardType = card.type || "wine";
+      const cardType = normalizeWineType(card.type) || "wine";
+      const normalizedColor = normalizeDrinkColor(card.color);
       const cardColor =
-        card.color && getDrinkColorOptions(cardType).includes(card.color)
-          ? card.color
+        normalizedColor &&
+        getDrinkColorOptions(cardType).includes(normalizedColor)
+          ? normalizedColor
           : getDefaultColorForType(cardType);
 
       setFormData({
         name: card.name || "",
         type: cardType,
+        sweetness: normalizeWineStyle(card.sweetness || card.type) || "secco",
         color: cardColor,
         frizzante: card.frizzante || false,
         unfiltered: card.unfiltered || false,
@@ -204,6 +213,7 @@ export default function EditCardModal({
           volume:
             formData.volume === "" ? undefined : (formData.volume as number),
           color: showColorFields ? formData.color : "bianco",
+          sweetness: showWineFields ? formData.sweetness : undefined,
 
           frizzante: showWineFields ? formData.frizzante : false,
           unfiltered: showBeerFields ? formData.unfiltered : false,
@@ -250,6 +260,7 @@ export default function EditCardModal({
       setFormData({
         ...formData,
         type: value,
+        sweetness: isWineDrinkType(value) ? formData.sweetness : "",
         color: hasDrinkColorOptions(value)
           ? getDrinkColorOptions(value).includes(formData.color)
             ? formData.color
@@ -393,7 +404,32 @@ export default function EditCardModal({
                   </select>
                 </div>
               )}
-            </div>
+              </div>
+
+              {showWineFields && (
+                <div>
+                  <label
+                    htmlFor="edit-card-sweetness"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
+                    {t(lang, "filter.sweetness")}
+                  </label>
+                  <select
+                    id="edit-card-sweetness"
+                    value={formData.sweetness}
+                    onChange={(e) =>
+                      handleChange("sweetness", e.target.value)
+                    }
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
+                  >
+                    {WINE_SWEETNESS.map((sweetness) => (
+                      <option key={sweetness} value={sweetness}>
+                        {getWineStyleLabel(sweetness, lang)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
             {/* Frizzante Checkbox */}
             {showWineFields && (

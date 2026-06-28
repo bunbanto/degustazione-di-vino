@@ -386,6 +386,7 @@ export const cardsAPI = {
 
     formData.append("name", card.name || "");
     formData.append("type", card.type || "wine");
+    if (card.sweetness) formData.append("sweetness", card.sweetness);
     formData.append("color", card.color || "bianco");
     formData.append("frizzante", String(card.frizzante || false));
     formData.append("unfiltered", String(card.unfiltered || false));
@@ -428,6 +429,8 @@ export const cardsAPI = {
 
     if (card.name !== undefined) formData.append("name", card.name);
     if (card.type !== undefined) formData.append("type", card.type);
+    if (card.sweetness !== undefined)
+      formData.append("sweetness", card.sweetness);
     if (card.color !== undefined) formData.append("color", card.color);
     if (card.frizzante !== undefined)
       formData.append("frizzante", String(card.frizzante));
@@ -704,6 +707,7 @@ async function fetchCardsFromServer(
   if (filters) {
     if (filters.search) params.set("search", filters.search);
     if (filters.type) params.set("type", filters.type);
+    if (filters.sweetness) params.set("sweetness", filters.sweetness);
     if (filters.color) params.set("color", filters.color);
     if (filters.frizzante) params.set("frizzante", "true");
     if (filters.unfiltered) params.set("unfiltered", "true");

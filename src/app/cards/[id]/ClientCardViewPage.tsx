@@ -14,6 +14,7 @@ import { useUserStore } from "@/store/userStore";
 import {
   getWineTypeLabel,
   getWineColorLabel,
+  getWineStyleLabel,
   isBeerDrinkType,
   isWineDrinkType,
   hasDrinkColorOptions,
@@ -45,6 +46,7 @@ export default function ClientCardViewPage() {
   const showWineFields = isWineDrinkType(card?.type);
   const showBeerFields = isBeerDrinkType(card?.type);
   const showColorFields = hasDrinkColorOptions(card?.type);
+  const wineStyleLabel = getWineStyleLabel(card?.sweetness, lang, card?.type);
 
   // Get current user from userStore
   const currentUser = useUserStore((state) => state.currentUser);
@@ -317,6 +319,11 @@ export default function ClientCardViewPage() {
                   {showWineFields && card.frizzante && (
                     <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 rounded-full text-sm font-medium">
                       Frizzante
+                    </span>
+                  )}
+                  {showWineFields && wineStyleLabel && (
+                    <span className="px-3 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 rounded-full text-sm font-medium">
+                      {wineStyleLabel}
                     </span>
                   )}
                   {showBeerFields && card.unfiltered && (

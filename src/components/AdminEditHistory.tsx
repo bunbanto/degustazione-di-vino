@@ -6,6 +6,7 @@ import { t, type Lang } from "@/i18n/i18n";
 const FIELD_LABELS: Record<string, Record<Lang, string>> = {
   name: { uk: "Назва", en: "Name", it: "Nome" },
   type: { uk: "Тип", en: "Type", it: "Tipo" },
+  sweetness: { uk: "Стиль вина", en: "Wine style", it: "Stile del vino" },
   color: { uk: "Колір", en: "Color", it: "Colore" },
   frizzante: { uk: "Frizzante", en: "Frizzante", it: "Frizzante" },
   unfiltered: { uk: "Нефільтроване", en: "Unfiltered", it: "Non filtrata" },

@@ -26,6 +26,7 @@ export interface WineCard {
   id?: number;
   name: string;
   type: string;
+  sweetness?: string;
   color: string;
   frizzante?: boolean;
   unfiltered?: boolean;
@@ -109,6 +110,7 @@ export interface SortParams {
 
 export interface FilterParams {
   type?: string;
+  sweetness?: string;
   color?: string;
   frizzante?: boolean;
   unfiltered?: boolean;

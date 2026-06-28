@@ -1,5 +1,6 @@
 import {
   getWineColorLabel,
+  getWineStyleLabel,
   hasDrinkColorOptions,
   isBeerDrinkType,
   isWineDrinkType,
@@ -19,6 +20,7 @@ export function WineCardBadges({ card, lang }: WineCardBadgesProps) {
   const showBeerFields = isBeerDrinkType(card.type);
   const showColorFields = hasDrinkColorOptions(card.type);
   const colorBadgeStyle = card.color ? getColorBadgeStyle(card.color) : null;
+  const wineStyleLabel = getWineStyleLabel(card.sweetness, lang, card.type);
 
   return (
     <div className="absolute top-4 left-4 flex flex-col items-start gap-2 z-20">
@@ -32,6 +34,11 @@ export function WineCardBadges({ card, lang }: WineCardBadgesProps) {
       {showWineFields && card.frizzante && (
         <div className="bg-amber-500/90 backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium text-white shadow-lg border border-white/20">
           Frizzante
+        </div>
+      )}
+      {showWineFields && wineStyleLabel && (
+        <div className="bg-rose-500/90 backdrop-blur-md px-3 py-1.5 rounded-full text-sm font-medium text-white shadow-lg border border-white/20">
+          {wineStyleLabel}
         </div>
       )}
       {showBeerFields && card.unfiltered && (
