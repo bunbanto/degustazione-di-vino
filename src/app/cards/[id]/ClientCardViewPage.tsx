@@ -21,6 +21,7 @@ import {
 } from "@/constants/wine";
 import {
   getColorBadgeStyle,
+  getWineStyleBadgeStyle,
   getDisplayRating,
   getDisplayRatingCount,
   getDisplayVolume,
@@ -47,6 +48,9 @@ export default function ClientCardViewPage() {
   const showBeerFields = isBeerDrinkType(card?.type);
   const showColorFields = hasDrinkColorOptions(card?.type);
   const wineStyleLabel = getWineStyleLabel(card?.sweetness, lang, card?.type);
+  const wineStyleBadgeStyle = getWineStyleBadgeStyle(
+    card?.sweetness || card?.type,
+  );
 
   // Get current user from userStore
   const currentUser = useUserStore((state) => state.currentUser);
@@ -322,7 +326,9 @@ export default function ClientCardViewPage() {
                     </span>
                   )}
                   {showWineFields && wineStyleLabel && (
-                    <span className="px-3 py-1 bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-300 rounded-full text-sm font-medium">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${wineStyleBadgeStyle.bg} ${wineStyleBadgeStyle.text} ${wineStyleBadgeStyle.border}`}
+                    >
                       {wineStyleLabel}
                     </span>
                   )}

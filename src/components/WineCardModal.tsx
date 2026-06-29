@@ -17,6 +17,7 @@ import {
 } from "@/constants/wine";
 import {
   getColorBadgeStyle,
+  getWineStyleBadgeStyle,
   getDisplayRating,
   getDisplayVolume,
   normalizeRatingForStars,
@@ -124,6 +125,9 @@ export default function WineCardModal({
   const showBeerFields = isBeerDrinkType(card.type);
   const showColorFields = hasDrinkColorOptions(card.type);
   const wineStyleLabel = getWineStyleLabel(card.sweetness, lang, card.type);
+  const wineStyleBadgeStyle = getWineStyleBadgeStyle(
+    card.sweetness || card.type,
+  );
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
@@ -275,7 +279,9 @@ export default function WineCardModal({
                 </span>
               )}
               {showWineFields && wineStyleLabel && (
-                <span className="px-3 py-1 liquid-glass rounded-full text-sm font-medium text-rose-700 dark:text-rose-400">
+                <span
+                  className={`px-3 py-1 liquid-glass rounded-full text-sm font-medium ${wineStyleBadgeStyle.bg} ${wineStyleBadgeStyle.text} ${wineStyleBadgeStyle.border}`}
+                >
                   {wineStyleLabel}
                 </span>
               )}

@@ -1,6 +1,6 @@
 import { WineCard } from "@/types";
 import type { User } from "@/types";
-import { normalizeDrinkColor } from "@/constants/wine";
+import { normalizeDrinkColor, normalizeWineStyle } from "@/constants/wine";
 
 type UserIdLike =
   | string
@@ -19,7 +19,9 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   return normalizeEmail(email) === ADMIN_EMAIL;
 }
 
-export function isAdminUser(user: Pick<User, "email" | "role"> | null): boolean {
+export function isAdminUser(
+  user: Pick<User, "email" | "role"> | null,
+): boolean {
   return !!user && (isAdminEmail(user.email) || user.role === "admin");
 }
 
@@ -38,7 +40,9 @@ export function getUserIdString(userId: UserIdLike): string {
   );
 }
 
-export function getDisplayRating(card: Pick<WineCard, "rating" | "ratings">): number {
+export function getDisplayRating(
+  card: Pick<WineCard, "rating" | "ratings">,
+): number {
   if (Array.isArray(card.ratings) && card.ratings.length > 0) {
     const validRatings = card.ratings
       .map((rating) => Number(rating.value))
@@ -109,7 +113,8 @@ export function isCardAuthor(
   }
 
   if (card.owner) {
-    const ownerId = typeof card.owner === "object" ? card.owner._id : card.owner;
+    const ownerId =
+      typeof card.owner === "object" ? card.owner._id : card.owner;
     const ownerEmail =
       typeof card.owner === "object" ? (card.owner.email ?? null) : null;
 
@@ -179,33 +184,72 @@ export function getColorBadgeStyle(color: string): {
   border?: string;
 } {
   const normalizedColor = normalizeDrinkColor(color) || color;
-  const styles: Record<string, { bg: string; text: string; border?: string }> = {
-    rosso: { bg: "bg-red-600", text: "text-white" },
-    bianco: {
-      bg: "bg-yellow-50 dark:bg-yellow-900/30",
-      text: "text-gray-800 dark:text-gray-200",
-      border: "border border-gray-200 dark:border-gray-700",
-    },
-    rosato: {
-      bg: "bg-pink-100 dark:bg-pink-900/30",
-      text: "text-gray-800 dark:text-gray-200",
-    },
-    light: {
-      bg: "bg-amber-100 dark:bg-amber-900/40",
-      text: "text-amber-900 dark:text-amber-200",
-      border: "border border-amber-200 dark:border-amber-700",
-    },
-    dark: {
-      bg: "bg-stone-800 dark:bg-stone-950",
-      text: "text-white dark:text-stone-100",
-      border: "border border-stone-700 dark:border-stone-600",
-    },
-  };
+  const styles: Record<string, { bg: string; text: string; border?: string }> =
+    {
+      rosso: { bg: "bg-red-600", text: "text-white" },
+      bianco: {
+        bg: "bg-yellow-50 dark:bg-yellow-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+        border: "border border-gray-200 dark:border-gray-700",
+      },
+      rosato: {
+        bg: "bg-pink-100 dark:bg-pink-900/30",
+        text: "text-gray-800 dark:text-gray-200",
+      },
+      light: {
+        bg: "bg-amber-100 dark:bg-amber-900/40",
+        text: "text-amber-900 dark:text-amber-200",
+        border: "border border-amber-200 dark:border-amber-700",
+      },
+      dark: {
+        bg: "bg-stone-800 dark:bg-stone-950",
+        text: "text-white dark:text-stone-100",
+        border: "border border-stone-700 dark:border-stone-600",
+      },
+    };
 
   return (
     styles[normalizedColor] || {
       bg: "bg-gray-200 dark:bg-gray-700",
       text: "text-gray-800 dark:text-gray-200",
+    }
+  );
+}
+
+export function getWineStyleBadgeStyle(style?: string): {
+  bg: string;
+  text: string;
+  border: string;
+} {
+  const normalizedStyle = normalizeWineStyle(style) || style || "";
+  const styles: Record<string, { bg: string; text: string; border: string }> = {
+    secco: {
+      bg: "bg-yellow-700/85 dark:bg-yellow-500/20",
+      text: "text-white dark:text-yellow-100",
+      border: "border border-yellow-100/30 dark:border-yellow-300/25",
+    },
+    abboccato: {
+      bg: "bg-amber-500/90 dark:bg-amber-500/25",
+      text: "text-white dark:text-amber-100",
+      border: "border border-amber-100/35 dark:border-amber-300/25",
+    },
+    amabile: {
+      bg: "bg-rose-500/90 dark:bg-rose-500/25",
+      text: "text-white dark:text-rose-100",
+      border: "border border-rose-100/35 dark:border-rose-300/25",
+    },
+    dolce: {
+      bg: "bg-fuchsia-700/85 dark:bg-fuchsia-500/25",
+      text: "text-white dark:text-fuchsia-100",
+      border: "border border-fuchsia-100/30 dark:border-fuchsia-300/25",
+    },
+  };
+
+  return (
+    styles[normalizedStyle] || {
+      bg: "bg-rose-500/90 dark:bg-rose-500/25",
+      text: "text-white dark:text-rose-100",
+      border: "border border-rose-100/35 dark:border-rose-300/25",
     }
   );
 }
