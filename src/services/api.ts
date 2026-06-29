@@ -408,9 +408,7 @@ export const cardsAPI = {
 
     if (imageFile) formData.append("img", imageFile);
 
-    const response = await api.post("/cards", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await api.post("/cards", formData);
 
     if (typeof window !== "undefined") {
       hybridCache.clearByType("cards");
@@ -457,9 +455,7 @@ export const cardsAPI = {
       formData.append("removeImage", String(removeImageFlag));
     if (imageFile) formData.append("img", imageFile);
 
-    const response = await api.put(`/cards/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const response = await api.put(`/cards/${id}`, formData);
 
     if (typeof window !== "undefined") {
       hybridCache.remove(generateCacheKey("card", id));
