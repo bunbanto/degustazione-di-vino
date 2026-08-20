@@ -80,9 +80,15 @@ export default function Pagination({
             key={index}
             onClick={() => typeof page === "number" && onPageChange(page)}
             disabled={typeof page !== "number"}
+            aria-current={page === currentPage ? "page" : undefined}
+            aria-label={
+              typeof page === "number"
+                ? `Сторінка ${page}${page === currentPage ? ", поточна" : ""}`
+                : undefined
+            }
             className={`min-w-[40px] h-10 rounded-xl font-medium transition-all liquid-glass ${
               page === currentPage
-                ? "bg-rose-500/20 text-rose-700 dark:text-rose-400"
+                ? "!bg-gradient-to-br !from-rose-600 !to-rose-800 !text-white !border-rose-400 shadow-lg shadow-rose-700/40 ring-2 ring-rose-300 dark:!from-rose-400 dark:!to-rose-700 dark:ring-rose-300/70 scale-110"
                 : typeof page === "number"
                   ? "text-rose-700 dark:text-rose-400 hover:bg-rose-100/50 dark:hover:bg-rose-900/30"
                   : "bg-transparent text-gray-400 cursor-default"
