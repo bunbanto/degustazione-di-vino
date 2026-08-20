@@ -56,7 +56,7 @@ export function RatingStars({
 
   return (
     <div className="w-full liquid-glass rounded-xl p-2">
-      <div className="flex items-center gap-0.5" aria-hidden="true">
+      <div className="flex items-center justify-between" aria-hidden="true">
         {STARS.map((star) => (
           <StarIcon
             key={star}
