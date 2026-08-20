@@ -323,7 +323,7 @@ export default function FilterPanel({
             type="range"
             min="0"
             max="10"
-            step="0.5"
+            step="0.1"
             value={localFilters.minRating || 0}
             onChange={(e) =>
               handleChange("minRating", parseFloat(e.target.value))
