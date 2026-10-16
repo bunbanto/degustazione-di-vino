@@ -1,6 +1,7 @@
 "use client";
 
 import { FilterParams } from "@/types";
+import CountrySelect from "@/components/CountrySelect";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -147,6 +148,18 @@ export default function FilterPanel({
             className="liquid-input pl-24"
           />
         </div>
+      </div>
+
+      {/* Country filter */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {t(lang, "form.country")}
+        </label>
+        <CountrySelect
+          value={localFilters.country || ""}
+          lang={lang}
+          onChange={(country) => handleChange("country", country)}
+        />
       </div>
 
       {/* Wine Type with liquid select */}

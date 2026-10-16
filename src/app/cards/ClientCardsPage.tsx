@@ -28,6 +28,7 @@ function CardsPageContent({
       ? parseFloat(searchParams.get("minRating")!)
       : undefined,
     search: searchParams.get("search") || undefined,
+    country: searchParams.get("country") || undefined,
     sort: searchParams.get("sortField")
       ? {
           field: searchParams.get("sortField") as "name" | "price" | "rating",

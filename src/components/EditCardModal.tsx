@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import CountrySelect from "@/components/CountrySelect";
 import { usePathname } from "next/navigation";
 import { cardsAPI, getApiErrorMessage } from "@/services/api";
 import { WineCard } from "@/types";
@@ -505,12 +506,10 @@ export default function EditCardModal({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t(lang, "form.country")}
                 </label>
-                <input
-                  type="text"
+                <CountrySelect
                   value={formData.country}
-                  onChange={(e) => handleChange("country", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-rose-300 dark:focus:ring-rose-600 focus:border-transparent bg-white/50 dark:bg-dark-700/50"
-                  placeholder={t(lang, "form.example.country")}
+                  lang={lang}
+                  onChange={(country) => handleChange("country", country)}
                 />
               </div>
 

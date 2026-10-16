@@ -190,6 +190,7 @@ function CardsContent({ initialFilters, initialPage }: CardsContentProps) {
       params.set("maxPrice", sourceFilters.maxPrice.toString());
     }
     if (sourceFilters.search) params.set("search", sourceFilters.search);
+    if (sourceFilters.country) params.set("country", sourceFilters.country);
     if (sourceFilters.sort) {
       params.set("sortField", sourceFilters.sort.field);
       params.set("sortDirection", sourceFilters.sort.direction);
