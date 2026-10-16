@@ -26,9 +26,11 @@ export default function CountrySelect({ value, lang, onChange }: CountrySelectPr
 
   const options = useMemo(() => {
     const names = countries.getNames(lang, { select: "official" });
-    return Object.entries(names)
+    const countryOptions = Object.entries(names)
       .map(([code, name]) => ({ code: code.toLowerCase(), name: String(name) }))
-      .sort((a, b) => a.name.localeCompare(b.name, lang));
+    const scotlandName = lang === "uk" ? "Шотландія" : lang === "it" ? "Scozia" : "Scotland";
+    countryOptions.push({ code: "gb-sct", name: scotlandName });
+    return countryOptions.sort((a, b) => a.name.localeCompare(b.name, lang));
   }, [lang]);
 
   const selectedCode = getCountryFlagCode(value, lang);
