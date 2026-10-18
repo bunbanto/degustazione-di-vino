@@ -1,114 +1,94 @@
 # Degustazione di Vino
 
-<div align="center">
+Каталог вина та інших напоїв, створений на Next.js. Користувачі можуть переглядати й фільтрувати каталог, оцінювати напої, залишати коментарі та зберігати улюблене.
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
-![React](https://img.shields.io/badge/React-19-149eca?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue?style=for-the-badge&logo=typescript)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8?style=for-the-badge&logo=tailwindcss)
-![Zustand](https://img.shields.io/badge/Zustand-5-7b3f00?style=for-the-badge)
+## Можливості
 
-Фронтенд-каталог вин на `Next.js App Router` з авторизацією, оцінками, коментарями та списком улюблених.
+- Каталог із пошуком, фільтрами, сортуванням і пагінацією.
+- Сторінки окремих напоїв із рейтингом та коментарями.
+- Реєстрація, вхід і профіль користувача.
+- Створення карток напоїв, оцінювання та керування улюбленими.
+- Оптимістичне оновлення оцінок і улюбленого.
+- Локальне кешування з TTL та підтримкою застарілих даних.
+- Інтерфейс українською, англійською та італійською мовами.
+- Sitemap із картками, отриманими з API, і fallback при недоступності сервера.
+- Сторінки обробки помилок і 404.
 
-</div>
+## Технології
 
-## Про проєкт
+- Next.js 16 (App Router), React 19, TypeScript
+- Tailwind CSS
+- Zustand
+- Axios
+- `i18n-iso-countries`, `flag-icons`
 
-`Degustazione di Vino` допомагає шукати вина, переглядати деталі, ставити оцінки, писати коментарі та формувати персональні добірки.
+## Сторінки
 
-Основний стек: `Next.js`, `React`, `TypeScript`, `Tailwind`, `Zustand`, `Axios`.
+Усі сторінки мають префікс мови: `/uk`, `/en` або `/it`. Кореневий URL перенаправляє на англійську версію.
 
-## Функціонал
+| Шлях | Призначення |
+| --- | --- |
+| `/{lang}` | Головна сторінка |
+| `/{lang}/login` | Вхід і реєстрація |
+| `/{lang}/cards` | Каталог напоїв |
+| `/{lang}/cards/{id}` | Деталі напою |
+| `/{lang}/favorites` | Улюблені напої |
+| `/{lang}/add-card` | Додавання напою |
+| `/{lang}/profile` | Профіль користувача |
 
-- Каталог вин з фільтрами, сортуванням і пагінацією.
-- Перегляд детальної сторінки вина (`/cards/[id]`).
-- Оцінки користувачів (крок `0.5`) і агрегований рейтинг.
-- Коментарі з оптимістичним оновленням.
-- Список улюблених вин користувача.
-- Авторизація та збереження сесії в `localStorage`.
-- Профіль користувача зі статистикою.
-- Створення нової картки вина.
-- Hybrid cache в `localStorage` (TTL + stale-while-revalidate підхід).
-- Централізована обробка API-помилок з дружніми повідомленнями для користувача (`getApiErrorMessage`).
-- Стабільна генерація `sitemap.xml` з таймаутом запиту до API та fallback при недоступності бекенду.
-- Глобальні сторінки помилок App Router: `error.tsx` (runtime error) та `not-found.tsx` (404).
-- Світла/темна теми (на головній сторінці дизайн зафіксований у світлій стилістиці).
-
-## Маршрути
-
-- `/` - лендінг
-- `/login` - вхід та реєстрація
-- `/cards` - каталог вин
-- `/cards/[id]` - деталі конкретної картки
-- `/favorites` - улюблені вина
-- `/add-card` - створення нової картки
-- `/profile` - профіль користувача
-
-## Структура проєкту
+## Структура
 
 ```text
 src/
-├── app/                  # App Router сторінки
-│   ├── add-card/
-│   ├── cards/
-│   ├── error.tsx
-│   ├── favorites/
-│   ├── login/
-│   ├── not-found.tsx
-│   └── profile/
+├── app/                  # Сторінки Next.js App Router
+│   └── [lang]/            # Локалізовані маршрути
 ├── components/           # UI-компоненти
-├── contexts/             # ThemeContext
-├── lib/                  # кеш, optimistic updates, hooks
+├── constants/            # Константи каталогу та сортування
+├── contexts/             # Контексти інтерфейсу
+├── i18n/                 # Мови, переклади та маршрутизація
+├── lib/                  # Кеш, hooks, SEO та optimistic updates
 ├── services/             # API-клієнт
-├── store/                # Zustand store
-└── types/                # TypeScript типи
+├── store/                # Zustand stores
+├── types/                # TypeScript типи
+└── utils/                # Допоміжні функції
 ```
 
-## Швидкий старт
+## Запуск локально
 
-1. Встановіть залежності:
+Потрібен Node.js і npm.
 
 ```bash
 npm install
 ```
 
-2. Створіть `.env.local`:
+Створіть `.env.local` на основі `.env.example` і за потреби вкажіть адресу API:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=https://wine-server-b5gr.onrender.com
 ```
 
-Якщо змінну не вказати, використовується fallback API URL з `src/services/api.ts`.
-
-3. Запустіть dev-сервер:
+Якщо змінну не задано, застосунок використовує цей API URL за замовчуванням.
 
 ```bash
 npm run dev
 ```
 
-Відкрийте `http://localhost:3000`.
+Відкрийте [http://localhost:3000](http://localhost:3000). Для локального бекенду задайте, наприклад, `NEXT_PUBLIC_API_URL=http://localhost:4000`.
 
 ## Скрипти
 
-- `npm run dev` - запуск у dev-режимі
-- `npm run build` - production build
-- `npm run start` - запуск production build
-- `npm run lint` - ESLint перевірка
-
-## Лінт-конфіг
-
-- Проєкт використовує `ESLint 9` з flat config у файлі `eslint.config.mjs`.
-- Файл `.eslintrc.json` залишено для сумісності, але основним є `eslint.config.mjs`.
+| Команда | Опис |
+| --- | --- |
+| `npm run dev` | Запуск сервера розробки |
+| `npm run build` | Production-збірка |
+| `npm run start` | Запуск production-збірки |
+| `npm run lint` | Перевірка ESLint у `src` |
 
 ## API
 
-Базовий URL задається через `NEXT_PUBLIC_API_URL`.
+Клієнт API налаштовано в `src/services/api.ts`. Базова адреса задається через `NEXT_PUBLIC_API_URL`; за замовчуванням використовується API сервера.
 
-Очікувані групи ендпоінтів:
-- `auth`
-- `cards`
-- `favorites`
+Клієнт взаємодіє з групами маршрутів авторизації, карток напоїв, оцінок, коментарів і улюбленого. Приватні запити надсилають токен Bearer із `localStorage`.
 
-Корисні посилання:
-- Swagger: `https://wine-server-b5gr.onrender.com/docs/`
-- Backend repo: `https://github.com/bunbanto/vine-server`
+- [API документація (Swagger)](https://wine-server-b5gr.onrender.com/docs/)
+- [Репозиторій бекенду](https://github.com/bunbanto/vine-server)
