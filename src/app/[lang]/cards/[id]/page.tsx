@@ -1,6 +1,7 @@
 import ClientCardViewPage from "@/app/cards/[id]/ClientCardViewPage";
 import type { Metadata } from "next";
 import { getLocaleFromLang, t, type Lang } from "@/i18n/i18n";
+import { SUPPORTED_LANGS } from "@/i18n/locales";
 
 interface PageProps {
   params: Promise<{ lang: Lang; id: string }>;
@@ -74,6 +75,12 @@ export async function generateMetadata({
       description,
       alternates: {
         canonical: canonicalUrl,
+        languages: Object.fromEntries(
+          SUPPORTED_LANGS.map((supportedLang) => [
+            supportedLang,
+            `/${supportedLang}/cards/${id}`,
+          ]),
+        ),
       },
       openGraph: {
         type: "article",
@@ -98,7 +105,14 @@ export async function generateMetadata({
     description: "",
     alternates: {
       canonical: canonicalUrl,
+      languages: Object.fromEntries(
+        SUPPORTED_LANGS.map((supportedLang) => [
+          supportedLang,
+          `/${supportedLang}/cards/${id}`,
+        ]),
+      ),
     },
+    openGraph: { url: canonicalUrl, locale, siteName: "Degustazione di Vino" },
   };
 }
 

@@ -30,9 +30,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Degustazione di Vino" }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
-  alternates: {
-    canonical: "/",
-  },
   robots: {
     index: true,
     follow: true,

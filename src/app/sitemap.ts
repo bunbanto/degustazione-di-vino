@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
+import { SUPPORTED_LANGS } from "@/i18n/locales";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://wine-server-b5gr.onrender.com";
@@ -28,23 +29,32 @@ async function fetchWithTimeout(url: string) {
 
 async function getCardUrls(): Promise<MetadataRoute.Sitemap> {
   try {
-    const response = await fetchWithTimeout(`${API_BASE_URL}/cards?page=1&limit=200`);
+    const firstResponse = await fetchWithTimeout(`${API_BASE_URL}/cards?page=1&limit=200`);
+    if (!firstResponse.ok) return [];
+    const firstPage = (await firstResponse.json()) as {
+      results?: ApiCard[];
+      totalPages?: number;
+    };
+    const cards = Array.isArray(firstPage.results) ? [...firstPage.results] : [];
+    const totalPages = Math.max(1, Number(firstPage.totalPages) || 1);
 
-    if (!response.ok) {
-      return [];
+    for (let page = 2; page <= totalPages; page += 1) {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/cards?page=${page}&limit=200`);
+      if (!response.ok) break;
+      const data = (await response.json()) as { results?: ApiCard[] };
+      if (Array.isArray(data.results)) cards.push(...data.results);
     }
-
-    const data = (await response.json()) as { results?: ApiCard[] };
-    const cards = Array.isArray(data.results) ? data.results : [];
 
     return cards
       .filter((card) => Boolean(card?._id))
-      .map((card) => ({
-        url: `${SITE_URL}/cards/${card._id}`,
-        lastModified: card.updatedAt || card.createdAt || new Date().toISOString(),
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      }));
+      .flatMap((card) =>
+        SUPPORTED_LANGS.map((lang) => ({
+          url: `${SITE_URL}/${lang}/cards/${card._id}`,
+          lastModified: card.updatedAt || card.createdAt || new Date().toISOString(),
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+        })),
+      );
   } catch {
     return [];
   }
@@ -52,18 +62,20 @@ async function getCardUrls(): Promise<MetadataRoute.Sitemap> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${SITE_URL}/`,
-      lastModified: new Date().toISOString(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${SITE_URL}/cards`,
-      lastModified: new Date().toISOString(),
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
+    ...SUPPORTED_LANGS.flatMap((lang) => [
+      {
+        url: `${SITE_URL}/${lang}`,
+        lastModified: new Date().toISOString(),
+        changeFrequency: "weekly" as const,
+        priority: 1,
+      },
+      {
+        url: `${SITE_URL}/${lang}/cards`,
+        lastModified: new Date().toISOString(),
+        changeFrequency: "daily" as const,
+        priority: 0.9,
+      },
+    ]),
   ];
 
   const cardRoutes = await getCardUrls();

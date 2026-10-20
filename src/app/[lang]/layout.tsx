@@ -35,14 +35,10 @@ export async function generateMetadata({
     authors: [{ name: "Degustazione di Vino" }],
     creator: SITE_NAME,
     publisher: SITE_NAME,
-    alternates: {
-      canonical: `/${lang}`,
-    },
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",
       locale,
-      url: `/${lang}`,
       siteName: SITE_NAME,
       title: SITE_NAME,
       description: "Degustazione di Vino — wine reviews & discovery.",

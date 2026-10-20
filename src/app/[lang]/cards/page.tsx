@@ -1,6 +1,8 @@
 import ClientCardsPage from "@/app/cards/ClientCardsPage";
 import type { Metadata } from "next";
 import { t, type Lang } from "@/i18n/i18n";
+import { SITE_NAME } from "@/lib/seo";
+import { SUPPORTED_LANGS } from "@/i18n/locales";
 
 export async function generateMetadata({
   params,
@@ -16,6 +18,13 @@ export async function generateMetadata({
         : lang === "en"
           ? "Browse the best wines from around the world. Search by type, color, rating and more."
           : "Esplora i migliori vini da tutto il mondo. Cerca per tipo, colore, valutazione e altro.",
+    alternates: {
+      canonical: `/${lang}/cards`,
+      languages: Object.fromEntries(
+        SUPPORTED_LANGS.map((supportedLang) => [supportedLang, `/${supportedLang}/cards`]),
+      ),
+    },
+    openGraph: { url: `/${lang}/cards`, siteName: SITE_NAME },
   };
 }
 

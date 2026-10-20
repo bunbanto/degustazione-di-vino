@@ -1,5 +1,26 @@
 import { t, type Lang } from "@/i18n/i18n";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { SITE_NAME } from "@/lib/seo";
+import { SUPPORTED_LANGS } from "@/i18n/locales";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: Lang }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const canonical = `/${lang}`;
+  return {
+    alternates: {
+      canonical,
+      languages: Object.fromEntries(
+        SUPPORTED_LANGS.map((supportedLang) => [supportedLang, `/${supportedLang}`]),
+      ),
+    },
+    openGraph: { url: canonical, title: SITE_NAME },
+  };
+}
 
 export default async function Home({
   params,
