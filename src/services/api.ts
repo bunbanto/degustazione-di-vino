@@ -254,6 +254,17 @@ export const authAPI = {
     return response.data;
   },
 
+  googleLogin: async (idToken: string): Promise<AuthResponse> => {
+    const response = await publicApi.post("/auth/google", { idToken });
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+    }
+
+    return response.data;
+  },
+
   getProfile: async () => {
     const response = await api.get("/auth/profile");
     return response.data;
