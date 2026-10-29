@@ -25,6 +25,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "nav.favorites": "Мої улюблені",
     "nav.addWine": "Додати напій",
     "nav.login": "Увійти",
+    "nav.login.google": "Увійти через Google",
     "nav.logout": "Вийти",
     "nav.profile": "Мій профіль",
     "nav.theme": "Тема",
@@ -178,8 +179,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "status.favoritesLoadError": "Помилка завантаження улюблених",
     "status.createCardError": "Помилка створення картки",
     "status.commentsLoadError": "Помилка завантаження коментарів",
-    "status.commentLoginRequired":
-      "Щоб залишити коментар, увійдіть у систему.",
+    "status.commentLoginRequired": "Щоб залишити коментар, увійдіть у систему.",
     "status.commentAddError": "Помилка додавання коментаря",
     "status.commentDeleteError": "Помилка видалення коментаря",
     "status.profileLoadError": "Не вдалося завантажити профіль",
@@ -246,6 +246,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "nav.favorites": "My favorites",
     "nav.addWine": "Add drink",
     "nav.login": "Sign in",
+    "nav.login.google": "Sign in with Google",
     "nav.logout": "Log out",
     "nav.profile": "My profile",
     "nav.theme": "Theme",
@@ -390,8 +391,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "common.ratingsCount": "({count} ratings)",
     "status.offline": "Offline",
     "status.offlineCachedCards": "Offline mode - showing cached data",
-    "status.offlineCachedFavorites":
-      "Offline mode - showing cached favorites",
+    "status.offlineCachedFavorites": "Offline mode - showing cached favorites",
     "status.loginRequired": "You need to sign in",
     "status.forbidden": "Access denied",
     "status.cardsLoadError": "Failed to load cards",
@@ -465,6 +465,7 @@ export const messages: Record<Lang, Record<string, string>> = {
     "nav.favorites": "I miei preferiti",
     "nav.addWine": "Aggiungi bevanda",
     "nav.login": "Accedi",
+    "nav.login.google": "Accedi con Google",
     "nav.logout": "Esci",
     "nav.profile": "Il mio profilo",
     "nav.theme": "Tema",
@@ -691,8 +692,7 @@ export function tf(
   values: Record<string, string | number>,
 ): string {
   return Object.entries(values).reduce(
-    (message, [name, value]) =>
-      message.replaceAll(`{${name}}`, String(value)),
+    (message, [name, value]) => message.replaceAll(`{${name}}`, String(value)),
     t(lang, key),
   );
 }

@@ -286,7 +286,7 @@ export default function ClientLoginPage() {
                     />
                   </svg>
                 )}
-                Google
+                {t(lang, "nav.login.google")}
               </button>
             </>
           )}
